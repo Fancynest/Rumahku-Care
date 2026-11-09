@@ -219,4 +219,45 @@ class ScheduleTest extends TestCase
             'id' => $schedule->id,
         ]);
     }
+
+    public function test_overdue_date_schedule_marked_complete_is_deactivated_and_removed_from_overdue_list(): void
+    {
+        $user = User::firstOrFail();
+        $asset = HomeAsset::firstOrFail();
+
+        $schedule = $asset->schedules()->create([
+            'user_id' => $user->id,
+            'title' => 'Penggantian Filter Khusus',
+            'trigger_type' => 'tanggal',
+            'next_due_date' => Carbon::yesterday()->toDateString(),
+            'priority' => 'mendesak',
+            'is_active' => true,
+        ]);
+
+        $this->assertSame('terlambat', $schedule->status);
+
+        // Before completion, schedule is visible in overdue list
+        $responseBefore = $this->get('/schedules?filter=all');
+        $responseBefore->assertSee('Penggantian Filter Khusus');
+        $responseBefore->assertSee('Terlambat');
+
+        // Complete the schedule
+        $responseComplete = $this->post("/schedules/{$schedule->id}/complete", [
+            'done_at' => Carbon::today()->toDateString(),
+            'notes' => 'Selesai diganti',
+        ]);
+
+        $responseComplete->assertRedirect();
+
+        $schedule->refresh();
+        $this->assertFalse((bool) $schedule->is_active);
+        $this->assertSame(Carbon::today()->toDateString(), $schedule->last_done_at?->format('Y-m-d'));
+
+        // Clear session flash so success message doesn't match the schedule title
+        $this->flushSession();
+
+        // After completion, schedule is inactive and disappears from active schedules / overdue list
+        $responseAfter = $this->get('/schedules?filter=all');
+        $responseAfter->assertDontSee('Penggantian Filter Khusus');
+    }
 }

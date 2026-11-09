@@ -155,6 +155,8 @@ class ScheduleController extends Controller
             } elseif ($schedule->trigger_type === 'interval_hari') {
                 $days = $schedule->interval_days ?: 30;
                 $schedule->next_due_date = Carbon::parse($validated['done_at'])->addDays($days)->toDateString();
+            } elseif ($schedule->trigger_type === 'tanggal') {
+                $schedule->is_active = false;
             }
 
             $schedule->save();

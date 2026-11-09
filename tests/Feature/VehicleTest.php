@@ -232,6 +232,34 @@ class VehicleTest extends TestCase
         $this->assertSame($newOdo + 10000, $schedule->next_due_km);
     }
 
+    public function test_storing_service_log_with_date_schedule_deactivates_it(): void
+    {
+        $vehicle = Vehicle::firstOrFail();
+        $user = $vehicle->user;
+
+        $schedule = $vehicle->schedules()->create([
+            'user_id' => $user->id,
+            'title' => 'Uji Emisi Satu Kali',
+            'trigger_type' => 'tanggal',
+            'next_due_date' => '2026-11-01',
+            'priority' => 'mendesak',
+            'is_active' => true,
+        ]);
+
+        $response = $this->post("/vehicles/{$vehicle->id}/service-logs", [
+            'done_at' => '2026-11-09',
+            'odometer' => $vehicle->odometer + 100,
+            'service_type' => 'Uji Emisi Satu Kali',
+            'schedule_id' => $schedule->id,
+        ]);
+
+        $response->assertRedirect();
+
+        $schedule->refresh();
+        $this->assertFalse((bool) $schedule->is_active);
+        $this->assertSame('2026-11-09', $schedule->last_done_at?->format('Y-m-d'));
+    }
+
     public function test_cannot_store_service_log_with_odometer_lower_than_current(): void
     {
         $vehicle = Vehicle::firstOrFail();
