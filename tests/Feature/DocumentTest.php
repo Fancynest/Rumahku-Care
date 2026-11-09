@@ -294,4 +294,44 @@ class DocumentTest extends TestCase
             ->delete(route('documents.destroy', $doc))
             ->assertNotFound();
     }
+
+    public function test_cannot_create_or_update_document_with_disallowed_type_for_subject(): void
+    {
+        // 1. Sertifikat tidak diizinkan untuk Vehicle (hanya stnk_pajak, bpkb, asuransi, garansi, nota_pembelian, manual_book, lainnya)
+        $resVehicle = $this->actingAs($this->user)->post(route('documents.store'), [
+            'subject_type' => Vehicle::class,
+            'subject_id' => $this->vehicle->id,
+            'type' => 'sertifikat',
+            'title' => 'Sertifikat Kendaraan Ilegal',
+        ]);
+        $resVehicle->assertSessionHasErrors('type');
+
+        // 2. STNK/Pajak tidak diizinkan untuk HomeAsset (hanya garansi, sertifikat, nota_pembelian, manual_book, lainnya)
+        $resAsset = $this->actingAs($this->user)->post(route('documents.store'), [
+            'subject_type' => HomeAsset::class,
+            'subject_id' => $this->homeAsset->id,
+            'type' => 'stnk_pajak',
+            'title' => 'STNK Rumah Ilegal',
+        ]);
+        $resAsset->assertSessionHasErrors('type');
+
+        // 3. Tipe yang diizinkan untuk HomeAsset (sertifikat) berhasil
+        $resAssetOk = $this->actingAs($this->user)->post(route('documents.store'), [
+            'subject_type' => HomeAsset::class,
+            'subject_id' => $this->homeAsset->id,
+            'type' => 'sertifikat',
+            'title' => 'Sertifikat Hak Milik',
+        ]);
+        $resAssetOk->assertRedirect();
+
+        $doc = Document::where('title', 'Sertifikat Hak Milik')->first();
+        $this->assertNotNull($doc);
+
+        // 4. Update ke tipe yang tidak diizinkan ditolak
+        $resUpdateDisallowed = $this->actingAs($this->user)->put(route('documents.update', $doc), [
+            'title' => 'Sertifikat Hak Milik',
+            'type' => 'stnk_pajak',
+        ]);
+        $resUpdateDisallowed->assertSessionHasErrors('type');
+    }
 }

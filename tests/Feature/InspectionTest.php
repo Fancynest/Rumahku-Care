@@ -81,9 +81,9 @@ class InspectionTest extends TestCase
             'inspected_at' => $inspectDate,
             'notes' => 'Pemeriksaan rutin berkala seluruh titik keselamatan.',
             'items' => [
-                ['label' => 'APAR (tekanan tabung)', 'status' => 'ok', 'notes' => 'Jarum masih di zona hijau'],
-                ['label' => 'Detektor Asap', 'status' => 'perhatian', 'notes' => 'Baterai 9V mulai lemah'],
-                ['label' => 'Panel MCB', 'status' => 'bahaya', 'notes' => 'Ada bau hangus di switch utama'],
+                ['label' => 'APAR (tekanan & masa berlaku tabung)', 'status' => 'ok', 'notes' => 'Jarum masih di zona hijau'],
+                ['label' => 'Detektor Asap / Gas (uji sensor & baterai)', 'status' => 'perhatian', 'notes' => 'Baterai 9V mulai lemah'],
+                ['label' => 'Panel MCB & Instalasi Kabel Utama', 'status' => 'bermasalah', 'notes' => 'Ada bau hangus di switch utama'],
             ],
         ]);
 
@@ -103,7 +103,7 @@ class InspectionTest extends TestCase
         $this->assertTrue($run->has_issues);
         $this->assertTrue($run->has_danger);
         $this->assertEquals(2, $run->issues_count);
-        $this->assertEquals('Ditemukan Bahaya', $run->status_label);
+        $this->assertEquals('Ditemukan Masalah', $run->status_label);
 
         // Memastikan last_inspected_at pada home_assets terupdate
         $this->homeAsset->refresh();
@@ -140,7 +140,7 @@ class InspectionTest extends TestCase
         $itemDanger = InspectionRunItem::create([
             'inspection_run_id' => $run->id,
             'item_label' => 'Kabel MCB Meleleh',
-            'status' => 'bahaya',
+            'status' => 'bermasalah',
             'notes' => 'Isolasi kabel terkelupas dan panas berlebih.',
         ]);
 
@@ -228,7 +228,7 @@ class InspectionTest extends TestCase
         $item = InspectionRunItem::create([
             'inspection_run_id' => $run->id,
             'item_label' => 'Selang Gas Retak',
-            'status' => 'bahaya',
+            'status' => 'bermasalah',
         ]);
 
         // 1. Konversi pertama berhasil
@@ -252,5 +252,97 @@ class InspectionTest extends TestCase
         // 3. Di view tersembunyi tombol konversi, diganti badge "Sudah Dikonversi"
         $viewResponse = $this->actingAs($this->user)->get(route('home-assets.show', $this->homeAsset->id));
         $viewResponse->assertSee('Sudah Dikonversi');
+    }
+
+    public function test_inspection_item_status_na_is_ignored_in_issues_count(): void
+    {
+        $run = InspectionRun::create([
+            'user_id' => $this->user->id,
+            'inspectable_type' => HomeAsset::class,
+            'inspectable_id' => $this->homeAsset->id,
+            'title' => 'Inspeksi Lengkap',
+            'inspected_at' => Carbon::today(),
+        ]);
+
+        InspectionRunItem::create([
+            'inspection_run_id' => $run->id,
+            'item_label' => 'Item OK',
+            'status' => 'ok',
+        ]);
+        InspectionRunItem::create([
+            'inspection_run_id' => $run->id,
+            'item_label' => 'Item NA',
+            'status' => 'na',
+        ]);
+        InspectionRunItem::create([
+            'inspection_run_id' => $run->id,
+            'item_label' => 'Item Perhatian',
+            'status' => 'perhatian',
+        ]);
+
+        $run->load('items');
+
+        $this->assertTrue($run->has_issues);
+        $this->assertFalse($run->has_danger);
+        $this->assertEquals(1, $run->issues_count);
+        $this->assertEquals('1 Perlu Perhatian', $run->status_label);
+    }
+
+    public function test_template_validation_rejects_invalid_key_or_mismatched_target_type(): void
+    {
+        // 1. Template key tidak ada di config
+        $resInvalid = $this->actingAs($this->user)->post(route('inspections.store'), [
+            'inspectable_type' => HomeAsset::class,
+            'inspectable_id' => $this->homeAsset->id,
+            'template_key' => 'tidak_ada_di_config',
+            'title' => 'Inspeksi Salah',
+            'inspected_at' => date('Y-m-d'),
+            'items' => [
+                ['label' => 'Item Bebas', 'status' => 'ok'],
+            ],
+        ]);
+        $resInvalid->assertSessionHasErrors('template_key');
+
+        // 2. Template key milik vehicle dipakai pada HomeAsset
+        $resMismatch = $this->actingAs($this->user)->post(route('inspections.store'), [
+            'inspectable_type' => HomeAsset::class,
+            'inspectable_id' => $this->homeAsset->id,
+            'template_key' => 'kendaraan_pra_jalan',
+            'title' => 'Inspeksi Mismatch',
+            'inspected_at' => date('Y-m-d'),
+            'items' => [
+                ['label' => 'Tekanan & Ketebalan Alur Ban', 'status' => 'ok'],
+            ],
+        ]);
+        $resMismatch->assertSessionHasErrors('template_key');
+    }
+
+    public function test_template_validation_rejects_unmatched_label_unless_marked_as_custom(): void
+    {
+        // 1. Label tidak ada di template dan tidak ditandai custom -> gagal
+        $resReject = $this->actingAs($this->user)->post(route('inspections.store'), [
+            'inspectable_type' => HomeAsset::class,
+            'inspectable_id' => $this->homeAsset->id,
+            'template_key' => 'rumah_keselamatan',
+            'title' => 'Inspeksi Custom Tanpa Tanda',
+            'inspected_at' => date('Y-m-d'),
+            'items' => [
+                ['label' => 'Pipa Bocor Liar', 'status' => 'ok'],
+            ],
+        ]);
+        $resReject->assertSessionHasErrors('items.0.label');
+
+        // 2. Label tidak ada di template tapi eksplisit custom -> berhasil
+        $resSuccess = $this->actingAs($this->user)->post(route('inspections.store'), [
+            'inspectable_type' => HomeAsset::class,
+            'inspectable_id' => $this->homeAsset->id,
+            'template_key' => 'rumah_keselamatan',
+            'title' => 'Inspeksi Custom Dengan Tanda',
+            'inspected_at' => date('Y-m-d'),
+            'items' => [
+                ['label' => 'Pipa Bocor Liar', 'status' => 'ok', 'is_custom' => true],
+            ],
+        ]);
+        $resSuccess->assertRedirect();
     }
 }

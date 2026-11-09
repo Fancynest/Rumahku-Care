@@ -46,23 +46,28 @@ class InspectionRun extends Model
 
     public function getHasIssuesAttribute(): bool
     {
-        return $this->items->contains(fn (InspectionRunItem $i) => in_array($i->status, ['perhatian', 'bahaya']));
+        return $this->items->contains(fn (InspectionRunItem $i) => in_array($i->status, ['perhatian', 'bermasalah']));
     }
 
     public function getIssuesCountAttribute(): int
     {
-        return $this->items->filter(fn (InspectionRunItem $i) => in_array($i->status, ['perhatian', 'bahaya']))->count();
+        return $this->items->filter(fn (InspectionRunItem $i) => in_array($i->status, ['perhatian', 'bermasalah']))->count();
     }
 
     public function getHasDangerAttribute(): bool
     {
-        return $this->items->contains(fn (InspectionRunItem $i) => $i->status === 'bahaya');
+        return $this->items->contains(fn (InspectionRunItem $i) => $i->status === 'bermasalah');
+    }
+
+    public function getHasProblemAttribute(): bool
+    {
+        return $this->items->contains(fn (InspectionRunItem $i) => $i->status === 'bermasalah');
     }
 
     public function getStatusLabelAttribute(): string
     {
         if ($this->has_danger) {
-            return 'Ditemukan Bahaya';
+            return 'Ditemukan Masalah';
         }
 
         if ($this->has_issues) {

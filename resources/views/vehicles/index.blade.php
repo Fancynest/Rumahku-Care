@@ -418,7 +418,7 @@
                         <span class="text-muted small">— {{ $item->notes }}</span>
                       @endif
                     </div>
-                    @if (in_array($item->status, ['perhatian', 'bahaya']))
+                    @if (in_array($item->status, ['perhatian', 'bermasalah']))
                       @if ($item->damage_report_id)
                         <span class="badge bg-secondary-subtle text-secondary border px-2 py-1" style="font-size: 0.72rem;">
                           <i class="bi bi-check-circle me-1"></i>Sudah Dikonversi
@@ -947,7 +947,8 @@
                       <select name="items[{{ $idx }}][status]" class="form-select form-select-sm" style="min-height: 38px; width: 140px;">
                         <option value="ok" selected>Kondisi OK</option>
                         <option value="perhatian">Perhatian</option>
-                        <option value="bahaya">Bahaya</option>
+                        <option value="bermasalah">Bermasalah</option>
+                        <option value="na">N/A</option>
                       </select>
                       <input type="text" name="items[{{ $idx }}][notes]" class="form-control form-control-sm" placeholder="Catatan (opsional)" style="min-height: 38px; width: 150px;">
                     </div>

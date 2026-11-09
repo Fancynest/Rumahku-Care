@@ -31,8 +31,9 @@ class InspectionRunItem extends Model
     public function getStatusLabelAttribute(): string
     {
         return match ($this->status) {
-            'bahaya' => 'Bahaya',
+            'bermasalah' => 'Bermasalah',
             'perhatian' => 'Perlu Perhatian',
+            'na' => 'N/A',
             default => 'Kondisi Baik (OK)',
         };
     }
@@ -40,8 +41,9 @@ class InspectionRunItem extends Model
     public function getStatusBadgeClassAttribute(): string
     {
         return match ($this->status) {
-            'bahaya' => 'bg-danger text-white',
+            'bermasalah' => 'bg-danger text-white',
             'perhatian' => 'bg-warning-subtle text-warning-emphasis border border-warning',
+            'na' => 'bg-light text-muted border',
             default => 'bg-success-subtle text-success border border-success-subtle',
         };
     }

@@ -60,7 +60,9 @@ class HomeAssetController extends Controller
 
         $schedules = $homeAsset->schedules()->where('is_active', true)->latest()->get();
         $inspectionTemplates = config('maintenance.inspection_templates', []);
-        $documentTypes = config('maintenance.document_types', []);
+        $allTypes = config('maintenance.document_types', []);
+        $allowedKeys = config('maintenance.allowed_document_types.home_asset', array_keys($allTypes));
+        $documentTypes = array_intersect_key($allTypes, array_flip($allowedKeys));
 
         return view('assets.show', compact('homeAsset', 'schedules', 'inspectionTemplates', 'documentTypes'));
     }

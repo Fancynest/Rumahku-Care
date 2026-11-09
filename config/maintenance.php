@@ -42,6 +42,25 @@ return [
         'lainnya' => 'Dokumen Lainnya',
     ],
 
+    'allowed_document_types' => [
+        'vehicle' => [
+            'stnk_pajak',
+            'bpkb',
+            'asuransi',
+            'garansi',
+            'nota_pembelian',
+            'manual_book',
+            'lainnya',
+        ],
+        'home_asset' => [
+            'garansi',
+            'sertifikat',
+            'nota_pembelian',
+            'manual_book',
+            'lainnya',
+        ],
+    ],
+
     'inspection_templates' => [
         'rumah_keselamatan' => [
             'title' => 'Inspeksi Keselamatan Rumah',

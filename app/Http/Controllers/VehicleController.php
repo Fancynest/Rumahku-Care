@@ -50,7 +50,9 @@ class VehicleController extends Controller
             ->groupBy('brand');
 
         $inspectionTemplates = config('maintenance.inspection_templates', []);
-        $documentTypes = config('maintenance.document_types', []);
+        $allTypes = config('maintenance.document_types', []);
+        $allowedKeys = config('maintenance.allowed_document_types.vehicle', array_keys($allTypes));
+        $documentTypes = array_intersect_key($allTypes, array_flip($allowedKeys));
 
         return view('vehicles.index', compact(
             'vehicles',

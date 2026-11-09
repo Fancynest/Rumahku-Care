@@ -9,6 +9,7 @@ use App\Services\AttachmentStorer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class DocumentController extends Controller
 {
@@ -53,6 +54,14 @@ class DocumentController extends Controller
             abort(404, 'Subjek tidak ditemukan atau bukan milik Anda.');
         }
 
+        $targetType = $subject instanceof Vehicle ? 'vehicle' : 'home_asset';
+        $allowedForSubject = config("maintenance.allowed_document_types.{$targetType}", []);
+        if (! in_array($validated['type'], $allowedForSubject, true)) {
+            throw ValidationException::withMessages([
+                'type' => 'Jenis dokumen tidak diizinkan untuk subjek ini.',
+            ]);
+        }
+
         DB::transaction(function () use ($request, $subject, $validated, $storer): void {
             $document = $subject->documents()->create([
                 'user_id' => $request->user()->id,
@@ -89,6 +98,16 @@ class DocumentController extends Controller
         ], [
             'expires_at.after_or_equal' => 'Tanggal kedaluwarsa tidak boleh lebih awal dari tanggal terbit.',
         ]);
+
+        if (isset($validated['type'])) {
+            $targetType = $document->subject instanceof Vehicle ? 'vehicle' : 'home_asset';
+            $allowedForSubject = config("maintenance.allowed_document_types.{$targetType}", []);
+            if (! in_array($validated['type'], $allowedForSubject, true)) {
+                throw ValidationException::withMessages([
+                    'type' => 'Jenis dokumen tidak diizinkan untuk subjek ini.',
+                ]);
+            }
+        }
 
         $document->update($validated);
 
