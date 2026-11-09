@@ -274,13 +274,19 @@
                       @endif
                     </div>
                     @if (in_array($item->status, ['perhatian', 'bahaya']))
-                      <form action="{{ route('inspections.convert-damage', $item->id) }}" method="POST" class="m-0" onsubmit="return confirm('Konversikan temuan ini menjadi laporan kerusakan aktif?');">
-                        @csrf
-                        <button type="submit" class="btn btn-glass btn-sm py-1 px-2.5 text-danger d-inline-flex align-items-center gap-1" style="min-height: 36px; font-size: 0.75rem;">
-                          <i class="bi bi-tools"></i>
-                          <span>Jadikan Kerusakan</span>
-                        </button>
-                      </form>
+                      @if ($item->damage_report_id)
+                        <span class="badge bg-secondary-subtle text-secondary border px-2 py-1" style="font-size: 0.72rem;">
+                          <i class="bi bi-check-circle me-1"></i>Sudah Dikonversi
+                        </span>
+                      @else
+                        <form action="{{ route('inspections.convert-damage', $item->id) }}" method="POST" class="m-0" onsubmit="return confirm('Konversikan temuan ini menjadi laporan kerusakan aktif?');">
+                          @csrf
+                          <button type="submit" class="btn btn-glass btn-sm py-1 px-2.5 text-danger d-inline-flex align-items-center gap-1" style="min-height: 36px; font-size: 0.75rem;">
+                            <i class="bi bi-tools"></i>
+                            <span>Jadikan Kerusakan</span>
+                          </button>
+                        </form>
+                      @endif
                     @endif
                   </div>
                 @endforeach

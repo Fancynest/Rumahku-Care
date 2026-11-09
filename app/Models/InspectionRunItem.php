@@ -14,12 +14,18 @@ class InspectionRunItem extends Model
         'inspection_run_id',
         'item_label',
         'status',
+        'damage_report_id',
         'notes',
     ];
 
     public function inspectionRun(): BelongsTo
     {
         return $this->belongsTo(InspectionRun::class);
+    }
+
+    public function damageReport(): BelongsTo
+    {
+        return $this->belongsTo(DamageReport::class);
     }
 
     public function getStatusLabelAttribute(): string

@@ -214,4 +214,43 @@ class InspectionTest extends TestCase
             ->post(route('inspections.convert-damage', $item))
             ->assertNotFound();
     }
+
+    public function test_convert_inspection_item_is_idempotent_and_does_not_create_duplicates(): void
+    {
+        $run = InspectionRun::create([
+            'user_id' => $this->user->id,
+            'inspectable_type' => HomeAsset::class,
+            'inspectable_id' => $this->homeAsset->id,
+            'title' => 'Inspeksi Gas',
+            'inspected_at' => Carbon::today(),
+        ]);
+
+        $item = InspectionRunItem::create([
+            'inspection_run_id' => $run->id,
+            'item_label' => 'Selang Gas Retak',
+            'status' => 'bahaya',
+        ]);
+
+        // 1. Konversi pertama berhasil
+        $this->actingAs($this->user)
+            ->post(route('inspections.convert-damage', $item))
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $item->refresh();
+        $this->assertNotNull($item->damage_report_id);
+        $this->assertDatabaseCount('damage_reports', 1);
+
+        // 2. Konversi kedua tidak membuat duplikat
+        $this->actingAs($this->user)
+            ->post(route('inspections.convert-damage', $item))
+            ->assertRedirect()
+            ->assertSessionHas('info');
+
+        $this->assertDatabaseCount('damage_reports', 1);
+
+        // 3. Di view tersembunyi tombol konversi, diganti badge "Sudah Dikonversi"
+        $viewResponse = $this->actingAs($this->user)->get(route('home-assets.show', $this->homeAsset->id));
+        $viewResponse->assertSee('Sudah Dikonversi');
+    }
 }

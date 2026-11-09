@@ -88,6 +88,11 @@ class InspectionController extends Controller
             abort(404, 'Item inspeksi tidak ditemukan atau bukan milik Anda.');
         }
 
+        if ($item->damage_report_id) {
+            return redirect()->back()
+                ->with('info', 'Temuan inspeksi ini sudah dikonversi menjadi laporan kerusakan.');
+        }
+
         $parent = $run->inspectable;
         if (! $parent) {
             abort(404, 'Objek induk inspeksi tidak ditemukan.');
@@ -98,7 +103,7 @@ class InspectionController extends Controller
         DB::transaction(function () use ($request, $parent, $run, $item, $severity): void {
             $notesPart = $item->notes ? "\nCatatan temuan: {$item->notes}" : '';
 
-            $parent->damageReports()->create([
+            $report = $parent->damageReports()->create([
                 'user_id' => $request->user()->id,
                 'title' => 'Temuan: '.$item->item_label,
                 'description' => "Ditemukan pada inspeksi '{$run->title}' tanggal ".$run->inspected_at->format('d/m/Y').".{$notesPart}",
@@ -106,6 +111,8 @@ class InspectionController extends Controller
                 'status' => 'dilaporkan',
                 'reported_at' => $run->inspected_at->toDateString(),
             ]);
+
+            $item->update(['damage_report_id' => $report->id]);
 
             if ($parent instanceof HomeAsset) {
                 $parent->recalculateCondition();
