@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\HomeAsset;
 use App\Models\MaintenanceSchedule;
 use App\Models\Vehicle;
+use App\Services\ActivityTimeline;
 use App\Services\MaintenanceRecorder;
 use App\Services\ScheduleCalendar;
 use Carbon\Carbon;
@@ -67,9 +68,19 @@ class ScheduleController extends Controller
         return view('schedules.calendar', $calendarData);
     }
 
-    public function history(Request $request): View
+    public function history(Request $request, ActivityTimeline $timelineService): View
     {
-        return view('schedules.history');
+        $filters = [
+            'type' => $request->query('type', 'all'),
+            'subject' => $request->query('subject', 'all'),
+            'from' => $request->query('from'),
+            'to' => $request->query('to'),
+            'page' => (int) $request->query('page', 1),
+        ];
+
+        $timelineData = $timelineService->build($request->user(), $filters);
+
+        return view('schedules.history', $timelineData);
     }
 
     public function store(Request $request): RedirectResponse
