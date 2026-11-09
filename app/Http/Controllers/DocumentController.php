@@ -99,6 +99,7 @@ class DocumentController extends Controller
     public function renew(Request $request, Document $document, AttachmentStorer $storer): RedirectResponse
     {
         abort_if((int) $document->user_id !== (int) $request->user()->id, 404);
+        abort_if($document->archived_at !== null, 404, 'Dokumen yang telah diarsipkan tidak dapat diperpanjang.');
 
         $validated = $request->validate([
             'issued_at' => ['nullable', 'date'],

@@ -195,6 +195,26 @@ class DocumentTest extends TestCase
         $this->assertCount(1, $newDoc->attachments);
     }
 
+    public function test_cannot_renew_already_archived_document(): void
+    {
+        $archivedDoc = Document::create([
+            'user_id' => $this->user->id,
+            'subject_type' => Vehicle::class,
+            'subject_id' => $this->vehicle->id,
+            'type' => 'asuransi',
+            'title' => 'Polis TLO Lama',
+            'reference_number' => 'POL-OLD',
+            'expires_at' => Carbon::yesterday(),
+            'archived_at' => Carbon::yesterday(),
+        ]);
+
+        $response = $this->actingAs($this->user)->post(route('documents.renew', $archivedDoc), [
+            'expires_at' => Carbon::today()->addYear()->format('Y-m-d'),
+        ]);
+
+        $response->assertNotFound();
+    }
+
     public function test_status_determination_by_expiry_thresholds(): void
     {
         $scheduleStatus = app(ScheduleStatus::class);
