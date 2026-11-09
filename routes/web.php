@@ -17,6 +17,7 @@ Route::prefix('vehicles')->name('vehicles.')->group(function () {
     Route::get('/', [VehicleController::class, 'index'])->name('index');
     Route::post('/', [VehicleController::class, 'store'])->name('store');
     Route::patch('/{vehicle}/odometer', [VehicleController::class, 'updateOdometer'])->name('update-odometer');
+    Route::post('/{vehicle}/service-logs', [VehicleController::class, 'storeServiceLog'])->name('service-logs.store');
 });
 
 Route::prefix('technicians')->name('technicians.')->group(function () {

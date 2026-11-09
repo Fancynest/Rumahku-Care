@@ -203,51 +203,33 @@
   <div class="modal fade" id="modalCatatServis" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content glass-panel border-0 shadow-lg">
-        <div class="modal-header border-bottom border-slate-200 py-3">
-          <h6 class="modal-title fw-bold text-dark">Catat Servis — {{ $selectedVehicle->name }}</h6>
-          <button type="button" class="btn-close small" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body py-3">
-          <div class="mb-3">
-            <label class="form-label text-muted small mb-1">Jenis Servis / Tindakan</label>
-            <select class="form-select">
-              <option selected>Ganti Oli Mesin & Filter</option>
-              <option>Servis Berkala Rutin (Tune Up)</option>
-              <option>Penggantian Kampas Rem</option>
-              <option>Rotasi / Penggantian Ban</option>
-              <option>Perbaikan Kelistrikan / Aki</option>
-              <option>Servis Lainnya</option>
-            </select>
+        <form action="{{ route('vehicles.service-logs.store', $selectedVehicle->id) }}" method="POST">
+          @csrf
+          <div class="modal-header border-bottom border-slate-200 py-3">
+            <h6 class="modal-title fw-bold text-dark">Catat Servis — {{ $selectedVehicle->name }}</h6>
+            <button type="button" class="btn-close small" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="row g-2 mb-3">
-            <div class="col-6">
-              <label class="form-label text-muted small mb-1">Tanggal Servis</label>
-              <input type="date" class="form-control" value="{{ date('Y-m-d') }}">
+          <div class="modal-body py-3">
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label text-muted small mb-1">Tanggal Servis <span class="text-danger">*</span></label>
+                <input type="date" name="serviced_at" class="form-control" value="{{ date('Y-m-d') }}" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label text-muted small mb-1">Odometer Saat Servis (KM) <span class="text-danger">*</span></label>
+                <input type="number" name="odometer" class="form-control" value="{{ $selectedVehicle->odometer }}" min="0" required>
+              </div>
             </div>
-            <div class="col-6">
-              <label class="form-label text-muted small mb-1">KM Saat Servis</label>
-              <input type="number" class="form-control" value="{{ $selectedVehicle->odometer }}">
+            <div class="mb-2">
+              <label class="form-label text-muted small mb-1">Catatan Servis</label>
+              <textarea name="notes" class="form-control" rows="3" placeholder="Contoh: Ganti oli mesin & filter oli, periksa kampas rem."></textarea>
             </div>
           </div>
-          <div class="row g-2 mb-3">
-            <div class="col-6">
-              <label class="form-label text-muted small mb-1">Biaya (Rp)</label>
-              <input type="number" class="form-control" placeholder="Contoh: 350000">
-            </div>
-            <div class="col-6">
-              <label class="form-label text-muted small mb-1">Bengkel / Pelaksana</label>
-              <input type="text" class="form-control" value="{{ $selectedVehicle->workshop ?? 'Bengkel Resmi' }}">
-            </div>
+          <div class="modal-footer border-top border-slate-200 py-2.5">
+            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 40px;">Batal</button>
+            <button type="submit" class="btn btn-dark btn-sm px-3" style="min-height: 40px;">Simpan Catatan Servis</button>
           </div>
-          <div class="mb-2">
-            <label class="form-label text-muted small mb-1">Catatan Tambahan (opsional)</label>
-            <textarea class="form-control" rows="2" placeholder="Nomor nota, saran mekanik, dll."></textarea>
-          </div>
-        </div>
-        <div class="modal-footer border-top border-slate-200 py-2.5">
-          <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 40px;">Tutup</button>
-          <button type="button" class="btn btn-dark btn-sm px-3" data-bs-dismiss="modal" style="min-height: 40px;">Simpan Catatan</button>
-        </div>
+        </form>
       </div>
     </div>
   </div>

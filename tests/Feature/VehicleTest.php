@@ -137,4 +137,34 @@ class VehicleTest extends TestCase
         $vehicle->refresh();
         $this->assertSame('Waktunya Servis', $vehicle->status_label);
     }
+
+    public function test_can_store_service_log_for_vehicle(): void
+    {
+        $vehicle = Vehicle::firstOrFail();
+
+        $response = $this->post("/vehicles/{$vehicle->id}/service-logs", [
+            'serviced_at' => '2026-11-09',
+            'odometer' => $vehicle->odometer + 100,
+            'notes' => 'Ganti oli transmisi dan filter',
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('service_logs', [
+            'vehicle_id' => $vehicle->id,
+            'serviced_at' => '2026-11-09 00:00:00',
+            'odometer' => $vehicle->odometer + 100,
+            'notes' => 'Ganti oli transmisi dan filter',
+        ]);
+
+        $this->assertEquals($vehicle->odometer + 100, $vehicle->fresh()->odometer);
+    }
+
+    public function test_cannot_store_service_log_with_invalid_data(): void
+    {
+        $vehicle = Vehicle::firstOrFail();
+
+        $response = $this->post("/vehicles/{$vehicle->id}/service-logs", []);
+
+        $response->assertSessionHasErrors(['serviced_at', 'odometer']);
+    }
 }

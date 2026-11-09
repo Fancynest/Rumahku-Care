@@ -81,4 +81,22 @@ class VehicleController extends Controller
         return redirect()->back()
             ->with('success', 'Odometer '.$vehicle->name.' berhasil diperbarui menjadi '.number_format($vehicle->odometer).' KM.');
     }
+
+    public function storeServiceLog(Request $request, Vehicle $vehicle): RedirectResponse
+    {
+        $validated = $request->validate([
+            'serviced_at' => ['required', 'date'],
+            'odometer' => ['required', 'integer', 'min:0'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $vehicle->serviceLogs()->create($validated);
+
+        if ($validated['odometer'] > $vehicle->odometer) {
+            $vehicle->update(['odometer' => $validated['odometer']]);
+        }
+
+        return redirect()->back()
+            ->with('success', 'Catatan servis untuk '.$vehicle->name.' berhasil disimpan.');
+    }
 }
