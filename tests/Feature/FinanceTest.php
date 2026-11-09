@@ -12,6 +12,7 @@ use App\Models\Vehicle;
 use App\Services\ExpenseReport;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class FinanceTest extends TestCase
@@ -326,5 +327,32 @@ class FinanceTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Rp 0');
         $response->assertDontSee('D 9999 SBD');
+    }
+
+    public function test_finance_index_does_not_suffer_from_n_plus_one_queries(): void
+    {
+        // Buat 10 catatan pengeluaran berbagai jenis
+        for ($i = 1; $i <= 10; $i++) {
+            FuelLog::create([
+                'user_id' => $this->user->id,
+                'vehicle_id' => $this->vehicle->id,
+                'filled_at' => Carbon::today()->subDays($i)->toDateString(),
+                'odometer' => 10000 + ($i * 100),
+                'liters' => 15,
+                'total_cost' => 150000,
+            ]);
+        }
+
+        $this->actingAs($this->user);
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        $response = $this->get('/finance');
+        $response->assertStatus(200);
+
+        $queries = DB::getQueryLog();
+        // Memastikan jumlah query tetap terikat dan tidak bertambah per baris data
+        $this->assertLessThanOrEqual(20, count($queries));
     }
 }

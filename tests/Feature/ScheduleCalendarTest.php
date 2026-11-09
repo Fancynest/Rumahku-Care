@@ -9,6 +9,7 @@ use App\Models\Vehicle;
 use App\Services\ScheduleCalendar;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class ScheduleCalendarTest extends TestCase
@@ -260,5 +261,31 @@ class ScheduleCalendarTest extends TestCase
         $this->assertEquals(1, $data31['weeks'][0][0]['date']->dayOfWeekIso);
         $lastWeek31 = end($data31['weeks']);
         $this->assertEquals(7, end($lastWeek31)['date']->dayOfWeekIso);
+    }
+
+    public function test_calendar_page_query_count_is_bounded(): void
+    {
+        for ($i = 1; $i <= 10; $i++) {
+            $this->vehicle->schedules()->create([
+                'user_id' => $this->user->id,
+                'title' => "Jadwal Uji #{$i}",
+                'trigger_type' => 'tanggal',
+                'interval_months' => 1,
+                'next_due_date' => Carbon::today()->addDays($i)->toDateString(),
+                'priority' => 'normal',
+                'is_active' => true,
+            ]);
+        }
+
+        $this->actingAs($this->user);
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        $response = $this->get(route('schedules.calendar'));
+        $response->assertOk();
+
+        $queries = DB::getQueryLog();
+        $this->assertLessThanOrEqual(15, count($queries));
     }
 }

@@ -11,6 +11,7 @@ use App\Models\MaintenanceRecord;
 use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class ScheduleHistoryTest extends TestCase
@@ -352,5 +353,32 @@ class ScheduleHistoryTest extends TestCase
         $response = $this->get(route('schedules.history'));
         $response->assertOk();
         $response->assertDontSee('Servis Mesin Rahasia User Lain');
+    }
+
+    public function test_history_page_query_count_is_bounded(): void
+    {
+        for ($i = 1; $i <= 10; $i++) {
+            FuelLog::create([
+                'user_id' => $this->user->id,
+                'vehicle_id' => $this->vehicle->id,
+                'filled_at' => '2026-11-01',
+                'odometer' => 20000 + ($i * 50),
+                'liters' => 10.0,
+                'total_cost' => 100000,
+                'fuel_grade' => 'Pertamax',
+                'is_full_tank' => true,
+            ]);
+        }
+
+        $this->actingAs($this->user);
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        $response = $this->get(route('schedules.history'));
+        $response->assertOk();
+
+        $queries = DB::getQueryLog();
+        $this->assertLessThanOrEqual(15, count($queries));
     }
 }

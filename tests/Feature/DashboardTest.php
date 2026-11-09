@@ -69,7 +69,8 @@ class DashboardTest extends TestCase
         $response->assertSee('Halo Gabriel');
         $response->assertSee('ada 1 hal yang perlu perhatianmu minggu ini');
         $response->assertSee('Cuci Filter AC Rutin');
-        $response->assertSee('3'); // 1 prime vehicle + 2 normal home assets = 3
+        $response->assertSee('Pengeluaran Bulan Ini');
+        $response->assertSee('Rp 0');
     }
 
     public function test_dashboard_displays_max_three_urgent_cards(): void

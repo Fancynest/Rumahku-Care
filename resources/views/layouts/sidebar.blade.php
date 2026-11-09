@@ -30,13 +30,19 @@
       <span>Jadwal</span>
     </a>
 
-    <a href="{{ route('technicians.index') }}" class="nav-item-link {{ request()->routeIs('technicians.*') ? 'active' : '' }}" style="min-height: 44px;">
-      <i class="bi bi-person-lines-fill"></i>
-      <span>Kontak</span>
+    <a href="{{ route('finance.index') }}" class="nav-item-link {{ request()->routeIs('finance.*') ? 'active' : '' }}" style="min-height: 44px;">
+      <i class="bi bi-wallet2"></i>
+      <span>Keuangan</span>
     </a>
   </nav>
 
-  <div class="p-3 border-top border-slate-200 d-flex align-items-center gap-2 mt-auto" style="border-color: rgba(226, 232, 240, 0.6) !important;">
+  <div class="p-3 border-top border-slate-200 d-flex flex-column gap-2 mt-auto" style="border-color: rgba(226, 232, 240, 0.6) !important;">
+    <div class="px-1">
+      <a href="{{ route('technicians.index') }}" class="text-decoration-none text-muted small d-inline-flex align-items-center gap-1.5 py-1" style="font-size: 0.78rem;">
+        <i class="bi bi-person-lines-fill"></i>
+        <span>Kontak Teknisi</span>
+      </a>
+    </div>
     @auth
       <div class="rounded-circle bg-slate-200 text-slate-700 d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width: 34px; height: 34px; font-size: 0.8rem;">
         {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}

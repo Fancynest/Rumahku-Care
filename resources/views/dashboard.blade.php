@@ -48,13 +48,18 @@
     </div>
 
     <div class="col-sm-6">
-      <div class="glass-panel p-4 h-100">
-        <div class="text-muted small fw-medium mb-1">Aset Kondisi Prima</div>
-        <div class="d-flex align-items-baseline gap-2">
-          <h2 class="fw-bold text-dark mb-0">{{ $primeAssetsCount }}</h2>
-          <span class="text-muted small">unit ({{ $primeVehiclesCount }} kendaraan, {{ $normalHomeAssetsCount }} aset rumah)</span>
+      <a href="{{ route('finance.index') }}" class="text-decoration-none">
+        <div class="glass-panel p-4 h-100 hover-lift">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="text-muted small fw-medium">Pengeluaran Bulan Ini</span>
+            <i class="bi bi-arrow-up-right text-muted small"></i>
+          </div>
+          <div class="d-flex align-items-baseline gap-2">
+            <h2 class="fw-bold text-dark mb-0">{{ $currentMonthExpenseFormatted }}</h2>
+            <span class="text-muted small">rekap biaya servis, BBM, dan dokumen</span>
+          </div>
         </div>
-      </div>
+      </a>
     </div>
   </div>
 
