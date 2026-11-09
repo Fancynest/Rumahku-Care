@@ -120,9 +120,12 @@ body {
 }
 
 .sidebar-menu {
-  padding: 0.5rem 0.85rem;
+  padding: 0.85rem 0.85rem;
   flex: 1;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .menu-section {
@@ -131,21 +134,21 @@ body {
   text-transform: uppercase;
   color: var(--slate-400);
   letter-spacing: 0.06em;
-  padding: 1rem 0.6rem 0.35rem;
+  padding: 0.75rem 0.6rem 0.25rem;
 }
 
 .nav-item-link {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.55rem 0.75rem;
+  gap: 0.85rem;
+  padding: 0.7rem 0.95rem;
   color: #475569;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 500;
-  border-radius: 9px;
+  border-radius: 10px;
   text-decoration: none;
   transition: all 0.15s ease;
-  margin-bottom: 2px;
+  min-height: 44px;
 }
 
 .nav-item-link i {
@@ -361,6 +364,48 @@ body {
   background: #ffffff;
   color: #0f172a;
   border-color: #cbd5e1;
+}
+
+/* Minimalist Tabs Navigation */
+.nav-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+  padding-bottom: 0;
+}
+
+.nav-tabs .nav-item {
+  margin-bottom: -1px;
+}
+
+.nav-tabs .nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.15rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #64748b;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 9px 9px 0 0;
+  transition: all 0.15s ease;
+  min-height: 44px;
+}
+
+.nav-tabs .nav-link:hover {
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.65);
+  border-color: rgba(226, 232, 240, 0.8) rgba(226, 232, 240, 0.8) transparent;
+}
+
+.nav-tabs .nav-link.active {
+  color: #0f172a !important;
+  font-weight: 600;
+  background-color: #ffffff;
+  border-color: rgba(203, 213, 225, 0.9) rgba(203, 213, 225, 0.9) #ffffff;
+  box-shadow: 0 -2px 6px rgba(15, 23, 42, 0.03);
 }
 
 /* Clean Asset Card */

@@ -42,11 +42,11 @@
     </div>
   </div>
 
-  <div class="d-flex gap-2 overflow-x-auto pb-1">
-    <button class="btn btn-dark btn-sm px-3 rounded-pill text-nowrap" style="font-size: 0.8rem;">Semua Kontak (4)</button>
-    <button class="btn btn-glass btn-sm px-3 rounded-pill text-nowrap" style="font-size: 0.8rem;">Teknisi AC (1)</button>
-    <button class="btn btn-glass btn-sm px-3 rounded-pill text-nowrap" style="font-size: 0.8rem;">Bengkel Kendaraan (2)</button>
-    <button class="btn btn-glass btn-sm px-3 rounded-pill text-nowrap" style="font-size: 0.8rem;">Listrik & Pompa (1)</button>
+  <div class="d-flex gap-2.5 overflow-x-auto pb-1">
+    <button class="btn btn-dark btn-sm px-3.5 py-1.5 rounded-pill text-nowrap" style="font-size: 0.82rem;">Semua Kontak (4)</button>
+    <button class="btn btn-glass btn-sm px-3.5 py-1.5 rounded-pill text-nowrap" style="font-size: 0.82rem;">Teknisi AC (1)</button>
+    <button class="btn btn-glass btn-sm px-3.5 py-1.5 rounded-pill text-nowrap" style="font-size: 0.82rem;">Bengkel Kendaraan (2)</button>
+    <button class="btn btn-glass btn-sm px-3.5 py-1.5 rounded-pill text-nowrap" style="font-size: 0.82rem;">Listrik & Pompa (1)</button>
   </div>
 </div>
 

@@ -15,7 +15,7 @@
     </div>
   </div>
 
-  <div class="d-flex align-items-center gap-2">
+  <div class="d-flex align-items-center gap-2.5">
     <button class="btn btn-glass btn-sm px-3" data-bs-toggle="modal" data-bs-target="#modalEditAset" style="min-height: 40px;">
       <i class="bi bi-pencil me-1.5"></i> Edit Aset
     </button>
@@ -30,7 +30,7 @@
 </div>
 
 <!-- Nav Tabs Bootstrap (5 Tab: Ringkasan, Jadwal, Inspeksi, Kerusakan, Dokumen) -->
-<ul class="nav nav-tabs border-bottom border-slate-200 mb-4" id="assetTabs" role="tablist">
+<ul class="nav nav-tabs border-bottom border-slate-200 mb-4 gap-2" id="assetTabs" role="tablist">
   <li class="nav-item" role="presentation">
     <button class="nav-link active fw-medium text-dark d-flex align-items-center gap-1.5 px-3 py-2.5" id="tab-ringkasan-btn" data-bs-toggle="tab" data-bs-target="#ringkasan" type="button" role="tab" aria-controls="ringkasan" aria-selected="true" style="min-height: 44px;">
       <i class="bi bi-info-circle"></i>

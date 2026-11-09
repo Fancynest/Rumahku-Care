@@ -5,7 +5,7 @@
     </button>
   </div>
 
-  <div class="d-flex align-items-center gap-2">
+  <div class="d-flex align-items-center gap-2.5">
     @yield('header-action')
 
     <!-- Notification Bell -->

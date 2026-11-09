@@ -24,21 +24,21 @@
   </div>
 
   <!-- Filter Pills -->
-  <div class="d-flex align-items-center gap-1 bg-white p-1 rounded-pill border shadow-xs">
+  <div class="d-flex align-items-center gap-2 bg-white p-1.5 rounded-pill border shadow-xs">
     <a href="{{ route('schedules.index', ['filter' => 'all']) }}" 
-       class="btn btn-sm rounded-pill px-3 py-1 text-decoration-none {{ $filter === 'all' ? 'btn-dark' : 'text-muted' }}" 
-       style="font-size: 0.8rem; font-weight: 500;">
+       class="btn btn-sm rounded-pill px-3.5 py-1.5 text-decoration-none {{ $filter === 'all' ? 'btn-dark' : 'text-muted' }}" 
+       style="font-size: 0.82rem; font-weight: 500;">
       Semua
     </a>
     <a href="{{ route('schedules.index', ['filter' => 'home_asset']) }}" 
-       class="btn btn-sm rounded-pill px-3 py-1 text-decoration-none {{ $filter === 'home_asset' ? 'btn-dark' : 'text-muted' }}" 
-       style="font-size: 0.8rem; font-weight: 500;">
-      <i class="bi bi-house-door me-1"></i>Rumah
+       class="btn btn-sm rounded-pill px-3.5 py-1.5 text-decoration-none {{ $filter === 'home_asset' ? 'btn-dark' : 'text-muted' }}" 
+       style="font-size: 0.82rem; font-weight: 500;">
+      <i class="bi bi-house-door me-1.5"></i>Rumah
     </a>
     <a href="{{ route('schedules.index', ['filter' => 'vehicle']) }}" 
-       class="btn btn-sm rounded-pill px-3 py-1 text-decoration-none {{ $filter === 'vehicle' ? 'btn-dark' : 'text-muted' }}" 
-       style="font-size: 0.8rem; font-weight: 500;">
-      <i class="bi bi-car-front me-1"></i>Kendaraan
+       class="btn btn-sm rounded-pill px-3.5 py-1.5 text-decoration-none {{ $filter === 'vehicle' ? 'btn-dark' : 'text-muted' }}" 
+       style="font-size: 0.82rem; font-weight: 500;">
+      <i class="bi bi-car-front me-1.5"></i>Kendaraan
     </a>
   </div>
 </div>

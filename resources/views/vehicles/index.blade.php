@@ -30,20 +30,20 @@
     </div>
   </div>
 
-  <div class="d-flex gap-2 overflow-x-auto pb-2" style="scrollbar-width: thin;">
+  <div class="d-flex gap-2.5 overflow-x-auto pb-2" style="scrollbar-width: thin;">
     @foreach ($vehicles as $v)
       @php
         $isActive = $v->id === $selectedVehicle->id;
       @endphp
       <a href="{{ route('vehicles.index', ['v' => $v->id]) }}" 
-         class="text-decoration-none d-flex align-items-center gap-2.5 px-3 py-2 rounded-3 border transition-all text-nowrap {{ $isActive ? 'bg-white border-dark shadow-sm' : 'bg-white-50 border-slate-200 text-secondary' }}"
-         style="min-height: 44px; transition: all 0.2s ease;">
+         class="text-decoration-none d-flex align-items-center gap-3 px-3.5 py-2.5 rounded-3 border transition-all text-nowrap {{ $isActive ? 'bg-white border-dark shadow-sm' : 'bg-white-50 border-slate-200 text-secondary' }}"
+         style="min-height: 48px; transition: all 0.2s ease;">
         <i class="bi {{ str_starts_with($v->body_type ?? '', 'motor') ? 'bi-bicycle' : 'bi-car-front' }} {{ $isActive ? 'text-dark' : 'text-muted' }}"></i>
         <div>
           <div class="fw-bold small {{ $isActive ? 'text-dark' : 'text-slate-700' }}">{{ $v->name }}</div>
           <div class="text-muted font-monospace" style="font-size: 0.72rem;">{{ $v->plate }}</div>
         </div>
-        <span class="chip {{ $v->status_chip_class }} py-0 px-1.5 ms-1" style="font-size: 0.65rem;">
+        <span class="chip {{ $v->status_chip_class }} py-0.5 px-2 ms-1" style="font-size: 0.65rem;">
           {{ $v->status_label }}
         </span>
       </a>
@@ -52,7 +52,7 @@
 </div>
 
 <!-- Nav Tabs Bootstrap (5 Tab: Ringkasan, Jadwal, Inspeksi, Kerusakan, Dokumen) -->
-<ul class="nav nav-tabs border-bottom border-slate-200 mb-4" id="vehicleTabs" role="tablist">
+<ul class="nav nav-tabs border-bottom border-slate-200 mb-4 gap-2" id="vehicleTabs" role="tablist">
   <li class="nav-item" role="presentation">
     <button class="nav-link active fw-medium text-dark d-flex align-items-center gap-1.5 px-3 py-2.5" id="tab-v-ringkasan-btn" data-bs-toggle="tab" data-bs-target="#ringkasan" type="button" role="tab" aria-controls="ringkasan" aria-selected="true" style="min-height: 44px;">
       <i class="bi bi-speedometer2"></i>
