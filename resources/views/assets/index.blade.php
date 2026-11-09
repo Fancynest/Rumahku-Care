@@ -80,9 +80,20 @@
           @foreach ($assets as $asset)
             <tr>
               <td class="py-3">
-                <a href="{{ route('home-assets.show', $asset->id) }}" class="fw-bold text-dark text-decoration-none">
-                  {{ $asset->name }}
-                </a>
+                <div class="d-flex align-items-center gap-2.5">
+                  @if ($asset->primary_image_url)
+                    <img src="{{ $asset->primary_image_url }}" alt="{{ $asset->name }}" class="rounded-2 object-fit-cover border flex-shrink-0" style="width: 40px; height: 40px;" loading="lazy">
+                  @else
+                    <div class="rounded-2 bg-light border d-flex align-items-center justify-content-center text-muted flex-shrink-0" style="width: 40px; height: 40px; font-size: 1.1rem;">
+                      <i class="bi bi-house-door"></i>
+                    </div>
+                  @endif
+                  <div>
+                    <a href="{{ route('home-assets.show', $asset->id) }}" class="fw-bold text-dark text-decoration-none d-block">
+                      {{ $asset->name }}
+                    </a>
+                  </div>
+                </div>
               </td>
               <td>
                 <span class="text-capitalize text-secondary">{{ $asset->category_label }}</span>

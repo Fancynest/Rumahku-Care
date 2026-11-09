@@ -32,11 +32,18 @@
 <!-- Main Detail Card -->
 <div class="glass-panel p-4 mb-4">
   <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom border-slate-200">
-    <div>
-      <span class="badge bg-light text-dark border px-2.5 py-1 text-uppercase me-2" style="font-size: 0.72rem; letter-spacing: 0.05em;">
-        {{ $homeAsset->category_label }}
-      </span>
-      <span class="text-muted small"><i class="bi bi-geo-alt me-1"></i>{{ $homeAsset->room }}</span>
+    <div class="d-flex align-items-center gap-2.5">
+      @if ($homeAsset->primary_image_url)
+        <a href="{{ $homeAsset->primary_image_url }}" target="_blank">
+          <img src="{{ $homeAsset->primary_image_url }}" alt="{{ $homeAsset->name }}" class="rounded-2 object-fit-cover border" style="width: 48px; height: 48px;">
+        </a>
+      @endif
+      <div>
+        <span class="badge bg-light text-dark border px-2.5 py-1 text-uppercase me-2" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+          {{ $homeAsset->category_label }}
+        </span>
+        <span class="text-muted small"><i class="bi bi-geo-alt me-1"></i>{{ $homeAsset->room }}</span>
+      </div>
     </div>
     <span class="chip {{ $homeAsset->condition_chip_class }} py-1 px-2.5">
       <span class="chip-dot"></span> Kondisi: {{ $homeAsset->condition_label }}
@@ -89,6 +96,11 @@
       <p class="text-muted small mb-0">{{ $homeAsset->notes }}</p>
     </div>
   @endif
+</div>
+
+<!-- Attachments Section -->
+<div class="glass-panel p-4 mb-4">
+  <x-attachments :model="$homeAsset" />
 </div>
 
 <!-- Schedules Section for this Home Asset -->

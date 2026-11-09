@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeAssetController;
@@ -47,5 +48,11 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('technicians')->name('technicians.')->group(function () {
         Route::get('/', [TechnicianController::class, 'index'])->name('index');
+    });
+
+    Route::prefix('attachments')->name('attachments.')->group(function () {
+        Route::post('/', [AttachmentController::class, 'store'])->name('store');
+        Route::get('/{attachment}', [AttachmentController::class, 'show'])->name('show');
+        Route::delete('/{attachment}', [AttachmentController::class, 'destroy'])->name('destroy');
     });
 });

@@ -1,6 +1,18 @@
 <?php
 
 return [
+    'attachments' => [
+        'max_kb' => 5120, // 5 MB
+        'max_per_object' => 5,
+        'allowed_mimes' => [
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'application/pdf',
+        ],
+        'allowed_extensions' => ['jpg', 'jpeg', 'png', 'webp', 'pdf'],
+    ],
+
     'thresholds' => [
         'date' => [
             'terlambat' => 0,     // <= 0 hari

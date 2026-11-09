@@ -11,7 +11,7 @@ class HomeAssetController extends Controller
 {
     public function index(Request $request): View
     {
-        $assets = $request->user()->homeAssets()->latest()->get();
+        $assets = $request->user()->homeAssets()->with('attachments')->latest()->get();
 
         $countNormal = $assets->where('condition', 'normal')->count();
         $countAttention = $assets->where('condition', 'perlu_perhatian')->count();
