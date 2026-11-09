@@ -26,6 +26,7 @@ class VehicleTest extends TestCase
         $response->assertSee('B 2341 KLS');
         $response->assertSee('B 1234 GAB');
         $response->assertSee('B 9999 KRA');
+        $response->assertSee('Warna:');
     }
 
     public function test_can_create_vehicle_from_catalog(): void

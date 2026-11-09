@@ -79,12 +79,18 @@
 
   <!-- 3. Tiga Info Kunci: Plat, Odometer, Status -->
   <div class="row g-3 text-start pt-3 border-top border-slate-200 mt-2">
-    <!-- Info 1: Nomor Plat -->
+    <!-- Info 1: Nomor Plat & Warna -->
     <div class="col-md-4 col-sm-6">
       <div class="p-2.5 rounded-3 bg-white-50 border border-slate-200 h-100">
         <small class="text-muted d-block" style="font-size: 0.75rem;">Nomor Registrasi (Plat)</small>
         <div class="fw-bold fs-5 text-dark font-monospace mt-0.5">{{ $selectedVehicle->plate }}</div>
-        <small class="text-muted" style="font-size: 0.72rem;">Tahun Perakitan: {{ $selectedVehicle->year ?? '-' }}</small>
+        <div class="d-flex align-items-center gap-2 mt-1">
+          <small class="text-muted" style="font-size: 0.72rem;">Tahun: {{ $selectedVehicle->year ?? '-' }}</small>
+          <span class="text-muted" style="font-size: 0.72rem;">•</span>
+          <span class="badge bg-white text-dark border py-0.5 px-1.5 text-capitalize" style="font-size: 0.72rem; font-weight: 500;">
+            <i class="bi bi-palette me-1 text-secondary"></i>Warna: {{ $selectedVehicle->color_key }}
+          </span>
+        </div>
       </div>
     </div>
 

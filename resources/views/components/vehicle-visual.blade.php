@@ -10,6 +10,16 @@
     $genericRelative = "images/vehicles/generic/{$bodyType}.svg";
     $hasGeneric = file_exists(public_path($genericRelative));
     $genericAsset = $hasGeneric ? asset($genericRelative) : asset('images/vehicles/generic/default.svg');
+
+    // Initial color factor for 3D GLB based on color_key
+    $colorKey = strtolower($vehicle->color_key ?? 'hitam');
+    $initialColorFactor = match ($colorKey) {
+        'putih', 'white' => [0.94, 0.94, 0.95, 1.0],
+        'merah', 'red' => [0.85, 0.15, 0.15, 1.0],
+        'biru', 'blue' => [0.15, 0.38, 0.92, 1.0],
+        'silver', 'abu-abu', 'gray', 'grey' => [0.72, 0.75, 0.80, 1.0],
+        default => [0.08, 0.10, 0.14, 1.0], // hitam / default
+    };
 @endphp
 
 <div class="vehicle-visual-container position-relative d-flex flex-column align-items-center justify-content-center w-100" style="min-height: 250px;">
@@ -35,9 +45,11 @@
                 const viewer = document.getElementById('modelViewer-{{ $vehicle->id }}');
                 if (viewer) {
                     viewer.addEventListener('load', function() {
+                        const defaultColor = @json($initialColorFactor);
+                        const targetColor = window.selectedColorFactor || defaultColor;
                         const material = viewer.model.materials.find(m => m.name.toLowerCase().includes('body') || m.name.toLowerCase().includes('paint')) || viewer.model.materials[0];
-                        if (material && window.selectedColorFactor) {
-                            material.pbrMetallicRoughness.setBaseColorFactor(window.selectedColorFactor);
+                        if (material && material.pbrMetallicRoughness) {
+                            material.pbrMetallicRoughness.setBaseColorFactor(targetColor);
                         }
                     });
                 }
