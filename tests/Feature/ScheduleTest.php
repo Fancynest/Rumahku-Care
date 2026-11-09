@@ -157,4 +157,66 @@ class ScheduleTest extends TestCase
 
         $response->assertStatus(404);
     }
+
+    public function test_user_can_view_schedules_index_with_filters(): void
+    {
+        $responseAll = $this->get('/schedules?filter=all');
+        $responseAll->assertStatus(200);
+        $responseAll->assertSee('Jadwal Perawatan');
+        $responseAll->assertSee('Mulai dari Template');
+
+        $responseVehicle = $this->get('/schedules?filter=vehicle');
+        $responseVehicle->assertStatus(200);
+
+        $responseAsset = $this->get('/schedules?filter=home_asset');
+        $responseAsset->assertStatus(200);
+    }
+
+    public function test_user_can_create_schedule_for_home_asset(): void
+    {
+        $user = User::firstOrFail();
+        $asset = HomeAsset::firstOrFail();
+
+        $response = $this->post('/schedules', [
+            'subject_type' => HomeAsset::class,
+            'subject_id' => $asset->id,
+            'title' => 'Cek & Bersihkan Talang',
+            'trigger_type' => 'interval_hari',
+            'interval_days' => 120,
+            'first_due_date' => '2026-11-15',
+            'priority' => 'normal',
+            'notes' => 'Bersihkan kotoran menjelang musim hujan',
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('maintenance_schedules', [
+            'user_id' => $user->id,
+            'subject_type' => HomeAsset::class,
+            'subject_id' => $asset->id,
+            'title' => 'Cek & Bersihkan Talang',
+            'interval_days' => 120,
+        ]);
+    }
+
+    public function test_user_can_delete_schedule(): void
+    {
+        $user = User::firstOrFail();
+        $vehicle = Vehicle::firstOrFail();
+
+        $schedule = $vehicle->schedules()->create([
+            'user_id' => $user->id,
+            'title' => 'Jadwal yang akan dihapus',
+            'trigger_type' => 'kilometer',
+            'interval_km' => 5000,
+            'priority' => 'normal',
+            'is_active' => true,
+        ]);
+
+        $response = $this->delete("/schedules/{$schedule->id}");
+        $response->assertRedirect();
+
+        $this->assertDatabaseMissing('maintenance_schedules', [
+            'id' => $schedule->id,
+        ]);
+    }
 }

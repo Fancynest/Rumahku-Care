@@ -49,7 +49,9 @@ class HomeAssetController extends Controller
     {
         abort_if($homeAsset->user_id !== $request->user()->id, 404);
 
-        return view('assets.show', compact('homeAsset'));
+        $schedules = $homeAsset->schedules()->where('is_active', true)->latest()->get();
+
+        return view('assets.show', compact('homeAsset', 'schedules'));
     }
 
     public function update(Request $request, HomeAsset $homeAsset): RedirectResponse
