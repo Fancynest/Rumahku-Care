@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>@yield('title', 'RUMAHKU CARE - Home & Vehicle Maintenance')</title>
+  <title>@yield('title', 'Rumahku Care - Personal Asset Manager')</title>
   
   <!-- Google Font: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,6 +28,13 @@
     @include('layouts.header')
 
     <main class="content-body">
+      @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+          <i class="bi bi-check-circle me-1.5"></i> {{ session('success') }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      @endif
+
       @yield('content')
     </main>
   </div>
@@ -35,9 +42,9 @@
   <!-- Global Modals -->
   @yield('modals')
 
-  <!-- Bootstrap 5 JS Bundle & Chart.js -->
+  <!-- Bootstrap 5 JS Bundle & Model Viewer CDN -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
   
   <script>
     document.getElementById('sidebarToggle')?.addEventListener('click', function() {
