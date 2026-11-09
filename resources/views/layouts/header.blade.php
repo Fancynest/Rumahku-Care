@@ -35,10 +35,17 @@
               @endphp
               <a href="{{ $targetUrl }}" class="list-group-item list-group-item-action px-0 py-2 bg-transparent border-bottom text-decoration-none">
                 <div class="d-flex justify-content-between align-items-baseline mb-0.5">
-                  <div class="fw-semibold text-dark text-truncate" style="max-width: 190px;">{{ $sched->title }}</div>
-                  <span class="chip {{ $sched->status_chip_class }} py-0 px-1" style="font-size: 0.65rem;">
-                    {{ $sched->status_label }}
-                  </span>
+                  <div class="fw-semibold text-dark text-truncate" style="max-width: 170px;">{{ $sched->title }}</div>
+                  <div class="d-flex align-items-center gap-1">
+                    @if ($sched->priority && $sched->priority !== 'normal')
+                      <span class="badge {{ $sched->priority === 'darurat' ? 'bg-danger text-white' : 'bg-warning-subtle text-warning-emphasis' }} py-0 px-1 text-capitalize" style="font-size: 0.6rem;">
+                        {{ $sched->priority }}
+                      </span>
+                    @endif
+                    <span class="chip {{ $sched->status_chip_class }} py-0 px-1" style="font-size: 0.65rem;">
+                      {{ $sched->status_label }}
+                    </span>
+                  </div>
                 </div>
                 <div class="text-muted" style="font-size: 0.72rem;">
                   {{ $sched->subject_name }} • 

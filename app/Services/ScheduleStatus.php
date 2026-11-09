@@ -19,63 +19,53 @@ class ScheduleStatus
 
     public function determine(MaintenanceSchedule $schedule): string
     {
+        $status = self::NORMAL;
+
         if ($schedule->trigger_type === 'kilometer') {
             if ($schedule->subject_type !== Vehicle::class && ! ($schedule->subject instanceof Vehicle)) {
                 throw new InvalidArgumentException('Jadwal berbasis kilometer hanya valid untuk subjek Kendaraan (Vehicle).');
             }
 
-            if ($schedule->next_due_km === null) {
-                return self::NORMAL;
+            if ($schedule->next_due_km !== null) {
+                $currentOdometer = $schedule->subject?->odometer ?? 0;
+                $diffKm = $schedule->next_due_km - $currentOdometer;
+
+                $thresholdTerlambat = (int) config('maintenance.thresholds.km.terlambat', 0);
+                $thresholdMendesak = (int) config('maintenance.thresholds.km.mendesak', 200);
+                $thresholdPerhatian = (int) config('maintenance.thresholds.km.perhatian', 500);
+
+                if ($diffKm <= $thresholdTerlambat) {
+                    $status = self::TERLAMBAT;
+                } elseif ($diffKm <= $thresholdMendesak) {
+                    $status = self::MENDESAK;
+                } elseif ($diffKm <= $thresholdPerhatian) {
+                    $status = self::PERHATIAN;
+                }
             }
+        } elseif ($schedule->next_due_date !== null) {
+            $dueDate = Carbon::parse($schedule->next_due_date)->startOfDay();
+            $today = Carbon::today();
+            $diffDays = (int) $today->diffInDays($dueDate, false);
 
-            $currentOdometer = $schedule->subject?->odometer ?? 0;
-            $diffKm = $schedule->next_due_km - $currentOdometer;
+            $thresholdTerlambat = (int) config('maintenance.thresholds.date.terlambat', 0);
+            $thresholdMendesak = (int) config('maintenance.thresholds.date.mendesak', 7);
+            $thresholdPerhatian = (int) config('maintenance.thresholds.date.perhatian', 30);
 
-            $thresholdTerlambat = (int) config('maintenance.thresholds.km.terlambat', 0);
-            $thresholdMendesak = (int) config('maintenance.thresholds.km.mendesak', 200);
-            $thresholdPerhatian = (int) config('maintenance.thresholds.km.perhatian', 500);
-
-            if ($diffKm <= $thresholdTerlambat) {
-                return self::TERLAMBAT;
+            if ($diffDays <= $thresholdTerlambat) {
+                $status = self::TERLAMBAT;
+            } elseif ($diffDays <= $thresholdMendesak) {
+                $status = self::MENDESAK;
+            } elseif ($diffDays <= $thresholdPerhatian) {
+                $status = self::PERHATIAN;
             }
-
-            if ($diffKm <= $thresholdMendesak) {
-                return self::MENDESAK;
-            }
-
-            if ($diffKm <= $thresholdPerhatian) {
-                return self::PERHATIAN;
-            }
-
-            return self::NORMAL;
         }
 
-        // Trigger type: tanggal or interval_hari
-        if ($schedule->next_due_date === null) {
-            return self::NORMAL;
-        }
-
-        $dueDate = Carbon::parse($schedule->next_due_date)->startOfDay();
-        $today = Carbon::today();
-        $diffDays = (int) $today->diffInDays($dueDate, false);
-
-        $thresholdTerlambat = (int) config('maintenance.thresholds.date.terlambat', 0);
-        $thresholdMendesak = (int) config('maintenance.thresholds.date.mendesak', 7);
-        $thresholdPerhatian = (int) config('maintenance.thresholds.date.perhatian', 30);
-
-        if ($diffDays <= $thresholdTerlambat) {
-            return self::TERLAMBAT;
-        }
-
-        if ($diffDays <= $thresholdMendesak) {
+        // Prioritas "darurat" menaikkan tampilan ke kelompok Mendesak minimal
+        if ($schedule->priority === 'darurat' && in_array($status, [self::NORMAL, self::PERHATIAN])) {
             return self::MENDESAK;
         }
 
-        if ($diffDays <= $thresholdPerhatian) {
-            return self::PERHATIAN;
-        }
-
-        return self::NORMAL;
+        return $status;
     }
 
     public static function label(string $status): string

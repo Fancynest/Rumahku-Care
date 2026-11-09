@@ -11,8 +11,15 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        $priorityMap = [
+        $statusRank = [
             'terlambat' => 0,
+            'mendesak' => 1,
+            'perhatian' => 2,
+            'normal' => 3,
+        ];
+
+        $priorityRank = [
+            'darurat' => 0,
             'mendesak' => 1,
             'perhatian' => 2,
             'normal' => 3,
@@ -23,10 +30,17 @@ class DashboardController extends Controller
             ->where('is_active', true)
             ->get();
 
-        // Urgent schedules sorted by urgency: terlambat (0), mendesak (1), perhatian (2)
+        // Urgent schedules sorted by urgency: terlambat -> mendesak -> perhatian, with priority tie-breaker (darurat > mendesak > perhatian > normal)
         $urgentSchedules = $allSchedules
             ->filter(fn ($s) => in_array($s->status, ['terlambat', 'mendesak', 'perhatian']))
-            ->sortBy(fn ($s) => $priorityMap[$s->status] ?? 99)
+            ->sort(function ($a, $b) use ($statusRank, $priorityRank) {
+                $statusCmp = ($statusRank[$a->status] ?? 99) <=> ($statusRank[$b->status] ?? 99);
+                if ($statusCmp !== 0) {
+                    return $statusCmp;
+                }
+
+                return ($priorityRank[$a->priority] ?? 99) <=> ($priorityRank[$b->priority] ?? 99);
+            })
             ->values();
 
         // Max 3 most urgent schedules for the cards

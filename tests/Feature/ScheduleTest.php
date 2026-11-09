@@ -397,4 +397,48 @@ class ScheduleTest extends TestCase
 
         $response->assertSessionHasErrors(['trigger_type']);
     }
+
+    public function test_schedules_index_orders_by_priority_within_same_status_group(): void
+    {
+        $user = User::factory()->create();
+        $vehicle = Vehicle::create([
+            'user_id' => $user->id,
+            'plate' => 'B 9999 SRT',
+            'odometer' => 5000,
+            'color_key' => 'putih',
+            'fuel_type' => 'Bensin',
+        ]);
+
+        // Create two schedules in the same status group (e.g. mendesak, 3 days due)
+        $vehicle->schedules()->create([
+            'user_id' => $user->id,
+            'title' => 'Jadwal Normal Mendesak',
+            'trigger_type' => 'interval_hari',
+            'interval_days' => 30,
+            'next_due_date' => Carbon::today()->addDays(3)->toDateString(),
+            'priority' => 'normal',
+            'is_active' => true,
+        ]);
+
+        $vehicle->schedules()->create([
+            'user_id' => $user->id,
+            'title' => 'Jadwal Darurat Mendesak',
+            'trigger_type' => 'interval_hari',
+            'interval_days' => 30,
+            'next_due_date' => Carbon::today()->addDays(3)->toDateString(),
+            'priority' => 'darurat',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($user)->get('/schedules');
+        $response->assertStatus(200);
+
+        $content = $response->getContent();
+        $posDarurat = strpos($content, 'Jadwal Darurat Mendesak');
+        $posNormal = strpos($content, 'Jadwal Normal Mendesak');
+
+        $this->assertNotFalse($posDarurat);
+        $this->assertNotFalse($posNormal);
+        $this->assertTrue($posDarurat < $posNormal, 'Darurat schedule should appear before normal within same group');
+    }
 }

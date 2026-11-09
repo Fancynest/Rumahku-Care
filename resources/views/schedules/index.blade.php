@@ -159,7 +159,12 @@
                   </div>
 
                   <!-- Col 3: Status Chip & Tombol Aksi -->
-                  <div class="d-flex align-items-center gap-2 ms-auto ms-md-0">
+                  <div class="d-flex align-items-center gap-1.5 ms-auto ms-md-0">
+                    @if ($sch->priority && $sch->priority !== 'normal')
+                      <span class="badge {{ $sch->priority === 'darurat' ? 'bg-danger text-white' : ($sch->priority === 'mendesak' ? 'bg-warning-subtle text-warning-emphasis border border-warning' : 'bg-info-subtle text-info-emphasis border border-info') }} py-1 px-2 text-capitalize" style="font-size: 0.68rem;">
+                        <i class="bi bi-flag-fill me-0.5"></i>{{ ucfirst($sch->priority) }}
+                      </span>
+                    @endif
                     <span class="chip {{ $sch->status_chip_class }} py-1 px-2.5">
                       <span class="chip-dot"></span> {{ ucfirst($sch->status) }}
                     </span>

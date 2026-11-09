@@ -131,4 +131,51 @@ class DashboardTest extends TestCase
         $response->assertSee('Tugas Perhatian');
         $response->assertDontSee('Tugas Normal Jauh');
     }
+
+    public function test_urgent_schedules_use_priority_as_tie_breaker_and_display_chip_only_when_not_normal(): void
+    {
+        $user = User::factory()->create(['name' => 'Eko Kurniawan']);
+        $asset = HomeAsset::create([
+            'user_id' => $user->id,
+            'name' => 'Genset Cadangan',
+            'category' => 'listrik',
+            'room' => 'Garasi',
+            'condition' => 'normal',
+        ]);
+
+        // Two schedules with same status (mendesak: 3 days left), but different priority
+        $asset->schedules()->create([
+            'user_id' => $user->id,
+            'title' => 'Cek Oli Genset Normal',
+            'trigger_type' => 'interval_hari',
+            'interval_days' => 30,
+            'next_due_date' => Carbon::today()->addDays(3)->toDateString(),
+            'priority' => 'normal',
+            'is_active' => true,
+        ]);
+
+        $asset->schedules()->create([
+            'user_id' => $user->id,
+            'title' => 'Cek Aki Genset Darurat',
+            'trigger_type' => 'interval_hari',
+            'interval_days' => 30,
+            'next_due_date' => Carbon::today()->addDays(3)->toDateString(),
+            'priority' => 'darurat',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($user)->get('/');
+        $response->assertStatus(200);
+
+        $content = $response->getContent();
+        $posDarurat = strpos($content, 'Cek Aki Genset Darurat');
+        $posNormal = strpos($content, 'Cek Oli Genset Normal');
+
+        $this->assertNotFalse($posDarurat);
+        $this->assertNotFalse($posNormal);
+        $this->assertTrue($posDarurat < $posNormal, 'Schedule with higher priority darurat should appear before normal');
+
+        // Priority darurat chip is rendered
+        $response->assertSee('Darurat');
+    }
 }

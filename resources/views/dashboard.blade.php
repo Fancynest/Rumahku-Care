@@ -66,9 +66,16 @@
           <div class="glass-panel p-3.5 h-100 d-flex flex-column justify-content-between">
             <div>
               <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="chip {{ $sch->status_chip_class }} py-0.5 px-2">
-                  <span class="chip-dot"></span> {{ ucfirst($sch->status) }}
-                </span>
+                <div class="d-flex align-items-center gap-1">
+                  <span class="chip {{ $sch->status_chip_class }} py-0.5 px-2">
+                    <span class="chip-dot"></span> {{ ucfirst($sch->status) }}
+                  </span>
+                  @if ($sch->priority && $sch->priority !== 'normal')
+                    <span class="badge {{ $sch->priority === 'darurat' ? 'bg-danger text-white' : ($sch->priority === 'mendesak' ? 'bg-warning-subtle text-warning-emphasis border border-warning' : 'bg-info-subtle text-info-emphasis border border-info') }} py-0.5 px-1.5 text-capitalize" style="font-size: 0.65rem;">
+                      {{ ucfirst($sch->priority) }}
+                    </span>
+                  @endif
+                </div>
                 <span class="badge bg-light text-dark border px-2 py-0.5" style="font-size: 0.68rem;">
                   {{ $isVehicle ? 'Kendaraan' : 'Aset Rumah' }}
                 </span>

@@ -31,11 +31,22 @@ class ScheduleController extends Controller
 
         $allSchedules = $query->get();
 
+        $priorityRank = [
+            'darurat' => 0,
+            'mendesak' => 1,
+            'perhatian' => 2,
+            'normal' => 3,
+        ];
+
         $grouped = [
-            'terlambat' => $allSchedules->filter(fn ($s) => $s->status === 'terlambat'),
-            'mendesak' => $allSchedules->filter(fn ($s) => $s->status === 'mendesak'),
-            'perhatian' => $allSchedules->filter(fn ($s) => $s->status === 'perhatian'),
-            'normal' => $allSchedules->filter(fn ($s) => $s->status === 'normal'),
+            'terlambat' => $allSchedules->filter(fn ($s) => $s->status === 'terlambat')
+                ->sortBy(fn ($s) => $priorityRank[$s->priority] ?? 99)->values(),
+            'mendesak' => $allSchedules->filter(fn ($s) => $s->status === 'mendesak')
+                ->sortBy(fn ($s) => $priorityRank[$s->priority] ?? 99)->values(),
+            'perhatian' => $allSchedules->filter(fn ($s) => $s->status === 'perhatian')
+                ->sortBy(fn ($s) => $priorityRank[$s->priority] ?? 99)->values(),
+            'normal' => $allSchedules->filter(fn ($s) => $s->status === 'normal')
+                ->sortBy(fn ($s) => $priorityRank[$s->priority] ?? 99)->values(),
         ];
 
         $vehicles = $request->user()->vehicles()->get();

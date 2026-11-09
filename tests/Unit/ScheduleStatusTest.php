@@ -128,4 +128,37 @@ class ScheduleStatusTest extends TestCase
 
         $this->service->determine($schedule);
     }
+
+    public function test_priority_darurat_elevates_normal_to_mendesak(): void
+    {
+        $schedule = new MaintenanceSchedule([
+            'trigger_type' => 'interval_hari',
+            'next_due_date' => Carbon::today()->addDays(60)->toDateString(),
+            'priority' => 'darurat',
+        ]);
+
+        $this->assertSame(ScheduleStatus::MENDESAK, $this->service->determine($schedule));
+    }
+
+    public function test_priority_darurat_elevates_perhatian_to_mendesak(): void
+    {
+        $schedule = new MaintenanceSchedule([
+            'trigger_type' => 'interval_hari',
+            'next_due_date' => Carbon::today()->addDays(20)->toDateString(),
+            'priority' => 'darurat',
+        ]);
+
+        $this->assertSame(ScheduleStatus::MENDESAK, $this->service->determine($schedule));
+    }
+
+    public function test_priority_darurat_preserves_terlambat(): void
+    {
+        $schedule = new MaintenanceSchedule([
+            'trigger_type' => 'interval_hari',
+            'next_due_date' => Carbon::today()->subDays(2)->toDateString(),
+            'priority' => 'darurat',
+        ]);
+
+        $this->assertSame(ScheduleStatus::TERLAMBAT, $this->service->determine($schedule));
+    }
 }
