@@ -303,4 +303,98 @@ class ScheduleTest extends TestCase
         $responseAfter = $this->get('/schedules?filter=all');
         $responseAfter->assertDontSee('Penggantian Filter Khusus');
     }
+
+    public function test_user_can_update_own_schedule(): void
+    {
+        $user = User::firstOrFail();
+        $asset = HomeAsset::firstOrFail();
+
+        $schedule = $asset->schedules()->create([
+            'user_id' => $user->id,
+            'title' => 'Judul Lama',
+            'trigger_type' => 'interval_hari',
+            'interval_days' => 30,
+            'priority' => 'normal',
+            'is_active' => true,
+        ]);
+
+        $response = $this->put("/schedules/{$schedule->id}", [
+            'title' => 'Judul Baru Diperbarui',
+            'trigger_type' => 'interval_hari',
+            'interval_days' => 60,
+            'next_due_date' => '2026-12-01',
+            'priority' => 'mendesak',
+            'is_active' => 1,
+            'notes' => 'Catatan baru hasil edit',
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('maintenance_schedules', [
+            'id' => $schedule->id,
+            'title' => 'Judul Baru Diperbarui',
+            'interval_days' => 60,
+            'priority' => 'mendesak',
+            'is_active' => 1,
+            'notes' => 'Catatan baru hasil edit',
+        ]);
+    }
+
+    public function test_user_cannot_update_other_users_schedule_returns_404(): void
+    {
+        $userA = User::firstOrFail();
+        $userB = User::factory()->create(['email' => 'other_user@example.com']);
+
+        $vehicleB = Vehicle::create([
+            'user_id' => $userB->id,
+            'plate' => 'B 9999 OTH',
+            'odometer' => 5000,
+            'color_key' => 'hitam',
+            'fuel_type' => 'Bensin',
+        ]);
+
+        $scheduleB = $vehicleB->schedules()->create([
+            'user_id' => $userB->id,
+            'title' => 'Jadwal Milik User B',
+            'trigger_type' => 'kilometer',
+            'interval_km' => 5000,
+            'priority' => 'normal',
+            'is_active' => true,
+        ]);
+
+        // Acting as userA, updating scheduleB must return 404
+        $response = $this->actingAs($userA)->put("/schedules/{$scheduleB->id}", [
+            'title' => 'Coba Retas Judul',
+            'trigger_type' => 'kilometer',
+            'interval_km' => 5000,
+            'priority' => 'normal',
+            'is_active' => 1,
+        ]);
+
+        $response->assertStatus(404);
+    }
+
+    public function test_updating_home_asset_schedule_with_km_trigger_fails_validation(): void
+    {
+        $user = User::firstOrFail();
+        $asset = HomeAsset::firstOrFail();
+
+        $schedule = $asset->schedules()->create([
+            'user_id' => $user->id,
+            'title' => 'Jadwal Aset Rumah',
+            'trigger_type' => 'interval_hari',
+            'interval_days' => 30,
+            'priority' => 'normal',
+            'is_active' => true,
+        ]);
+
+        $response = $this->put("/schedules/{$schedule->id}", [
+            'title' => 'Jadwal Aset Rumah Diubah ke KM',
+            'trigger_type' => 'kilometer',
+            'interval_km' => 5000,
+            'priority' => 'normal',
+            'is_active' => 1,
+        ]);
+
+        $response->assertSessionHasErrors(['trigger_type']);
+    }
 }

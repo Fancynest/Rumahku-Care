@@ -185,6 +185,27 @@
                       </button>
                       <ul class="dropdown-menu dropdown-menu-end glass-panel border-0 p-1 shadow-sm">
                         <li>
+                          <button type="button" 
+                                  class="dropdown-item py-1.5 rounded-2 small d-flex align-items-center gap-2 btn-edit-schedule"
+                                  data-bs-toggle="modal" 
+                                  data-bs-target="#modalEditJadwal"
+                                  data-id="{{ $sch->id }}"
+                                  data-title="{{ $sch->title }}"
+                                  data-trigger="{{ $sch->trigger_type }}"
+                                  data-interval-days="{{ $sch->interval_days }}"
+                                  data-interval-km="{{ $sch->interval_km }}"
+                                  data-due-date="{{ $sch->next_due_date ? $sch->next_due_date->format('Y-m-d') : '' }}"
+                                  data-due-km="{{ $sch->next_due_km }}"
+                                  data-priority="{{ $sch->priority }}"
+                                  data-notes="{{ $sch->notes }}"
+                                  data-is-active="{{ $sch->is_active ? '1' : '0' }}"
+                                  data-is-vehicle="{{ $isVehicle ? '1' : '0' }}">
+                            <i class="bi bi-pencil text-muted"></i>
+                            <span>Edit Jadwal</span>
+                          </button>
+                        </li>
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li>
                           <form action="{{ route('schedules.destroy', $sch->id) }}" method="POST" onsubmit="return confirm('Hapus jadwal perawatan ini?');" class="m-0">
                             @csrf
                             @method('DELETE')
@@ -366,6 +387,98 @@
       <div class="modal-footer border-top border-slate-200 py-2.5">
         <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Tutup</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: EDIT JADWAL ================= -->
+<div class="modal fade" id="modalEditJadwal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content glass-panel border-0 shadow-lg">
+      <form action="" method="POST" id="formEditJadwal">
+        @csrf
+        @method('PUT')
+        <div class="modal-header border-bottom border-slate-200 py-3">
+          <h6 class="modal-title fw-bold text-dark">Edit Jadwal Perawatan</h6>
+          <button type="button" class="btn-close small" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body py-3">
+          <!-- Judul Jadwal -->
+          <div class="mb-3">
+            <label class="form-label text-muted small mb-1">Nama / Judul Agenda <span class="text-danger">*</span></label>
+            <input type="text" name="title" id="editScheduleTitle" class="form-control" required>
+          </div>
+
+          <!-- Tipe Pemicu -->
+          <div class="mb-3">
+            <label class="form-label text-muted small mb-1">Tipe Pemicu Jadwal <span class="text-danger">*</span></label>
+            <select name="trigger_type" id="editTriggerType" class="form-select" required>
+              <option value="interval_hari">Interval Rutin (Hari / Bulan)</option>
+              <option value="kilometer" id="editOptionKM">Jarak Tempuh (Kilometer / KM)</option>
+              <option value="tanggal">Tanggal Pasti (Satu Kali)</option>
+            </select>
+          </div>
+
+          <!-- Input Dinamis Pemicu -->
+          <div id="editWrapperIntervalDays" class="mb-3">
+            <label class="form-label text-muted small mb-1">Interval Hari <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input type="number" name="interval_days" id="editIntervalDays" class="form-control" min="1">
+              <span class="input-group-text bg-transparent text-muted">Hari</span>
+            </div>
+          </div>
+
+          <div id="editWrapperIntervalKM" class="mb-3 d-none">
+            <label class="form-label text-muted small mb-1">Interval Kilometer <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input type="number" name="interval_km" id="editIntervalKM" class="form-control" min="100" step="100">
+              <span class="input-group-text bg-transparent text-muted">KM</span>
+            </div>
+          </div>
+
+          <div id="editWrapperDueDate" class="mb-3">
+            <label class="form-label text-muted small mb-1">Jatuh Tempo Tanggal</label>
+            <input type="date" name="next_due_date" id="editNextDueDate" class="form-control">
+          </div>
+
+          <div id="editWrapperDueKM" class="mb-3 d-none">
+            <label class="form-label text-muted small mb-1">Jatuh Tempo Odometer (KM)</label>
+            <input type="number" name="next_due_km" id="editNextDueKM" class="form-control" min="0">
+          </div>
+
+          <!-- Prioritas & Status Aktif -->
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label text-muted small mb-1">Tingkat Prioritas <span class="text-danger">*</span></label>
+              <select name="priority" id="editPriority" class="form-select" required>
+                <option value="normal">Normal</option>
+                <option value="perhatian">Perlu Perhatian</option>
+                <option value="mendesak">Mendesak</option>
+                <option value="darurat">Darurat</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label text-muted small mb-1">Status Keaktifan <span class="text-danger">*</span></label>
+              <select name="is_active" id="editIsActive" class="form-select" required>
+                <option value="1">Aktif</option>
+                <option value="0">Nonaktif</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Catatan -->
+          <div class="mb-2">
+            <label class="form-label text-muted small mb-1">Catatan Tambahan</label>
+            <textarea name="notes" id="editNotes" class="form-control" rows="2"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer border-top border-slate-200 py-2.5">
+          <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
+          <button type="submit" class="btn btn-dark btn-sm px-4" style="min-height: 44px;">Simpan Perubahan</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -558,6 +671,73 @@
         odoWrapper.classList.add('d-none');
         odoInput.required = false;
       }
+    });
+  });
+
+  // Edit schedule modal trigger
+  const editTrigger = document.getElementById('editTriggerType');
+  const editDaysWrap = document.getElementById('editWrapperIntervalDays');
+  const editKmWrap = document.getElementById('editWrapperIntervalKM');
+  const editDueDateWrap = document.getElementById('editWrapperDueDate');
+  const editDueKmWrap = document.getElementById('editWrapperDueKM');
+  const editOptionKM = document.getElementById('editOptionKM');
+
+  function syncEditTriggerFields() {
+    if (!editTrigger) return;
+    const val = editTrigger.value;
+    if (val === 'kilometer') {
+      editKmWrap.classList.remove('d-none');
+      editDueKmWrap.classList.remove('d-none');
+      editDaysWrap.classList.add('d-none');
+      editDueDateWrap.classList.add('d-none');
+    } else if (val === 'interval_hari') {
+      editKmWrap.classList.add('d-none');
+      editDueKmWrap.classList.add('d-none');
+      editDaysWrap.classList.remove('d-none');
+      editDueDateWrap.classList.remove('d-none');
+    } else {
+      editKmWrap.classList.add('d-none');
+      editDueKmWrap.classList.add('d-none');
+      editDaysWrap.classList.add('d-none');
+      editDueDateWrap.classList.remove('d-none');
+    }
+  }
+
+  editTrigger?.addEventListener('change', syncEditTriggerFields);
+
+  document.querySelectorAll('.btn-edit-schedule').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const id = this.getAttribute('data-id');
+      const title = this.getAttribute('data-title');
+      const trigger = this.getAttribute('data-trigger');
+      const days = this.getAttribute('data-interval-days');
+      const km = this.getAttribute('data-interval-km');
+      const dueDate = this.getAttribute('data-due-date');
+      const dueKm = this.getAttribute('data-due-km');
+      const priority = this.getAttribute('data-priority');
+      const notes = this.getAttribute('data-notes');
+      const isActive = this.getAttribute('data-is-active');
+      const isVehicle = this.getAttribute('data-is-vehicle') === '1';
+
+      const form = document.getElementById('formEditJadwal');
+      form.action = '/schedules/' + id;
+
+      document.getElementById('editScheduleTitle').value = title;
+      document.getElementById('editPriority').value = priority;
+      document.getElementById('editIsActive').value = isActive;
+      document.getElementById('editNotes').value = notes || '';
+
+      if (editOptionKM) {
+        editOptionKM.disabled = !isVehicle;
+      }
+
+      editTrigger.value = trigger;
+      syncEditTriggerFields();
+
+      document.getElementById('editIntervalDays').value = days || '';
+      document.getElementById('editIntervalKM').value = km || '';
+      document.getElementById('editNextDueDate').value = dueDate || '';
+      document.getElementById('editNextDueKM').value = dueKm || '';
     });
   });
 </script>

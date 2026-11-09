@@ -40,6 +40,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('schedules')->name('schedules.')->group(function () {
         Route::get('/', [ScheduleController::class, 'index'])->name('index');
         Route::post('/', [ScheduleController::class, 'store'])->name('store');
+        Route::put('/{schedule}', [ScheduleController::class, 'update'])->name('update');
         Route::post('/{schedule}/complete', [ScheduleController::class, 'complete'])->name('complete');
         Route::delete('/{schedule}', [ScheduleController::class, 'destroy'])->name('destroy');
     });

@@ -101,6 +101,64 @@ class ScheduleController extends Controller
             ->with('success', 'Jadwal perawatan "'.$schedule->title.'" berhasil ditambahkan.');
     }
 
+    public function update(Request $request, MaintenanceSchedule $schedule): RedirectResponse
+    {
+        abort_if($schedule->user_id !== $request->user()->id, 404);
+
+        $subject = $schedule->subject;
+        $isVehicle = $subject instanceof Vehicle;
+
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:150'],
+            'trigger_type' => ['required', 'string', 'in:tanggal,interval_hari,kilometer'],
+            'interval_days' => ['nullable', 'required_if:trigger_type,interval_hari', 'integer', 'min:1'],
+            'interval_km' => ['nullable', 'required_if:trigger_type,kilometer', 'integer', 'min:100'],
+            'next_due_date' => ['nullable', 'date'],
+            'next_due_km' => ['nullable', 'integer', 'min:0'],
+            'priority' => ['required', 'string', 'in:normal,perhatian,mendesak,darurat'],
+            'is_active' => ['required', 'boolean'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        if (! $isVehicle && $validated['trigger_type'] === 'kilometer') {
+            throw ValidationException::withMessages([
+                'trigger_type' => 'Pemicu kilometer hanya dapat digunakan untuk kendaraan.',
+            ]);
+        }
+
+        $nextDueDate = $validated['next_due_date'] ?? $schedule->next_due_date;
+        $nextDueKm = $validated['next_due_km'] ?? $schedule->next_due_km;
+
+        if ($validated['trigger_type'] === 'kilometer') {
+            if (empty($nextDueKm)) {
+                $nextDueKm = (int) ($subject?->odometer ?? 0) + (int) $validated['interval_km'];
+            }
+            $nextDueDate = null;
+        } elseif ($validated['trigger_type'] === 'interval_hari') {
+            if (empty($nextDueDate)) {
+                $nextDueDate = Carbon::today()->addDays((int) $validated['interval_days'])->toDateString();
+            }
+            $nextDueKm = null;
+        } else {
+            $nextDueKm = null;
+        }
+
+        $schedule->update([
+            'title' => $validated['title'],
+            'trigger_type' => $validated['trigger_type'],
+            'interval_days' => $validated['trigger_type'] === 'interval_hari' ? $validated['interval_days'] : null,
+            'interval_km' => $validated['trigger_type'] === 'kilometer' ? $validated['interval_km'] : null,
+            'next_due_date' => $nextDueDate,
+            'next_due_km' => $nextDueKm,
+            'priority' => $validated['priority'],
+            'is_active' => (bool) $validated['is_active'],
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
+        return redirect()->back()
+            ->with('success', 'Jadwal "'.$schedule->title.'" berhasil diperbarui.');
+    }
+
     public function complete(Request $request, MaintenanceSchedule $schedule): RedirectResponse
     {
         abort_if($schedule->user_id !== $request->user()->id, 404);
