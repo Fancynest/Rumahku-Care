@@ -6,137 +6,164 @@
 <!-- (a) 1 Kalimat Sapaan Kontekstual -->
 <div class="mb-4">
   <h4 class="fw-bold mb-1 text-dark" style="letter-spacing: -0.02em;">{{ $greetingMessage }}</h4>
-  <p class="text-muted mb-0 small">Pantau status jadwal perawatan dan kondisi fisik seluruh aset Anda secara terpadu.</p>
-</div>
-
-<!-- (c) 2 Angka Ringkasan -->
-<div class="row g-3 mb-4">
-  <div class="col-sm-6">
-    <div class="glass-panel p-4 h-100">
-      <div class="text-muted small fw-medium mb-1">Jadwal Perlu Tindakan</div>
-      <div class="d-flex align-items-baseline gap-2">
-        <h2 class="fw-bold text-dark mb-0">{{ $urgentCount }}</h2>
-        <span class="text-muted small">agenda berstatus terlambat atau mendesak</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-sm-6">
-    <div class="glass-panel p-4 h-100">
-      <div class="text-muted small fw-medium mb-1">Aset Kondisi Prima</div>
-      <div class="d-flex align-items-baseline gap-2">
-        <h2 class="fw-bold text-dark mb-0">{{ $primeAssetsCount }}</h2>
-        <span class="text-muted small">unit ({{ $primeVehiclesCount }} kendaraan, {{ $normalHomeAssetsCount }} aset rumah)</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- (b) Maksimal 3 Kartu Jadwal Paling Mendesak -->
-<div class="mb-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h6 class="fw-bold text-dark mb-0">Perlu Perhatian Segera</h6>
-    <a href="{{ route('schedules.index') }}" class="text-dark small text-decoration-none fw-medium">
-      Lihat Semua Jadwal <i class="bi bi-arrow-right"></i>
-    </a>
-  </div>
-
-  @if ($topUrgentCards->isEmpty())
-    <div class="glass-panel p-4 text-center my-2">
-      <i class="bi bi-shield-check text-success fs-2 mb-2 d-block"></i>
-      <div class="fw-bold text-dark mb-1">Semua Aset Terawat Baik</div>
-      <p class="text-muted small mb-3">Tidak ada jadwal perawatan yang mendesak atau terlambat saat ini.</p>
-      <div class="d-flex justify-content-center gap-2">
-        <a href="{{ route('vehicles.index') }}" class="btn btn-glass btn-sm px-3" style="min-height: 40px;">
-          <i class="bi bi-car-front me-1"></i> Buka Garasi
-        </a>
-        <a href="{{ route('home-assets.index') }}" class="btn btn-glass btn-sm px-3" style="min-height: 40px;">
-          <i class="bi bi-grid me-1"></i> Aset Rumah
-        </a>
-      </div>
-    </div>
+  @if ($hasNoData)
+    <p class="text-muted mb-0 small">Mulai kelola inventaris aset dan jadwalkan perawatan berkala Anda di satu tempat.</p>
   @else
-    <div class="row g-3">
-      @foreach ($topUrgentCards as $sch)
-        @php
-          $isVehicle = $sch->subject instanceof \App\Models\Vehicle;
-          $subjectOdo = $isVehicle ? (int) $sch->subject->odometer : 0;
-        @endphp
-        <div class="col-md-4">
-          <div class="glass-panel p-3.5 h-100 d-flex flex-column justify-content-between">
-            <div>
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <div class="d-flex align-items-center gap-1">
-                  <span class="chip {{ $sch->status_chip_class }} py-0.5 px-2">
-                    <span class="chip-dot"></span> {{ ucfirst($sch->status) }}
-                  </span>
-                  @if ($sch->priority && $sch->priority !== 'normal')
-                    <span class="badge {{ $sch->priority === 'darurat' ? 'bg-danger text-white' : ($sch->priority === 'mendesak' ? 'bg-warning-subtle text-warning-emphasis border border-warning' : 'bg-info-subtle text-info-emphasis border border-info') }} py-0.5 px-1.5 text-capitalize" style="font-size: 0.65rem;">
-                      {{ ucfirst($sch->priority) }}
-                    </span>
-                  @endif
-                </div>
-                <span class="badge bg-light text-dark border px-2 py-0.5" style="font-size: 0.68rem;">
-                  {{ $isVehicle ? 'Kendaraan' : 'Aset Rumah' }}
-                </span>
-              </div>
-
-              <div class="fw-bold text-secondary small mb-0.5">{{ $sch->subject_name }}</div>
-              <h6 class="fw-bold mb-1 text-dark">{{ $sch->title }}</h6>
-
-              <!-- Sisa KM / Hari -->
-              <div class="text-muted small mb-3" style="font-size: 0.8rem;">
-                @if ($sch->trigger_type === 'kilometer')
-                  @php
-                    $diff = (int) $sch->next_due_km - $subjectOdo;
-                  @endphp
-                  @if ($diff <= 0)
-                    <span class="text-danger fw-bold"><i class="bi bi-speedometer2 me-1"></i>Terlewat {{ number_format(abs($diff)) }} KM</span>
-                  @else
-                    <span class="text-secondary"><i class="bi bi-speedometer2 me-1"></i>Sisa {{ number_format($diff) }} KM</span>
-                  @endif
-                  <span class="text-muted d-block" style="font-size: 0.72rem;">Target: {{ number_format($sch->next_due_km) }} KM</span>
-                @elseif ($sch->next_due_date)
-                  @php
-                    $daysDiff = \Carbon\Carbon::today()->diffInDays(\Carbon\Carbon::parse($sch->next_due_date), false);
-                  @endphp
-                  @if ($daysDiff < 0)
-                    <span class="text-danger fw-bold"><i class="bi bi-clock-history me-1"></i>Terlambat {{ abs($daysDiff) }} hari</span>
-                  @else
-                    <span class="text-secondary"><i class="bi bi-clock me-1"></i>Sisa {{ $daysDiff }} hari lagi</span>
-                  @endif
-                  <span class="text-muted d-block" style="font-size: 0.72rem;">Jatuh tempo: {{ \Carbon\Carbon::parse($sch->next_due_date)->format('d M Y') }}</span>
-                @else
-                  <span class="text-secondary"><i class="bi bi-calendar-event me-1"></i>Jadwal Rutin</span>
-                @endif
-              </div>
-            </div>
-
-            <!-- Tombol Cepat: Tandai Selesai -->
-            <div class="pt-2.5 border-top border-slate-200 d-flex justify-content-between align-items-center">
-              <span class="badge bg-white text-dark border px-2 py-1 font-monospace" style="font-size: 0.7rem;">
-                {{ $sch->trigger_label }}
-              </span>
-              <button class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center gap-1.5 btn-dashboard-complete" 
-                      style="min-height: 40px; font-weight: 500;"
-                      data-bs-toggle="modal" 
-                      data-bs-target="#modalTandaiSelesai"
-                      data-id="{{ $sch->id }}"
-                      data-title="{{ $sch->title }}"
-                      data-trigger="{{ $sch->trigger_type }}"
-                      data-subject="{{ $sch->subject_name }}"
-                      data-odo="{{ $subjectOdo }}"
-                      data-workshop="{{ $isVehicle ? ($sch->subject->workshop ?? '') : '' }}">
-                <i class="bi bi-check2"></i>
-                <span>Tandai Selesai</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      @endforeach
-    </div>
+    <p class="text-muted mb-0 small">Pantau status jadwal perawatan dan kondisi fisik seluruh aset Anda secara terpadu.</p>
   @endif
 </div>
+
+@if ($hasNoData)
+  <!-- Empty State Onboarding -->
+  <div class="glass-panel p-5 text-center my-4">
+    <div class="mx-auto mb-3 d-inline-flex align-items-center justify-content-center rounded-circle bg-light border" style="width: 64px; height: 64px;">
+      <i class="bi bi-house-add text-dark fs-3"></i>
+    </div>
+    <h5 class="fw-bold text-dark mb-2">Mulai Kelola Rumah dan Kendaraan Anda</h5>
+    <p class="text-muted small mx-auto mb-4" style="max-width: 500px;">
+      Anda belum memiliki kendaraan, aset rumah, maupun jadwal perawatan yang terdaftar. Tambahkan aset pertama Anda untuk mulai memantau servis berkala dan pengingat jatuh tempo secara otomatis.
+    </p>
+    <div class="d-flex flex-wrap justify-content-center gap-3">
+      <a href="{{ route('vehicles.index') }}" class="btn btn-dark px-4 py-2 d-inline-flex align-items-center gap-2" style="min-height: 44px; font-weight: 500;">
+        <i class="bi bi-car-front"></i>
+        <span>Tambah Kendaraan</span>
+      </a>
+      <a href="{{ route('home-assets.index') }}" class="btn btn-glass px-4 py-2 d-inline-flex align-items-center gap-2" style="min-height: 44px; font-weight: 500;">
+        <i class="bi bi-grid"></i>
+        <span>Tambah Aset Rumah</span>
+      </a>
+    </div>
+  </div>
+@else
+  <!-- (c) 2 Angka Ringkasan -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6">
+      <div class="glass-panel p-4 h-100">
+        <div class="text-muted small fw-medium mb-1">Jadwal Perlu Tindakan</div>
+        <div class="d-flex align-items-baseline gap-2">
+          <h2 class="fw-bold text-dark mb-0">{{ $urgentCount }}</h2>
+          <span class="text-muted small">agenda berstatus terlambat atau mendesak</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6">
+      <div class="glass-panel p-4 h-100">
+        <div class="text-muted small fw-medium mb-1">Aset Kondisi Prima</div>
+        <div class="d-flex align-items-baseline gap-2">
+          <h2 class="fw-bold text-dark mb-0">{{ $primeAssetsCount }}</h2>
+          <span class="text-muted small">unit ({{ $primeVehiclesCount }} kendaraan, {{ $normalHomeAssetsCount }} aset rumah)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- (b) Maksimal 3 Kartu Jadwal Paling Mendesak -->
+  <div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h6 class="fw-bold text-dark mb-0">Perlu Perhatian Segera</h6>
+      <a href="{{ route('schedules.index') }}" class="text-dark small text-decoration-none fw-medium">
+        Lihat Semua Jadwal <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+
+    @if ($topUrgentCards->isEmpty())
+      <div class="glass-panel p-4 text-center my-2">
+        <i class="bi bi-shield-check text-success fs-2 mb-2 d-block"></i>
+        <div class="fw-bold text-dark mb-1">Semua Aset Terawat Baik</div>
+        <p class="text-muted small mb-3">Tidak ada jadwal perawatan yang mendesak atau terlambat saat ini.</p>
+        <div class="d-flex justify-content-center gap-2">
+          <a href="{{ route('vehicles.index') }}" class="btn btn-glass btn-sm px-3" style="min-height: 40px;">
+            <i class="bi bi-car-front me-1"></i> Buka Garasi
+          </a>
+          <a href="{{ route('home-assets.index') }}" class="btn btn-glass btn-sm px-3" style="min-height: 40px;">
+            <i class="bi bi-grid me-1"></i> Aset Rumah
+          </a>
+        </div>
+      </div>
+    @else
+      <div class="row g-3">
+        @foreach ($topUrgentCards as $sch)
+          @php
+            $isVehicle = $sch->subject instanceof \App\Models\Vehicle;
+            $subjectOdo = $isVehicle ? (int) $sch->subject->odometer : 0;
+          @endphp
+          <div class="col-md-4">
+            <div class="glass-panel p-3.5 h-100 d-flex flex-column justify-content-between">
+              <div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div class="d-flex align-items-center gap-1">
+                    <span class="chip {{ $sch->status_chip_class }} py-0.5 px-2">
+                      <span class="chip-dot"></span> {{ ucfirst($sch->status) }}
+                    </span>
+                    @if ($sch->priority && $sch->priority !== 'normal')
+                      <span class="badge {{ $sch->priority === 'darurat' ? 'bg-danger text-white' : ($sch->priority === 'mendesak' ? 'bg-warning-subtle text-warning-emphasis border border-warning' : 'bg-info-subtle text-info-emphasis border border-info') }} py-0.5 px-1.5 text-capitalize" style="font-size: 0.65rem;">
+                        {{ ucfirst($sch->priority) }}
+                      </span>
+                    @endif
+                  </div>
+                  <span class="badge bg-light text-dark border px-2 py-0.5" style="font-size: 0.68rem;">
+                    {{ $isVehicle ? 'Kendaraan' : 'Aset Rumah' }}
+                  </span>
+                </div>
+
+                <div class="fw-bold text-secondary small mb-0.5">{{ $sch->subject_name }}</div>
+                <h6 class="fw-bold mb-1 text-dark">{{ $sch->title }}</h6>
+
+                <!-- Sisa KM / Hari -->
+                <div class="text-muted small mb-3" style="font-size: 0.8rem;">
+                  @if ($sch->trigger_type === 'kilometer')
+                    @php
+                      $diff = (int) $sch->next_due_km - $subjectOdo;
+                    @endphp
+                    @if ($diff <= 0)
+                      <span class="text-danger fw-bold"><i class="bi bi-speedometer2 me-1"></i>Terlewat {{ number_format(abs($diff)) }} KM</span>
+                    @else
+                      <span class="text-secondary"><i class="bi bi-speedometer2 me-1"></i>Sisa {{ number_format($diff) }} KM</span>
+                    @endif
+                    <span class="text-muted d-block" style="font-size: 0.72rem;">Target: {{ number_format($sch->next_due_km) }} KM</span>
+                  @elseif ($sch->next_due_date)
+                    @php
+                      $daysDiff = \Carbon\Carbon::today()->diffInDays(\Carbon\Carbon::parse($sch->next_due_date), false);
+                    @endphp
+                    @if ($daysDiff < 0)
+                      <span class="text-danger fw-bold"><i class="bi bi-clock-history me-1"></i>Terlambat {{ abs($daysDiff) }} hari</span>
+                    @else
+                      <span class="text-secondary"><i class="bi bi-clock me-1"></i>Sisa {{ $daysDiff }} hari lagi</span>
+                    @endif
+                    <span class="text-muted d-block" style="font-size: 0.72rem;">Jatuh tempo: {{ \Carbon\Carbon::parse($sch->next_due_date)->format('d M Y') }}</span>
+                  @else
+                    <span class="text-secondary"><i class="bi bi-calendar-event me-1"></i>Jadwal Rutin</span>
+                  @endif
+                </div>
+              </div>
+
+              <!-- Tombol Cepat: Tandai Selesai -->
+              <div class="pt-2.5 border-top border-slate-200 d-flex justify-content-between align-items-center">
+                <span class="badge bg-white text-dark border px-2 py-1 font-monospace" style="font-size: 0.7rem;">
+                  {{ $sch->trigger_label }}
+                </span>
+                <button class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center gap-1.5 btn-dashboard-complete" 
+                        style="min-height: 40px; font-weight: 500;"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#modalTandaiSelesai"
+                        data-id="{{ $sch->id }}"
+                        data-title="{{ $sch->title }}"
+                        data-trigger="{{ $sch->trigger_type }}"
+                        data-subject="{{ $sch->subject_name }}"
+                        data-odo="{{ $subjectOdo }}"
+                        data-workshop="{{ $isVehicle ? ($sch->subject->workshop ?? '') : '' }}">
+                  <i class="bi bi-check2"></i>
+                  <span>Tandai Selesai</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        @endforeach
+      </div>
+    @endif
+  </div>
+@endif
 @endsection
 
 @section('modals')

@@ -61,9 +61,13 @@ class DashboardController extends Controller
 
         $primeAssetsCount = $primeVehiclesCount + $normalHomeAssetsCount;
 
+        $hasNoData = $vehicles->isEmpty() && $homeAssets->isEmpty() && $allSchedules->isEmpty();
+
         // Contextual greeting
         $userName = explode(' ', $user->name)[0];
-        if ($urgentCount > 0) {
+        if ($hasNoData) {
+            $greetingMessage = "Halo {$userName}, selamat datang di Rumahku Care.";
+        } elseif ($urgentCount > 0) {
             $greetingMessage = "Halo {$userName}, ada {$urgentCount} hal yang perlu perhatianmu minggu ini.";
         } else {
             $greetingMessage = "Halo {$userName}, seluruh aset rumah dan kendaraan Anda dalam kondisi prima.";
@@ -75,7 +79,8 @@ class DashboardController extends Controller
             'urgentCount',
             'primeAssetsCount',
             'primeVehiclesCount',
-            'normalHomeAssetsCount'
+            'normalHomeAssetsCount',
+            'hasNoData'
         ));
     }
 }

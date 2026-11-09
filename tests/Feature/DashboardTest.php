@@ -178,4 +178,18 @@ class DashboardTest extends TestCase
         // Priority darurat chip is rendered
         $response->assertSee('Darurat');
     }
+
+    public function test_dashboard_displays_empty_state_with_call_to_action_and_buttons_when_user_has_no_data(): void
+    {
+        $user = User::factory()->create(['name' => 'Pengguna Baru']);
+
+        $response = $this->actingAs($user)->get('/');
+
+        $response->assertStatus(200);
+        $response->assertSee('Mulai Kelola Rumah dan Kendaraan Anda');
+        $response->assertSee('Tambah Kendaraan');
+        $response->assertSee('Tambah Aset Rumah');
+        $response->assertDontSee('kondisi prima', false);
+        $response->assertDontSee('Semua Aset Terawat Baik');
+    }
 }
