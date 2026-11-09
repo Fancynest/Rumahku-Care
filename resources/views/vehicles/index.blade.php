@@ -342,7 +342,7 @@
             <div class="row g-3 mb-3">
               <div class="col-md-6">
                 <label class="form-label text-muted small mb-1">Tanggal Servis <span class="text-danger">*</span></label>
-                <input type="date" name="done_at" class="form-control" value="{{ date('Y-m-d') }}" required>
+                <input type="date" name="done_at" class="form-control" value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" required>
               </div>
               <div class="col-md-6">
                 <label class="form-label text-muted small mb-1">Odometer Saat Servis (KM) <span class="text-danger">*</span></label>
@@ -350,9 +350,9 @@
                        name="odometer" 
                        class="form-control font-monospace fw-semibold" 
                        value="{{ $selectedVehicle->odometer }}" 
-                       min="{{ $selectedVehicle->odometer }}" 
+                       min="0" 
                        required>
-                <small class="text-muted" style="font-size: 0.72rem;">Minimal {{ number_format($selectedVehicle->odometer) }} KM (odometer saat ini).</small>
+                <small class="text-muted" style="font-size: 0.72rem;">Sesuai angka odometer pada tanggal pelaksanaan servis.</small>
               </div>
             </div>
 

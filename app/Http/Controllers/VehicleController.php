@@ -133,8 +133,42 @@ class VehicleController extends Controller
         }
 
         $validated = $request->validate([
-            'done_at' => ['required', 'date'],
-            'odometer' => ['required', 'integer', 'min:'.$vehicle->odometer],
+            'done_at' => ['required', 'date', 'before_or_equal:today'],
+            'odometer' => [
+                'required',
+                'integer',
+                'min:0',
+                function (string $attribute, mixed $value, \Closure $fail) use ($vehicle, $request): void {
+                    $doneAt = $request->input('done_at') ?? $request->input('serviced_at');
+                    if (! $doneAt || ! strtotime($doneAt)) {
+                        return;
+                    }
+
+                    $prevRecord = $vehicle->maintenanceRecords()
+                        ->whereNotNull('odometer')
+                        ->whereDate('done_at', '<=', $doneAt)
+                        ->orderByDesc('done_at')
+                        ->orderByDesc('id')
+                        ->first();
+
+                    if ($prevRecord && (int) $value < (int) $prevRecord->odometer) {
+                        $fail('Odometer tidak boleh lebih kecil dari riwayat servis sebelumnya ('.number_format($prevRecord->odometer).' KM pada '.$prevRecord->done_at->format('d/m/Y').').');
+
+                        return;
+                    }
+
+                    $nextRecord = $vehicle->maintenanceRecords()
+                        ->whereNotNull('odometer')
+                        ->whereDate('done_at', '>', $doneAt)
+                        ->orderBy('done_at')
+                        ->orderBy('id')
+                        ->first();
+
+                    if ($nextRecord && (int) $value > (int) $nextRecord->odometer) {
+                        $fail('Odometer tidak boleh lebih besar dari riwayat servis berikutnya ('.number_format($nextRecord->odometer).' KM pada '.$nextRecord->done_at->format('d/m/Y').').');
+                    }
+                },
+            ],
             'service_type' => ['nullable', 'string', 'max:100'],
             'workshop_name' => ['nullable', 'string', 'max:150'],
             'labor_cost' => ['nullable', 'integer', 'min:0'],
@@ -156,6 +190,8 @@ class VehicleController extends Controller
                     }
                 },
             ],
+        ], [
+            'done_at.before_or_equal' => 'Tanggal servis tidak boleh di masa depan.',
         ]);
 
         DB::transaction(function () use ($request, $vehicle, $validated): void {
@@ -182,15 +218,21 @@ class VehicleController extends Controller
             ]);
 
             if ($schedule) {
-                $schedule->last_done_at = $validated['done_at'];
                 if ($schedule->trigger_type === 'kilometer') {
-                    $schedule->last_done_km = $odometer;
-                    $schedule->next_due_km = $odometer + ($schedule->interval_km ?: 5000);
+                    if ($schedule->last_done_km === null || $odometer >= $schedule->last_done_km) {
+                        $schedule->last_done_km = $odometer;
+                        $schedule->next_due_km = $odometer + ($schedule->interval_km ?: 5000);
+                        $schedule->last_done_at = $validated['done_at'];
+                    }
                 } elseif ($schedule->trigger_type === 'interval_hari') {
-                    $days = $schedule->interval_days ?: 30;
-                    $schedule->next_due_date = Carbon::parse($validated['done_at'])->addDays($days)->toDateString();
+                    if ($schedule->last_done_at === null || $validated['done_at'] >= $schedule->last_done_at->toDateString()) {
+                        $days = $schedule->interval_days ?: 30;
+                        $schedule->next_due_date = Carbon::parse($validated['done_at'])->addDays($days)->toDateString();
+                        $schedule->last_done_at = $validated['done_at'];
+                    }
                 } elseif ($schedule->trigger_type === 'tanggal') {
                     $schedule->is_active = false;
+                    $schedule->last_done_at = $validated['done_at'];
                 }
                 $schedule->save();
             }

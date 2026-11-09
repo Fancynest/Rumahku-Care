@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleModel;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -275,16 +276,90 @@ class VehicleTest extends TestCase
         $this->assertSame('2026-11-09', $schedule->last_done_at?->format('Y-m-d'));
     }
 
-    public function test_cannot_store_service_log_with_odometer_lower_than_current(): void
+    public function test_can_backfill_historical_service_log_without_decreasing_vehicle_odometer(): void
+    {
+        $vehicle = Vehicle::firstOrFail();
+        $initialOdometer = $vehicle->odometer;
+
+        // Record a historical service from earlier with a lower odometer
+        $response = $this->post("/vehicles/{$vehicle->id}/service-logs", [
+            'done_at' => Carbon::yesterday()->toDateString(),
+            'odometer' => max(100, $initialOdometer - 1000),
+            'service_type' => 'Ganti Oli Sejarah',
+            'notes' => 'Servis masa lalu',
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('maintenance_records', [
+            'subject_id' => $vehicle->id,
+            'odometer' => max(100, $initialOdometer - 1000),
+            'service_type' => 'Ganti Oli Sejarah',
+        ]);
+
+        // Vehicle current odometer must NOT decrease
+        $this->assertSame($initialOdometer, $vehicle->fresh()->odometer);
+    }
+
+    public function test_cannot_store_service_log_with_future_date(): void
     {
         $vehicle = Vehicle::firstOrFail();
 
         $response = $this->post("/vehicles/{$vehicle->id}/service-logs", [
-            'done_at' => '2026-11-09',
-            'odometer' => $vehicle->odometer - 500,
+            'done_at' => Carbon::tomorrow()->toDateString(),
+            'odometer' => $vehicle->odometer + 100,
         ]);
 
-        $response->assertSessionHasErrors(['odometer']);
+        $response->assertSessionHasErrors(['done_at']);
+    }
+
+    public function test_cannot_store_service_log_with_odometer_conflicting_with_records_timeline(): void
+    {
+        $user = User::firstOrFail();
+        $vehicle = Vehicle::create([
+            'user_id' => $user->id,
+            'plate' => 'B 9900 TML',
+            'odometer' => 20000,
+            'color_key' => 'hitam',
+            'fuel_type' => 'Bensin',
+        ]);
+
+        // Record 1: 2026-01-01 -> 5000 KM
+        $vehicle->maintenanceRecords()->create([
+            'user_id' => $user->id,
+            'done_at' => '2026-01-01',
+            'odometer' => 5000,
+            'service_type' => 'Servis 1',
+        ]);
+
+        // Record 2: 2026-06-01 -> 10000 KM
+        $vehicle->maintenanceRecords()->create([
+            'user_id' => $user->id,
+            'done_at' => '2026-06-01',
+            'odometer' => 10000,
+            'service_type' => 'Servis 2',
+        ]);
+
+        // Trying to record at 2026-03-01 with 4000 KM (lower than 2026-01-01's 5000 KM) -> Fails
+        $responseLow = $this->post("/vehicles/{$vehicle->id}/service-logs", [
+            'done_at' => '2026-03-01',
+            'odometer' => 4000,
+        ]);
+        $responseLow->assertSessionHasErrors(['odometer']);
+
+        // Trying to record at 2026-03-01 with 12000 KM (higher than 2026-06-01's 10000 KM) -> Fails
+        $responseHigh = $this->post("/vehicles/{$vehicle->id}/service-logs", [
+            'done_at' => '2026-03-01',
+            'odometer' => 12000,
+        ]);
+        $responseHigh->assertSessionHasErrors(['odometer']);
+
+        // Valid backfill between: 2026-03-01 with 7500 KM -> Succeeds
+        $responseValid = $this->post("/vehicles/{$vehicle->id}/service-logs", [
+            'done_at' => '2026-03-01',
+            'odometer' => 7500,
+        ]);
+        $responseValid->assertRedirect();
+        $this->assertSame(20000, $vehicle->fresh()->odometer); // Vehicle odometer remains 20000
     }
 
     public function test_cannot_store_service_log_with_invalid_data(): void

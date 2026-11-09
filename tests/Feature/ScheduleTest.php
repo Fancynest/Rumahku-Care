@@ -110,6 +110,13 @@ class ScheduleTest extends TestCase
             'fuel_type' => 'Bensin',
         ]);
 
+        $vehicle->maintenanceRecords()->create([
+            'user_id' => $user->id,
+            'done_at' => Carbon::yesterday()->toDateString(),
+            'odometer' => 10000,
+            'service_type' => 'Catatan Kemarin',
+        ]);
+
         $schedule = $vehicle->schedules()->create([
             'user_id' => $user->id,
             'title' => 'Ganti oli mesin',
@@ -121,11 +128,47 @@ class ScheduleTest extends TestCase
         ]);
 
         $response = $this->post("/schedules/{$schedule->id}/complete", [
-            'done_at' => '2026-11-09',
-            'odometer' => 9500, // lower than current vehicle odometer (10000)
+            'done_at' => Carbon::today()->toDateString(),
+            'odometer' => 9500, // lower than previous record (10000)
         ]);
 
         $response->assertSessionHasErrors(['odometer']);
+    }
+
+    public function test_can_complete_schedule_as_backfill_without_reducing_vehicle_odometer(): void
+    {
+        $user = User::firstOrFail();
+        $vehicle = Vehicle::create([
+            'user_id' => $user->id,
+            'plate' => 'B 8888 BKF',
+            'odometer' => 20000,
+            'color_key' => 'hitam',
+            'fuel_type' => 'Bensin',
+        ]);
+
+        $schedule = $vehicle->schedules()->create([
+            'user_id' => $user->id,
+            'title' => 'Ganti Oli Sejarah',
+            'trigger_type' => 'kilometer',
+            'interval_km' => 5000,
+            'next_due_km' => 25000,
+            'priority' => 'normal',
+            'is_active' => true,
+        ]);
+
+        $response = $this->post("/schedules/{$schedule->id}/complete", [
+            'done_at' => Carbon::yesterday()->toDateString(),
+            'odometer' => 15000,
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('maintenance_records', [
+            'schedule_id' => $schedule->id,
+            'odometer' => 15000,
+        ]);
+
+        // Vehicle odometer must remain 20000
+        $this->assertSame(20000, $vehicle->fresh()->odometer);
     }
 
     public function test_user_a_cannot_complete_user_b_schedule(): void

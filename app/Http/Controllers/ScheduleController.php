@@ -105,8 +105,11 @@ class ScheduleController extends Controller
     {
         abort_if($schedule->user_id !== $request->user()->id, 404);
 
+        $subject = $schedule->subject;
+        $isVehicle = $subject instanceof Vehicle;
+
         $rules = [
-            'done_at' => ['required', 'date'],
+            'done_at' => ['required', 'date', 'before_or_equal:today'],
             'labor_cost' => ['nullable', 'integer', 'min:0'],
             'parts_cost' => ['nullable', 'integer', 'min:0'],
             'parts' => ['nullable', 'string', 'max:1000'],
@@ -114,18 +117,55 @@ class ScheduleController extends Controller
             'workshop_name' => ['nullable', 'string', 'max:150'],
         ];
 
-        if ($schedule->trigger_type === 'kilometer') {
-            $minOdometer = $schedule->subject instanceof Vehicle ? $schedule->subject->odometer : 0;
-            $rules['odometer'] = ['required', 'integer', 'min:'.$minOdometer];
+        if ($schedule->trigger_type === 'kilometer' || ($isVehicle && $request->filled('odometer'))) {
+            $rules['odometer'] = [
+                $schedule->trigger_type === 'kilometer' ? 'required' : 'nullable',
+                'integer',
+                'min:0',
+                function (string $attribute, mixed $value, \Closure $fail) use ($isVehicle, $subject, $request): void {
+                    if (! $isVehicle || $value === null) {
+                        return;
+                    }
+
+                    $doneAt = $request->input('done_at');
+                    if (! $doneAt || ! strtotime($doneAt)) {
+                        return;
+                    }
+
+                    $prevRecord = $subject->maintenanceRecords()
+                        ->whereNotNull('odometer')
+                        ->whereDate('done_at', '<=', $doneAt)
+                        ->orderByDesc('done_at')
+                        ->orderByDesc('id')
+                        ->first();
+
+                    if ($prevRecord && (int) $value < (int) $prevRecord->odometer) {
+                        $fail('Odometer tidak boleh lebih kecil dari riwayat servis sebelumnya ('.number_format($prevRecord->odometer).' KM pada '.$prevRecord->done_at->format('d/m/Y').').');
+
+                        return;
+                    }
+
+                    $nextRecord = $subject->maintenanceRecords()
+                        ->whereNotNull('odometer')
+                        ->whereDate('done_at', '>', $doneAt)
+                        ->orderBy('done_at')
+                        ->orderBy('id')
+                        ->first();
+
+                    if ($nextRecord && (int) $value > (int) $nextRecord->odometer) {
+                        $fail('Odometer tidak boleh lebih besar dari riwayat servis berikutnya ('.number_format($nextRecord->odometer).' KM pada '.$nextRecord->done_at->format('d/m/Y').').');
+                    }
+                },
+            ];
         } else {
             $rules['odometer'] = ['nullable', 'integer', 'min:0'];
         }
 
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, [
+            'done_at.before_or_equal' => 'Tanggal servis tidak boleh di masa depan.',
+        ]);
 
-        DB::transaction(function () use ($schedule, $validated): void {
-            $subject = $schedule->subject;
-
+        DB::transaction(function () use ($schedule, $validated, $isVehicle, $subject): void {
             // 1. Create MaintenanceRecord
             $schedule->records()->create([
                 'user_id' => $schedule->user_id,
@@ -134,7 +174,7 @@ class ScheduleController extends Controller
                 'done_at' => $validated['done_at'],
                 'odometer' => $validated['odometer'] ?? null,
                 'service_type' => $schedule->title,
-                'workshop_name' => $validated['workshop_name'] ?? ($subject instanceof Vehicle ? $subject->workshop : null),
+                'workshop_name' => $validated['workshop_name'] ?? ($isVehicle ? $subject->workshop : null),
                 'labor_cost' => $validated['labor_cost'] ?? 0,
                 'parts_cost' => $validated['parts_cost'] ?? 0,
                 'parts' => $validated['parts'] ?? null,
@@ -142,21 +182,26 @@ class ScheduleController extends Controller
             ]);
 
             // 2. Update Schedule last_done and next_due
-            $schedule->last_done_at = $validated['done_at'];
-
             if ($schedule->trigger_type === 'kilometer') {
                 $odometer = (int) $validated['odometer'];
-                $schedule->last_done_km = $odometer;
-                $schedule->next_due_km = $odometer + ($schedule->interval_km ?: 5000);
+                if ($schedule->last_done_km === null || $odometer >= $schedule->last_done_km) {
+                    $schedule->last_done_km = $odometer;
+                    $schedule->next_due_km = $odometer + ($schedule->interval_km ?: 5000);
+                    $schedule->last_done_at = $validated['done_at'];
+                }
 
-                if ($subject instanceof Vehicle && $odometer > $subject->odometer) {
+                if ($isVehicle && $odometer > $subject->odometer) {
                     $subject->update(['odometer' => $odometer]);
                 }
             } elseif ($schedule->trigger_type === 'interval_hari') {
-                $days = $schedule->interval_days ?: 30;
-                $schedule->next_due_date = Carbon::parse($validated['done_at'])->addDays($days)->toDateString();
+                if ($schedule->last_done_at === null || $validated['done_at'] >= $schedule->last_done_at->toDateString()) {
+                    $days = $schedule->interval_days ?: 30;
+                    $schedule->next_due_date = Carbon::parse($validated['done_at'])->addDays($days)->toDateString();
+                    $schedule->last_done_at = $validated['done_at'];
+                }
             } elseif ($schedule->trigger_type === 'tanggal') {
                 $schedule->is_active = false;
+                $schedule->last_done_at = $validated['done_at'];
             }
 
             $schedule->save();

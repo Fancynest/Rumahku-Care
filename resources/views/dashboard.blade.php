@@ -152,7 +152,7 @@
           <div class="row g-2 mb-3">
             <div class="col-6">
               <label class="form-label text-muted small mb-1">Tanggal Selesai <span class="text-danger">*</span></label>
-              <input type="date" name="done_at" class="form-control" value="{{ date('Y-m-d') }}" required>
+              <input type="date" name="done_at" class="form-control" value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" required>
             </div>
             <div class="col-6" id="wrapperDashboardOdo">
               <label class="form-label text-muted small mb-1">Odometer Saat Ini <span class="text-danger">*</span></label>
@@ -215,7 +215,7 @@
       if (trigger === 'kilometer') {
         odoWrapper.classList.remove('d-none');
         odoInput.required = true;
-        odoInput.min = odo;
+        odoInput.min = 0;
         odoInput.value = odo;
       } else {
         odoWrapper.classList.add('d-none');
