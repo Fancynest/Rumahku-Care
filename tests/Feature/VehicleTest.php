@@ -117,6 +117,21 @@ class VehicleTest extends TestCase
         ]);
     }
 
+    public function test_cannot_update_vehicle_odometer_lower_than_current(): void
+    {
+        $vehicle = Vehicle::firstOrFail();
+
+        $response = $this->patch("/vehicles/{$vehicle->id}/odometer", [
+            'odometer' => $vehicle->odometer - 50,
+        ]);
+
+        $response->assertSessionHasErrors(['odometer']);
+        $this->assertEquals(
+            'Odometer baru tidak boleh lebih kecil dari odometer kendaraan saat ini ('.number_format($vehicle->odometer).' KM).',
+            session('errors')->first('odometer')
+        );
+    }
+
     public function test_vehicle_service_status_based_on_schedules(): void
     {
         $user = User::firstOrFail();

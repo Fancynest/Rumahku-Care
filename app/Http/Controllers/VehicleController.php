@@ -111,7 +111,9 @@ class VehicleController extends Controller
         abort_if($vehicle->user_id !== $request->user()->id, 404);
 
         $validated = $request->validate([
-            'odometer' => ['required', 'integer', 'min:0'],
+            'odometer' => ['required', 'integer', 'min:'.$vehicle->odometer],
+        ], [
+            'odometer.min' => 'Odometer baru tidak boleh lebih kecil dari odometer kendaraan saat ini ('.number_format($vehicle->odometer).' KM).',
         ]);
 
         $vehicle->update([
