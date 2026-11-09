@@ -16,6 +16,8 @@
 @endsection
 
 @section('content')
+@include('schedules.partials.nav-tabs')
+
 <!-- Header & Filter -->
 <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
   <div>

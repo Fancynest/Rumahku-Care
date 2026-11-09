@@ -6,6 +6,7 @@ use App\Models\HomeAsset;
 use App\Models\MaintenanceSchedule;
 use App\Models\Vehicle;
 use App\Services\MaintenanceRecorder;
+use App\Services\ScheduleCalendar;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -54,6 +55,21 @@ class ScheduleController extends Controller
         $templates = config('maintenance.templates', []);
 
         return view('schedules.index', compact('grouped', 'filter', 'vehicles', 'homeAssets', 'templates'));
+    }
+
+    public function calendar(Request $request, ScheduleCalendar $calendarService): View
+    {
+        $month = $request->query('month');
+        $showCompleted = filter_var($request->query('show_completed', false), FILTER_VALIDATE_BOOLEAN);
+
+        $calendarData = $calendarService->build($request->user(), $month, $showCompleted);
+
+        return view('schedules.calendar', $calendarData);
+    }
+
+    public function history(Request $request): View
+    {
+        return view('schedules.history');
     }
 
     public function store(Request $request): RedirectResponse
