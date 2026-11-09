@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DamageReportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\FuelLogController;
 use App\Http\Controllers\HomeAssetController;
 use App\Http\Controllers\InspectionController;
@@ -46,6 +47,11 @@ Route::middleware('auth')->group(function () {
     Route::prefix('fuel-logs')->name('fuel-logs.')->group(function () {
         Route::put('/{fuelLog}', [FuelLogController::class, 'update'])->name('update');
         Route::delete('/{fuelLog}', [FuelLogController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('finance')->name('finance.')->group(function () {
+        Route::get('/', [FinanceController::class, 'index'])->name('index');
+        Route::get('/export', [FinanceController::class, 'export'])->name('export');
     });
 
     Route::prefix('schedules')->name('schedules.')->group(function () {
