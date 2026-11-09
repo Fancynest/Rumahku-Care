@@ -70,4 +70,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(DamageReport::class);
     }
+
+    /**
+     * @return HasMany<InspectionRun, $this>
+     */
+    public function inspectionRuns(): HasMany
+    {
+        return $this->hasMany(InspectionRun::class);
+    }
 }

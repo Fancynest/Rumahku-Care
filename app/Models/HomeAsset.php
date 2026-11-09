@@ -90,6 +90,14 @@ class HomeAsset extends Model
     }
 
     /**
+     * @return MorphMany<InspectionRun, $this>
+     */
+    public function inspectionRuns(): MorphMany
+    {
+        return $this->morphMany(InspectionRun::class, 'inspectable')->orderByDesc('inspected_at')->orderByDesc('id');
+    }
+
+    /**
      * Sinkronkan kondisi fisik aset berdasarkan riwayat kerusakan terbuka.
      * Jika ada kerusakan berat: rusak.
      * Jika ada sedang/ringan: perlu_perhatian.

@@ -99,6 +99,14 @@ class Vehicle extends Model
         return $this->morphMany(DamageReport::class, 'reportable')->orderByDesc('reported_at')->orderByDesc('id');
     }
 
+    /**
+     * @return MorphMany<InspectionRun, $this>
+     */
+    public function inspectionRuns(): MorphMany
+    {
+        return $this->morphMany(InspectionRun::class, 'inspectable')->orderByDesc('inspected_at')->orderByDesc('id');
+    }
+
     public function getNameAttribute(): string
     {
         if ($this->vehicleModel) {

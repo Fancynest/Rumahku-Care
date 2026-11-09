@@ -42,6 +42,42 @@ return [
         'lainnya' => 'Dokumen Lainnya',
     ],
 
+    'inspection_templates' => [
+        'rumah_keselamatan' => [
+            'title' => 'Inspeksi Keselamatan Rumah',
+            'target_type' => 'home_asset',
+            'items' => [
+                'APAR (tekanan & masa berlaku tabung)',
+                'Detektor Asap / Gas (uji sensor & baterai)',
+                'Panel MCB & Instalasi Kabel Utama',
+                'Selang, Regulator, & Tabung Gas Dapur',
+                'Kunci Pintu, Jendela, & Akses Darurat',
+            ],
+        ],
+        'rumah_air_atap' => [
+            'title' => 'Inspeksi Air & Atap',
+            'target_type' => 'home_asset',
+            'items' => [
+                'Talang Air & Saluran Pembuangan Hujan',
+                'Toren Air & Pelampung Otomatis',
+                'Pipa Distribusi & Bebas Rembesan',
+                'Kondisi Atap, Genteng, & Plafon',
+            ],
+        ],
+        'kendaraan_pra_jalan' => [
+            'title' => 'Inspeksi Pra-Perjalanan Kendaraan',
+            'target_type' => 'vehicle',
+            'items' => [
+                'Tekanan & Ketebalan Alur Ban',
+                'Ketinggian & Kondisi Oli Mesin',
+                'Fungsi Rem & Level Minyak Rem',
+                'Lampu Utama, Lampu Rem, & Sein',
+                'Air Radiator, Cadangan Wiper, & Karet Wiper',
+                'Indikator Aki & Kelistrikan Starter',
+            ],
+        ],
+    ],
+
     'templates' => [
         [
             'title' => 'Cuci & Cek Filter AC',

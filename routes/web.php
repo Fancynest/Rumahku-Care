@@ -6,6 +6,7 @@ use App\Http\Controllers\DamageReportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\HomeAssetController;
+use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\TechnicianController;
 use App\Http\Controllers\VehicleController;
@@ -69,5 +70,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/', [DamageReportController::class, 'store'])->name('store');
         Route::put('/{damageReport}/status', [DamageReportController::class, 'updateStatus'])->name('update-status');
         Route::delete('/{damageReport}', [DamageReportController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('inspections')->name('inspections.')->group(function () {
+        Route::post('/', [InspectionController::class, 'store'])->name('store');
+        Route::post('/items/{item}/convert-to-damage', [InspectionController::class, 'convertIssueToDamageReport'])->name('convert-damage');
     });
 });
