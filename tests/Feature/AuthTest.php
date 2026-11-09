@@ -89,4 +89,24 @@ class AuthTest extends TestCase
         $garageResponse = $this->actingAs($userA)->get('/vehicles');
         $garageResponse->assertDontSee('D 1111 TST');
     }
+
+    public function test_login_rate_limiting_throttles_after_five_failed_attempts(): void
+    {
+        for ($i = 0; $i < 5; $i++) {
+            $response = $this->post('/login', [
+                'email' => 'throttletest@example.com',
+                'password' => 'wrongpassword',
+            ]);
+            $response->assertSessionHasErrors(['email']);
+        }
+
+        // 6th attempt should be blocked with HTTP 429
+        $response6 = $this->post('/login', [
+            'email' => 'throttletest@example.com',
+            'password' => 'wrongpassword',
+        ]);
+
+        $response6->assertStatus(429);
+        $response6->assertSee('Terlalu banyak percobaan masuk');
+    }
 }
