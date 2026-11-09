@@ -54,4 +54,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(MaintenanceSchedule::class);
     }
+
+    /**
+     * @return HasMany<Document, $this>
+     */
+    public function documents(): HasMany
+    {
+        return $this->hasMany(Document::class);
+    }
 }

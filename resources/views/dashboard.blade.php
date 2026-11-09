@@ -83,79 +83,70 @@
       </div>
     @else
       <div class="row g-3">
-        @foreach ($topUrgentCards as $sch)
-          @php
-            $isVehicle = $sch->subject instanceof \App\Models\Vehicle;
-            $subjectOdo = $isVehicle ? (int) $sch->subject->odometer : 0;
-          @endphp
+        @foreach ($topUrgentCards as $card)
           <div class="col-md-4">
             <div class="glass-panel p-3.5 h-100 d-flex flex-column justify-content-between">
               <div>
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <div class="d-flex align-items-center gap-1">
-                    <span class="chip {{ $sch->status_chip_class }} py-0.5 px-2">
-                      <span class="chip-dot"></span> {{ ucfirst($sch->status) }}
+                    <span class="chip {{ $card->status_chip_class }} py-0.5 px-2">
+                      <span class="chip-dot"></span> {{ ucfirst($card->status_label) }}
                     </span>
-                    @if ($sch->priority && $sch->priority !== 'normal')
-                      <span class="badge {{ $sch->priority === 'darurat' ? 'bg-danger text-white' : ($sch->priority === 'mendesak' ? 'bg-warning-subtle text-warning-emphasis border border-warning' : 'bg-info-subtle text-info-emphasis border border-info') }} py-0.5 px-1.5 text-capitalize" style="font-size: 0.65rem;">
-                        {{ ucfirst($sch->priority) }}
+                    @if ($card->priority && $card->priority !== 'normal')
+                      <span class="badge {{ $card->priority === 'darurat' ? 'bg-danger text-white' : ($card->priority === 'mendesak' ? 'bg-warning-subtle text-warning-emphasis border border-warning' : 'bg-info-subtle text-info-emphasis border border-info') }} py-0.5 px-1.5 text-capitalize" style="font-size: 0.65rem;">
+                        {{ ucfirst($card->priority) }}
                       </span>
                     @endif
                   </div>
                   <span class="badge bg-light text-dark border px-2 py-0.5" style="font-size: 0.68rem;">
-                    {{ $isVehicle ? 'Kendaraan' : 'Aset Rumah' }}
+                    {{ $card->type_badge }}
                   </span>
                 </div>
 
-                <div class="fw-bold text-secondary small mb-0.5">{{ $sch->subject_name }}</div>
-                <h6 class="fw-bold mb-1 text-dark">{{ $sch->title }}</h6>
+                <div class="fw-bold text-secondary small mb-0.5">{{ $card->subject_name }}</div>
+                <h6 class="fw-bold mb-1 text-dark">{{ $card->title }}</h6>
 
-                <!-- Sisa KM / Hari -->
+                <!-- Sisa KM / Hari / Keterangan -->
                 <div class="text-muted small mb-3" style="font-size: 0.8rem;">
-                  @if ($sch->trigger_type === 'kilometer')
-                    @php
-                      $diff = (int) $sch->next_due_km - $subjectOdo;
-                    @endphp
-                    @if ($diff <= 0)
-                      <span class="text-danger fw-bold"><i class="bi bi-speedometer2 me-1"></i>Terlewat {{ number_format(abs($diff)) }} KM</span>
-                    @else
-                      <span class="text-secondary"><i class="bi bi-speedometer2 me-1"></i>Sisa {{ number_format($diff) }} KM</span>
-                    @endif
-                    <span class="text-muted d-block" style="font-size: 0.72rem;">Target: {{ number_format($sch->next_due_km) }} KM</span>
-                  @elseif ($sch->next_due_date)
-                    @php
-                      $daysDiff = \Carbon\Carbon::today()->diffInDays(\Carbon\Carbon::parse($sch->next_due_date), false);
-                    @endphp
-                    @if ($daysDiff < 0)
-                      <span class="text-danger fw-bold"><i class="bi bi-clock-history me-1"></i>Terlambat {{ abs($daysDiff) }} hari</span>
-                    @else
-                      <span class="text-secondary"><i class="bi bi-clock me-1"></i>Sisa {{ $daysDiff }} hari lagi</span>
-                    @endif
-                    <span class="text-muted d-block" style="font-size: 0.72rem;">Jatuh tempo: {{ \Carbon\Carbon::parse($sch->next_due_date)->format('d M Y') }}</span>
-                  @else
-                    <span class="text-secondary"><i class="bi bi-calendar-event me-1"></i>Jadwal Rutin</span>
+                  <span class="{{ in_array($card->status, ['terlambat', 'mendesak']) ? 'text-danger fw-bold' : 'text-secondary' }}">
+                    <i class="bi bi-clock-history me-1"></i>{{ $card->due_label }}
+                  </span>
+                  @if (!empty($card->due_detail))
+                    <span class="text-muted d-block" style="font-size: 0.72rem;">{{ $card->due_detail }}</span>
                   @endif
                 </div>
               </div>
 
-              <!-- Tombol Cepat: Tandai Selesai -->
+              <!-- Tombol Cepat: Sesuai Tipe Item -->
               <div class="pt-2.5 border-top border-slate-200 d-flex justify-content-between align-items-center">
                 <span class="badge bg-white text-dark border px-2 py-1 font-monospace" style="font-size: 0.7rem;">
-                  {{ $sch->trigger_label }}
+                  {{ $card->trigger_label }}
                 </span>
-                <button class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center gap-1.5 btn-dashboard-complete" 
-                        style="min-height: 40px; font-weight: 500;"
-                        data-bs-toggle="modal" 
-                        data-bs-target="#modalTandaiSelesai"
-                        data-id="{{ $sch->id }}"
-                        data-title="{{ $sch->title }}"
-                        data-trigger="{{ $sch->trigger_type }}"
-                        data-subject="{{ $sch->subject_name }}"
-                        data-odo="{{ $subjectOdo }}"
-                        data-workshop="{{ $isVehicle ? ($sch->subject->workshop ?? '') : '' }}">
-                  <i class="bi bi-check2"></i>
-                  <span>Tandai Selesai</span>
-                </button>
+                @if ($card->type === 'jadwal')
+                  <button class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center gap-1.5 btn-dashboard-complete" 
+                          style="min-height: 40px; font-weight: 500;"
+                          data-bs-toggle="modal" 
+                          data-bs-target="#modalTandaiSelesai"
+                          data-id="{{ $card->id }}"
+                          data-title="{{ $card->title }}"
+                          data-trigger="{{ $card->source->trigger_type }}"
+                          data-subject="{{ $card->subject_name }}"
+                          data-odo="{{ $card->subject_odometer }}"
+                          data-workshop="{{ $card->is_vehicle ? ($card->source->subject->workshop ?? '') : '' }}">
+                    <i class="bi bi-check2"></i>
+                    <span>Tandai Selesai</span>
+                  </button>
+                @elseif ($card->type === 'dokumen')
+                  <a href="{{ $card->url }}" class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center gap-1.5" style="min-height: 40px; font-weight: 500;">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>Kelola Dokumen</span>
+                  </a>
+                @else
+                  <a href="{{ $card->url }}" class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center gap-1.5" style="min-height: 40px; font-weight: 500;">
+                    <i class="bi bi-wrench"></i>
+                    <span>Lihat Detail</span>
+                  </a>
+                @endif
               </div>
             </div>
           </div>

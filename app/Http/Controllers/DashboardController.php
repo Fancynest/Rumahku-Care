@@ -3,27 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Models\Vehicle;
+use App\Services\AttentionFeed;
 use App\Services\ScheduleStatus;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request, ScheduleStatus $scheduleStatus): View
+    public function index(Request $request, ScheduleStatus $scheduleStatus, AttentionFeed $feed): View
     {
         $user = $request->user();
 
         $allSchedules = $scheduleStatus->forUser($user);
-        $urgentSchedules = $scheduleStatus->urgentForUser($user);
 
-        // Max 3 most urgent schedules for the cards
-        $topUrgentCards = $urgentSchedules->take(3);
+        // Max 3 most urgent items (jadwal, dokumen, kerusakan) for the cards
+        $topUrgentCards = $feed->urgent($user)->take(3);
 
-        // 2 Summary numbers:
-        // 1. Jumlah jadwal terlambat / mendesak
-        $urgentCount = $allSchedules
-            ->filter(fn ($s) => in_array($s->status, [ScheduleStatus::TERLAMBAT, ScheduleStatus::MENDESAK]))
-            ->count();
+        // 1. Jumlah item berstatus terlambat / mendesak
+        $urgentCount = $feed->urgentCount($user);
 
         // 2. Jumlah aset dalam kondisi prima (kendaraan prima + aset rumah normal)
         $vehicleSchedules = $allSchedules->where('subject_type', Vehicle::class)->groupBy('subject_id');
@@ -37,7 +34,7 @@ class DashboardController extends Controller
 
         $primeAssetsCount = $primeVehiclesCount + $normalHomeAssetsCount;
 
-        $hasNoData = $vehicles->isEmpty() && $homeAssets->isEmpty() && $allSchedules->isEmpty();
+        $hasNoData = $vehicles->isEmpty() && $homeAssets->isEmpty() && $feed->get($user)->isEmpty();
 
         // Contextual greeting
         $userName = explode(' ', $user->name)[0];

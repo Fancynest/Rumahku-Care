@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Document;
 use App\Models\MaintenanceSchedule;
 use App\Models\User;
 use App\Models\Vehicle;
@@ -69,6 +70,55 @@ class ScheduleStatus
         }
 
         return $status;
+    }
+
+    /**
+     * Tentukan status dokumen berdasarkan tanggal kedaluwarsa.
+     */
+    public function determineDocument(Document $document): ?string
+    {
+        if ($document->expires_at === null) {
+            return null;
+        }
+
+        $dueDate = Carbon::parse($document->expires_at)->startOfDay();
+        $today = Carbon::today();
+        $diffDays = (int) $today->diffInDays($dueDate, false);
+
+        $thresholdTerlambat = (int) config('maintenance.thresholds.document.terlambat', 0);
+        $thresholdMendesak = (int) config('maintenance.thresholds.document.mendesak', 7);
+        $thresholdPerhatian = (int) config('maintenance.thresholds.document.perhatian', 30);
+
+        if ($diffDays <= $thresholdTerlambat) {
+            return self::TERLAMBAT;
+        } elseif ($diffDays <= $thresholdMendesak) {
+            return self::MENDESAK;
+        } elseif ($diffDays <= $thresholdPerhatian) {
+            return self::PERHATIAN;
+        }
+
+        return self::NORMAL;
+    }
+
+    public static function documentLabel(?string $status): ?string
+    {
+        return match ($status) {
+            self::TERLAMBAT => 'Kedaluwarsa',
+            self::MENDESAK => 'Mendesak',
+            self::PERHATIAN => 'Perlu Perhatian',
+            self::NORMAL => 'Aktif',
+            default => null,
+        };
+    }
+
+    public static function documentChipClass(?string $status): string
+    {
+        return match ($status) {
+            self::TERLAMBAT, self::MENDESAK => 'chip-urgent',
+            self::PERHATIAN => 'chip-warning',
+            self::NORMAL => 'chip-success',
+            default => 'chip-neutral',
+        };
     }
 
     public static function label(string $status): string

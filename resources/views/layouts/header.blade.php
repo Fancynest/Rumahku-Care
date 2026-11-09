@@ -29,14 +29,19 @@
           @if (isset($urgentSchedules) && $urgentSchedules->isNotEmpty())
             @foreach ($urgentSchedules as $sched)
               @php
-                $targetUrl = $sched->subject_type === App\Models\Vehicle::class
+                $targetUrl = $sched->url ?? ($sched->subject_type === App\Models\Vehicle::class
                     ? route('vehicles.index', ['v' => $sched->subject_id])
-                    : route('home-assets.show', $sched->subject_id);
+                    : route('home-assets.show', $sched->subject_id));
               @endphp
               <a href="{{ $targetUrl }}" class="list-group-item list-group-item-action px-0 py-2 bg-transparent border-bottom text-decoration-none">
                 <div class="d-flex justify-content-between align-items-baseline mb-0.5">
                   <div class="fw-semibold text-dark text-truncate" style="max-width: 170px;">{{ $sched->title }}</div>
                   <div class="d-flex align-items-center gap-1">
+                    @if ($sched->type && $sched->type !== 'jadwal')
+                      <span class="badge bg-secondary-subtle text-secondary py-0 px-1 text-capitalize" style="font-size: 0.6rem;">
+                        {{ $sched->type }}
+                      </span>
+                    @endif
                     @if ($sched->priority && $sched->priority !== 'normal')
                       <span class="badge {{ $sched->priority === 'darurat' ? 'bg-danger text-white' : 'bg-warning-subtle text-warning-emphasis' }} py-0 px-1 text-capitalize" style="font-size: 0.6rem;">
                         {{ $sched->priority }}
@@ -48,12 +53,7 @@
                   </div>
                 </div>
                 <div class="text-muted" style="font-size: 0.72rem;">
-                  {{ $sched->subject_name }} • 
-                  @if ($sched->trigger_type === 'kilometer')
-                    Target: {{ number_format($sched->next_due_km) }} KM
-                  @else
-                    {{ $sched->next_due_date ? $sched->next_due_date->format('d/m/Y') : 'Segera' }}
-                  @endif
+                  {{ $sched->subject_name }} • {{ $sched->due_label ?? ($sched->next_due_date ? $sched->next_due_date->format('d/m/Y') : 'Segera') }}
                 </div>
               </a>
             @endforeach

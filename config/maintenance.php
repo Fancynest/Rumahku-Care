@@ -24,6 +24,22 @@ return [
             'mendesak' => 200,    // <= 200 KM
             'perhatian' => 500,   // <= 500 KM
         ],
+        'document' => [
+            'terlambat' => 0,     // <= 0 hari (Kedaluwarsa)
+            'mendesak' => 7,      // <= 7 hari
+            'perhatian' => 30,    // <= 30 hari
+        ],
+    ],
+
+    'document_types' => [
+        'stnk_pajak' => 'STNK / Pajak',
+        'bpkb' => 'BPKB',
+        'asuransi' => 'Asuransi',
+        'garansi' => 'Garansi',
+        'manual_book' => 'Buku Manual / Servis',
+        'sertifikat' => 'Sertifikat',
+        'nota_pembelian' => 'Nota Pembelian',
+        'lainnya' => 'Dokumen Lainnya',
     ],
 
     'templates' => [

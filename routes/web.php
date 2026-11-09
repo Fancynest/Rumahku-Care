@@ -3,6 +3,7 @@
 use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\HomeAssetController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\TechnicianController;
@@ -54,5 +55,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/', [AttachmentController::class, 'store'])->name('store');
         Route::get('/{attachment}', [AttachmentController::class, 'show'])->name('show');
         Route::delete('/{attachment}', [AttachmentController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('documents')->name('documents.')->group(function () {
+        Route::post('/', [DocumentController::class, 'store'])->name('store');
+        Route::put('/{document}', [DocumentController::class, 'update'])->name('update');
+        Route::post('/{document}/renew', [DocumentController::class, 'renew'])->name('renew');
+        Route::delete('/{document}', [DocumentController::class, 'destroy'])->name('destroy');
     });
 });

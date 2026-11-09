@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\AttentionFeed;
 use App\Services\ScheduleStatus;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Http\Events\RequestHandled;
@@ -20,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->scoped(ScheduleStatus::class);
+        $this->app->scoped(AttentionFeed::class);
 
         $this->app['events']->listen(RequestHandled::class, function (): void {
             $this->app->forgetScopedInstances();
@@ -65,7 +67,7 @@ class AppServiceProvider extends ServiceProvider
             $urgentSchedules = collect();
 
             if (Auth::check()) {
-                $urgentSchedules = app(ScheduleStatus::class)->urgentForUser(Auth::user())->take(5);
+                $urgentSchedules = app(AttentionFeed::class)->urgent(Auth::user())->take(5);
             }
 
             $view->with('urgentSchedules', $urgentSchedules);

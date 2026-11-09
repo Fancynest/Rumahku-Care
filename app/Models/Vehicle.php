@@ -83,6 +83,14 @@ class Vehicle extends Model
         return $this->morphMany(MaintenanceSchedule::class, 'subject')->where('is_active', true);
     }
 
+    /**
+     * @return MorphMany<Document, $this>
+     */
+    public function documents(): MorphMany
+    {
+        return $this->morphMany(Document::class, 'subject')->latest();
+    }
+
     public function getNameAttribute(): string
     {
         if ($this->vehicleModel) {

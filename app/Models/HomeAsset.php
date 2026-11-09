@@ -73,6 +73,14 @@ class HomeAsset extends Model
         };
     }
 
+    /**
+     * @return MorphMany<Document, $this>
+     */
+    public function documents(): MorphMany
+    {
+        return $this->morphMany(Document::class, 'subject')->latest();
+    }
+
     public function getConditionChipClassAttribute(): string
     {
         return match ($this->condition) {
