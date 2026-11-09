@@ -16,6 +16,7 @@ class Vehicle extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'user_id',
         'vehicle_model_id',
         'custom_model_name',
         'custom_body_type',
@@ -34,10 +35,19 @@ class Vehicle extends Model
     protected function casts(): array
     {
         return [
+            'user_id' => 'integer',
             'year' => 'integer',
             'odometer' => 'integer',
             'service_interval_km' => 'integer',
         ];
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     /**

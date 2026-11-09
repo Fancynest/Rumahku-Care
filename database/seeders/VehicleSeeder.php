@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleModel;
 use Illuminate\Database\Seeder;
@@ -13,6 +14,9 @@ class VehicleSeeder extends Seeder
      */
     public function run(): void
     {
+        $user = User::first();
+        $userId = $user?->id;
+
         $beat = VehicleModel::where('brand', 'Honda')->where('model', 'Beat Street')->first();
         $avanza = VehicleModel::where('brand', 'Toyota')->where('model', 'Avanza 1.5 G')->first();
         $prado = VehicleModel::where('brand', 'Toyota')->where('model', 'Land Cruiser Prado')->first();
@@ -21,6 +25,7 @@ class VehicleSeeder extends Seeder
             $vBeat = Vehicle::updateOrCreate(
                 ['plate' => 'B 2341 KLS'],
                 [
+                    'user_id' => $userId,
                     'vehicle_model_id' => $beat->id,
                     'year' => 2023,
                     'color_key' => 'black',
@@ -44,6 +49,7 @@ class VehicleSeeder extends Seeder
             $vAvanza = Vehicle::updateOrCreate(
                 ['plate' => 'B 1234 GAB'],
                 [
+                    'user_id' => $userId,
                     'vehicle_model_id' => $avanza->id,
                     'year' => 2022,
                     'color_key' => 'black',
@@ -67,6 +73,7 @@ class VehicleSeeder extends Seeder
             Vehicle::updateOrCreate(
                 ['plate' => 'B 9999 KRA'],
                 [
+                    'user_id' => $userId,
                     'vehicle_model_id' => $prado->id,
                     'year' => 2021,
                     'color_key' => 'white',

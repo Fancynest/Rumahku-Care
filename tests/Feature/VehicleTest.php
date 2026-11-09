@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleModel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -15,6 +16,11 @@ class VehicleTest extends TestCase
     {
         parent::setUp();
         $this->seed();
+
+        $user = User::first();
+        if ($user) {
+            $this->actingAs($user);
+        }
     }
 
     public function test_can_view_vehicles_list_with_seeded_data(): void

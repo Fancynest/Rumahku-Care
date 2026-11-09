@@ -12,7 +12,7 @@ class VehicleController extends Controller
 {
     public function index(Request $request): View
     {
-        $vehicles = Vehicle::with('vehicleModel')->latest()->get();
+        $vehicles = $request->user()->vehicles()->with(['vehicleModel', 'latestServiceLog'])->latest()->get();
 
         $selectedId = $request->query('v');
         $selectedVehicle = $vehicles->firstWhere('id', $selectedId) ?? $vehicles->first();
@@ -52,7 +52,7 @@ class VehicleController extends Controller
 
         $modelId = $validated['vehicle_model_id'] === 'other' ? null : (int) $validated['vehicle_model_id'];
 
-        $vehicle = Vehicle::create([
+        $vehicle = $request->user()->vehicles()->create([
             'vehicle_model_id' => $modelId,
             'custom_model_name' => $modelId ? null : $validated['custom_model_name'],
             'custom_body_type' => $modelId ? null : $validated['custom_body_type'],
@@ -70,6 +70,8 @@ class VehicleController extends Controller
 
     public function updateOdometer(Request $request, Vehicle $vehicle): RedirectResponse
     {
+        abort_if($vehicle->user_id !== $request->user()->id, 404);
+
         $validated = $request->validate([
             'odometer' => ['required', 'integer', 'min:0'],
         ]);
@@ -84,6 +86,8 @@ class VehicleController extends Controller
 
     public function storeServiceLog(Request $request, Vehicle $vehicle): RedirectResponse
     {
+        abort_if($vehicle->user_id !== $request->user()->id, 404);
+
         $validated = $request->validate([
             'serviced_at' => ['required', 'date'],
             'odometer' => ['required', 'integer', 'min:0'],

@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Vehicle;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $vehicles = Vehicle::with('vehicleModel')->get();
+        $user = $request->user();
+        $vehicles = $user->vehicles()->with(['vehicleModel', 'latestServiceLog'])->get();
         $totalVehicles = $vehicles->count();
         $urgentVehicles = $vehicles->filter(fn ($v) => $v->status_label === 'Waktunya Servis');
         $primeVehiclesCount = $vehicles->filter(fn ($v) => $v->status_label === 'Kondisi Prima')->count();

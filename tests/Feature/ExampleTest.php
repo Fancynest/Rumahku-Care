@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,7 +17,7 @@ class ExampleTest extends TestCase
     {
         $this->seed();
 
-        $response = $this->get('/');
+        $response = $this->actingAs(User::first())->get('/');
 
         $response->assertStatus(200);
     }

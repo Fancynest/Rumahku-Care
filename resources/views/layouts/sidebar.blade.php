@@ -32,12 +32,24 @@
   </nav>
 
   <div class="p-3 border-top border-slate-200 d-flex align-items-center gap-2 mt-auto" style="border-color: rgba(226, 232, 240, 0.6) !important;">
-    <div class="rounded-circle bg-slate-200 text-slate-700 d-flex align-items-center justify-content-center fw-bold" style="width: 34px; height: 34px; font-size: 0.8rem;">
-      GA
-    </div>
-    <div class="overflow-hidden">
-      <div class="fw-semibold text-truncate text-dark" style="font-size: 0.85rem;">Gabriel</div>
-      <div class="text-muted" style="font-size: 0.72rem;">Akun Personal</div>
-    </div>
+    @auth
+      <div class="rounded-circle bg-slate-200 text-slate-700 d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width: 34px; height: 34px; font-size: 0.8rem;">
+        {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
+      </div>
+      <div class="overflow-hidden me-auto">
+        <div class="fw-semibold text-truncate text-dark" style="font-size: 0.85rem;">{{ Auth::user()->name }}</div>
+        <div class="text-muted text-truncate" style="font-size: 0.72rem;">{{ Auth::user()->email }}</div>
+      </div>
+      <form action="{{ route('logout') }}" method="POST" class="m-0">
+        @csrf
+        <button type="submit" class="btn btn-glass btn-sm p-1.5 text-danger" title="Keluar" aria-label="Keluar" style="min-height: 34px; min-width: 34px;">
+          <i class="bi bi-box-arrow-right"></i>
+        </button>
+      </form>
+    @else
+      <a href="{{ route('login') }}" class="btn btn-dark btn-sm w-100" style="min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
+        <i class="bi bi-box-arrow-in-right me-1.5"></i> Masuk
+      </a>
+    @endauth
   </div>
 </aside>

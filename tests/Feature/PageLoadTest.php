@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -13,6 +14,11 @@ class PageLoadTest extends TestCase
     {
         parent::setUp();
         $this->seed();
+
+        $user = User::first();
+        if ($user) {
+            $this->actingAs($user);
+        }
     }
 
     public function test_dashboard_page_loads_successfully(): void

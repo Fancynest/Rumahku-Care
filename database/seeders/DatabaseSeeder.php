@@ -12,12 +12,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        if (User::count() === 0) {
-            User::factory()->create([
+        $user = User::firstOrCreate(
+            ['email' => 'gabriel@rumahkucare.id'],
+            [
                 'name' => 'Gabriel',
-                'email' => 'gabriel@example.com',
-            ]);
-        }
+                'password' => bcrypt('password'),
+            ]
+        );
 
         $this->call([
             VehicleModelSeeder::class,
