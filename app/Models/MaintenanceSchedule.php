@@ -13,12 +13,6 @@ class MaintenanceSchedule extends Model
 {
     use HasFactory;
 
-    protected static function booted(): void
-    {
-        static::saved(fn () => ScheduleStatus::clearCache());
-        static::deleted(fn () => ScheduleStatus::clearCache());
-    }
-
     /**
      * @var list<string>
      */

@@ -9,12 +9,12 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, ScheduleStatus $scheduleStatus): View
     {
         $user = $request->user();
 
-        $allSchedules = ScheduleStatus::forUser($user);
-        $urgentSchedules = ScheduleStatus::urgentForUser($user);
+        $allSchedules = $scheduleStatus->forUser($user);
+        $urgentSchedules = $scheduleStatus->urgentForUser($user);
 
         // Max 3 most urgent schedules for the cards
         $topUrgentCards = $urgentSchedules->take(3);

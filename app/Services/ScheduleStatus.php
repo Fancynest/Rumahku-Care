@@ -119,28 +119,28 @@ class ScheduleStatus
     /**
      * @var array<int, Collection<int, MaintenanceSchedule>>
      */
-    private static array $cachedActiveSchedules = [];
+    private array $cachedActiveSchedules = [];
 
     /**
      * @var array<int, Collection<int, MaintenanceSchedule>>
      */
-    private static array $cachedUrgentSchedules = [];
+    private array $cachedUrgentSchedules = [];
 
     /**
      * Ambil seluruh jadwal aktif milik user (dengan subjek terkait), dimemoize per siklus request.
      *
      * @return Collection<int, MaintenanceSchedule>
      */
-    public static function forUser(User $user): Collection
+    public function forUser(User $user): Collection
     {
-        if (! isset(self::$cachedActiveSchedules[$user->id])) {
-            self::$cachedActiveSchedules[$user->id] = $user->schedules()
+        if (! isset($this->cachedActiveSchedules[$user->id])) {
+            $this->cachedActiveSchedules[$user->id] = $user->schedules()
                 ->with('subject')
                 ->where('is_active', true)
                 ->get();
         }
 
-        return self::$cachedActiveSchedules[$user->id];
+        return $this->cachedActiveSchedules[$user->id];
     }
 
     /**
@@ -148,13 +148,13 @@ class ScheduleStatus
      *
      * @return Collection<int, MaintenanceSchedule>
      */
-    public static function urgentForUser(User $user): Collection
+    public function urgentForUser(User $user): Collection
     {
-        if (! isset(self::$cachedUrgentSchedules[$user->id])) {
-            self::$cachedUrgentSchedules[$user->id] = self::sortUrgent(self::forUser($user));
+        if (! isset($this->cachedUrgentSchedules[$user->id])) {
+            $this->cachedUrgentSchedules[$user->id] = self::sortUrgent($this->forUser($user));
         }
 
-        return self::$cachedUrgentSchedules[$user->id];
+        return $this->cachedUrgentSchedules[$user->id];
     }
 
     /**
@@ -189,14 +189,5 @@ class ScheduleStatus
                 return ($priorityRank[$a->priority] ?? 99) <=> ($priorityRank[$b->priority] ?? 99);
             })
             ->values();
-    }
-
-    /**
-     * Bersihkan cache memoize (berguna saat mutasi data atau antar-test).
-     */
-    public static function clearCache(): void
-    {
-        self::$cachedActiveSchedules = [];
-        self::$cachedUrgentSchedules = [];
     }
 }
