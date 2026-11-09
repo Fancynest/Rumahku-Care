@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\HomeAsset;
 use App\Models\MaintenanceSchedule;
 use App\Models\Vehicle;
+use App\Services\MaintenanceRecorder;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -170,7 +170,7 @@ class ScheduleController extends Controller
             ->with('success', 'Jadwal "'.$schedule->title.'" berhasil diperbarui.');
     }
 
-    public function complete(Request $request, MaintenanceSchedule $schedule): RedirectResponse
+    public function complete(Request $request, MaintenanceSchedule $schedule, MaintenanceRecorder $recorder): RedirectResponse
     {
         abort_if($schedule->user_id !== $request->user()->id, 404);
 
@@ -191,40 +191,7 @@ class ScheduleController extends Controller
                 $schedule->trigger_type === 'kilometer' ? 'required' : 'nullable',
                 'integer',
                 'min:0',
-                function (string $attribute, mixed $value, \Closure $fail) use ($isVehicle, $subject, $request): void {
-                    if (! $isVehicle || $value === null) {
-                        return;
-                    }
-
-                    $doneAt = $request->input('done_at');
-                    if (! $doneAt || ! strtotime($doneAt)) {
-                        return;
-                    }
-
-                    $prevRecord = $subject->maintenanceRecords()
-                        ->whereNotNull('odometer')
-                        ->whereDate('done_at', '<=', $doneAt)
-                        ->orderByDesc('done_at')
-                        ->orderByDesc('id')
-                        ->first();
-
-                    if ($prevRecord && (int) $value < (int) $prevRecord->odometer) {
-                        $fail('Odometer tidak boleh lebih kecil dari riwayat servis sebelumnya ('.number_format($prevRecord->odometer).' KM pada '.$prevRecord->done_at->format('d/m/Y').').');
-
-                        return;
-                    }
-
-                    $nextRecord = $subject->maintenanceRecords()
-                        ->whereNotNull('odometer')
-                        ->whereDate('done_at', '>', $doneAt)
-                        ->orderBy('done_at')
-                        ->orderBy('id')
-                        ->first();
-
-                    if ($nextRecord && (int) $value > (int) $nextRecord->odometer) {
-                        $fail('Odometer tidak boleh lebih besar dari riwayat servis berikutnya ('.number_format($nextRecord->odometer).' KM pada '.$nextRecord->done_at->format('d/m/Y').').');
-                    }
-                },
+                $recorder->validateOdometerTimeline($isVehicle ? $subject : null, $request->input('done_at')),
             ];
         } else {
             $rules['odometer'] = ['nullable', 'integer', 'min:0'];
@@ -234,47 +201,12 @@ class ScheduleController extends Controller
             'done_at.before_or_equal' => 'Tanggal servis tidak boleh di masa depan.',
         ]);
 
-        DB::transaction(function () use ($schedule, $validated, $isVehicle, $subject): void {
-            // 1. Create MaintenanceRecord
-            $schedule->records()->create([
-                'user_id' => $schedule->user_id,
-                'subject_type' => $schedule->subject_type,
-                'subject_id' => $schedule->subject_id,
-                'done_at' => $validated['done_at'],
-                'odometer' => $validated['odometer'] ?? null,
-                'service_type' => $schedule->title,
-                'workshop_name' => $validated['workshop_name'] ?? ($isVehicle ? $subject->workshop : null),
-                'labor_cost' => $validated['labor_cost'] ?? 0,
-                'parts_cost' => $validated['parts_cost'] ?? 0,
-                'parts' => $validated['parts'] ?? null,
-                'notes' => $validated['notes'] ?? null,
-            ]);
-
-            // 2. Update Schedule last_done and next_due
-            if ($schedule->trigger_type === 'kilometer') {
-                $odometer = (int) $validated['odometer'];
-                if ($schedule->last_done_km === null || $odometer >= $schedule->last_done_km) {
-                    $schedule->last_done_km = $odometer;
-                    $schedule->next_due_km = $odometer + ($schedule->interval_km ?: 5000);
-                    $schedule->last_done_at = $validated['done_at'];
-                }
-
-                if ($isVehicle && $odometer > $subject->odometer) {
-                    $subject->update(['odometer' => $odometer]);
-                }
-            } elseif ($schedule->trigger_type === 'interval_hari') {
-                if ($schedule->last_done_at === null || $validated['done_at'] >= $schedule->last_done_at->toDateString()) {
-                    $days = $schedule->interval_days ?: 30;
-                    $schedule->next_due_date = Carbon::parse($validated['done_at'])->addDays($days)->toDateString();
-                    $schedule->last_done_at = $validated['done_at'];
-                }
-            } elseif ($schedule->trigger_type === 'tanggal') {
-                $schedule->is_active = false;
-                $schedule->last_done_at = $validated['done_at'];
-            }
-
-            $schedule->save();
-        });
+        $recorder->record(
+            user: $request->user(),
+            subject: $subject,
+            data: $validated,
+            schedule: $schedule
+        );
 
         return redirect()->back()
             ->with('success', 'Jadwal "'.$schedule->title.'" berhasil ditandai selesai.');
