@@ -172,12 +172,84 @@ class VehicleTest extends TestCase
         $this->assertEquals($vehicle->odometer + 100, $vehicle->fresh()->odometer);
     }
 
+    public function test_can_store_service_log_with_full_details_and_total_cost(): void
+    {
+        $vehicle = Vehicle::firstOrFail();
+
+        $response = $this->post("/vehicles/{$vehicle->id}/service-logs", [
+            'done_at' => '2026-11-09',
+            'odometer' => $vehicle->odometer + 500,
+            'service_type' => 'Ganti Oli',
+            'workshop_name' => 'Bengkel Resmi Auto2000',
+            'labor_cost' => 150000,
+            'parts_cost' => 350000,
+            'parts' => 'Oli TMO 4L, Filter Oli',
+            'notes' => 'Servis berkala rutin',
+        ]);
+
+        $response->assertRedirect();
+
+        $record = $vehicle->maintenanceRecords()->latest('id')->first();
+        $this->assertNotNull($record);
+        $this->assertSame(150000, $record->labor_cost);
+        $this->assertSame(350000, $record->parts_cost);
+        $this->assertSame(500000, $record->total_cost);
+        $this->assertSame('Bengkel Resmi Auto2000', $record->workshop_name);
+        $this->assertEquals($vehicle->odometer + 500, $vehicle->fresh()->odometer);
+    }
+
+    public function test_storing_service_log_marks_linked_schedule_complete(): void
+    {
+        $vehicle = Vehicle::firstOrFail();
+        $user = $vehicle->user;
+
+        $schedule = $vehicle->schedules()->create([
+            'user_id' => $user->id,
+            'title' => 'Ganti filter AC',
+            'trigger_type' => 'kilometer',
+            'interval_km' => 10000,
+            'next_due_km' => $vehicle->odometer + 10000,
+            'priority' => 'normal',
+            'is_active' => true,
+        ]);
+
+        $newOdo = $vehicle->odometer + 1000;
+
+        $response = $this->post("/vehicles/{$vehicle->id}/service-logs", [
+            'done_at' => '2026-11-09',
+            'odometer' => $newOdo,
+            'service_type' => 'Ganti filter AC',
+            'schedule_id' => $schedule->id,
+            'labor_cost' => 50000,
+            'parts_cost' => 120000,
+        ]);
+
+        $response->assertRedirect();
+
+        $schedule->refresh();
+        $this->assertSame('2026-11-09', $schedule->last_done_at?->format('Y-m-d'));
+        $this->assertSame($newOdo, $schedule->last_done_km);
+        $this->assertSame($newOdo + 10000, $schedule->next_due_km);
+    }
+
+    public function test_cannot_store_service_log_with_odometer_lower_than_current(): void
+    {
+        $vehicle = Vehicle::firstOrFail();
+
+        $response = $this->post("/vehicles/{$vehicle->id}/service-logs", [
+            'done_at' => '2026-11-09',
+            'odometer' => $vehicle->odometer - 500,
+        ]);
+
+        $response->assertSessionHasErrors(['odometer']);
+    }
+
     public function test_cannot_store_service_log_with_invalid_data(): void
     {
         $vehicle = Vehicle::firstOrFail();
 
         $response = $this->post("/vehicles/{$vehicle->id}/service-logs", []);
 
-        $response->assertSessionHasErrors(['serviced_at', 'odometer']);
+        $response->assertSessionHasErrors(['done_at', 'odometer']);
     }
 }

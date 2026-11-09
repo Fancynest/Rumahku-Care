@@ -165,6 +165,83 @@
     </div>
   </div>
 </div>
+
+<!-- 5. Riwayat 10 Servis Terakhir -->
+<div class="glass-panel p-4 mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h6 class="fw-bold text-dark mb-0">Riwayat Servis Terakhir</h6>
+      <span class="text-muted small">10 catatan perawatan dan perbaikan berkala untuk {{ $selectedVehicle->name }}.</span>
+    </div>
+    <button class="btn btn-dark btn-sm d-flex align-items-center gap-1.5" data-bs-toggle="modal" data-bs-target="#modalCatatServis" style="min-height: 40px; padding: 0.4rem 1rem;">
+      <i class="bi bi-wrench"></i>
+      <span>Catat Servis</span>
+    </button>
+  </div>
+
+  @if ($recentRecords->isEmpty())
+    <div class="p-4 text-center text-muted bg-white-50 rounded-3 border border-dashed border-slate-200">
+      <i class="bi bi-wrench-adjustable d-block fs-3 mb-1 text-secondary"></i>
+      <div class="fw-medium text-dark small">Belum ada riwayat servis tercatat</div>
+      <p class="text-muted mb-0" style="font-size: 0.78rem;">Klik "Catat Servis" di atas untuk menambahkan catatan perawatan pertama Anda.</p>
+    </div>
+  @else
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+        <thead class="text-muted" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+          <tr>
+            <th class="ps-3 py-2.5">Tanggal & KM</th>
+            <th class="py-2.5">Jenis Servis</th>
+            <th class="py-2.5">Bengkel</th>
+            <th class="py-2.5">Total Biaya</th>
+            <th class="pe-3 py-2.5">Catatan & Suku Cadang</th>
+          </tr>
+        </thead>
+        <tbody>
+          @foreach ($recentRecords as $record)
+            <tr>
+              <td class="ps-3 py-3">
+                <div class="fw-bold text-dark">{{ $record->done_at?->format('d/m/Y') ?? '-' }}</div>
+                <div class="text-muted font-monospace" style="font-size: 0.75rem;">
+                  {{ $record->odometer ? number_format($record->odometer) . ' KM' : '-' }}
+                </div>
+              </td>
+              <td class="py-3">
+                <span class="badge bg-light text-dark border px-2 py-1">
+                  {{ $record->service_type }}
+                </span>
+                @if ($record->schedule)
+                  <div class="text-success small mt-0.5" style="font-size: 0.72rem;">
+                    <i class="bi bi-check-circle-fill me-0.5"></i>{{ $record->schedule->title }}
+                  </div>
+                @endif
+              </td>
+              <td class="py-3 text-secondary">
+                <i class="bi bi-geo-alt me-1 text-muted"></i>{{ $record->workshop_name ?? '-' }}
+              </td>
+              <td class="py-3">
+                <div class="fw-bold text-dark">Rp {{ number_format($record->total_cost, 0, ',', '.') }}</div>
+                @if ($record->labor_cost > 0 || $record->parts_cost > 0)
+                  <small class="text-muted d-block" style="font-size: 0.7rem;">
+                    Jasa: Rp {{ number_format($record->labor_cost, 0, ',', '.') }} | Part: Rp {{ number_format($record->parts_cost, 0, ',', '.') }}
+                  </small>
+                @endif
+              </td>
+              <td class="pe-3 py-3">
+                <div class="text-dark">{{ $record->notes ?? '-' }}</div>
+                @if ($record->parts)
+                  <small class="text-muted d-block mt-0.5" style="font-size: 0.72rem;">
+                    <i class="bi bi-tools me-1"></i>{{ $record->parts }}
+                  </small>
+                @endif
+              </td>
+            </tr>
+          @endforeach
+        </tbody>
+      </table>
+    </div>
+  @endif
+</div>
 @endif
 @endsection
 
@@ -207,7 +284,7 @@
 
   <!-- ================= MODAL: CATAT SERVIS ================= -->
   <div class="modal fade" id="modalCatatServis" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content glass-panel border-0 shadow-lg">
         <form action="{{ route('vehicles.service-logs.store', $selectedVehicle->id) }}" method="POST">
           @csrf
@@ -216,24 +293,87 @@
             <button type="button" class="btn-close small" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body py-3">
-            <div class="row g-2 mb-3">
-              <div class="col-6">
+            <!-- Baris 1: Tanggal & Odometer -->
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
                 <label class="form-label text-muted small mb-1">Tanggal Servis <span class="text-danger">*</span></label>
-                <input type="date" name="serviced_at" class="form-control" value="{{ date('Y-m-d') }}" required>
+                <input type="date" name="done_at" class="form-control" value="{{ date('Y-m-d') }}" required>
               </div>
-              <div class="col-6">
+              <div class="col-md-6">
                 <label class="form-label text-muted small mb-1">Odometer Saat Servis (KM) <span class="text-danger">*</span></label>
-                <input type="number" name="odometer" class="form-control" value="{{ $selectedVehicle->odometer }}" min="0" required>
+                <input type="number" 
+                       name="odometer" 
+                       class="form-control font-monospace fw-semibold" 
+                       value="{{ $selectedVehicle->odometer }}" 
+                       min="{{ $selectedVehicle->odometer }}" 
+                       required>
+                <small class="text-muted" style="font-size: 0.72rem;">Minimal {{ number_format($selectedVehicle->odometer) }} KM (odometer saat ini).</small>
               </div>
             </div>
+
+            <!-- Baris 2: Jenis Servis & Nama Bengkel -->
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label text-muted small mb-1">Jenis Servis <span class="text-danger">*</span></label>
+                <select name="service_type" class="form-select" required>
+                  <option value="Ganti Oli">Ganti Oli</option>
+                  <option value="Servis Berkala" selected>Servis Berkala</option>
+                  <option value="Perbaikan">Perbaikan</option>
+                  <option value="Ganti Ban">Ganti Ban</option>
+                  <option value="Lainnya">Lainnya</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-muted small mb-1">Nama Bengkel Pelaksana</label>
+                <input type="text" name="workshop_name" class="form-control" value="{{ $selectedVehicle->workshop }}" placeholder="Contoh: Auto2000, AHASS">
+              </div>
+            </div>
+
+            <!-- Baris 3: Tandai Jadwal Selesai -->
+            <div class="mb-3">
+              <label class="form-label text-muted small mb-1">Tandai Jadwal Selesai (Opsional)</label>
+              <select name="schedule_id" class="form-select">
+                <option value="">-- Tidak Ada / Servis Mandiri Tanpa Jadwal --</option>
+                @foreach ($activeSchedules as $sch)
+                  <option value="{{ $sch->id }}">
+                    {{ $sch->title }} ({{ $sch->trigger_label }}) — Status: {{ ucfirst($sch->status) }}
+                  </option>
+                @endforeach
+              </select>
+              <small class="text-muted" style="font-size: 0.72rem;">Jika dipilih, siklus jadwal terkait akan otomatis diperbarui.</small>
+            </div>
+
+            <!-- Baris 4: Biaya Jasa & Suku Cadang + Total -->
+            <div class="p-3 rounded-3 bg-light border mb-3">
+              <div class="row g-2 align-items-center">
+                <div class="col-md-4">
+                  <label class="form-label text-muted small mb-1">Biaya Jasa (Rp)</label>
+                  <input type="number" id="servisLaborCost" name="labor_cost" class="form-control" value="0" min="0" step="1000">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label text-muted small mb-1">Biaya Suku Cadang (Rp)</label>
+                  <input type="number" id="servisPartsCost" name="parts_cost" class="form-control" value="0" min="0" step="1000">
+                </div>
+                <div class="col-md-4 text-md-end pt-2 pt-md-0">
+                  <small class="text-muted d-block" style="font-size: 0.72rem;">Total Biaya Perawatan:</small>
+                  <div class="fw-bold fs-5 text-dark" id="servisTotalCost">Rp 0</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Baris 5: Suku Cadang Diganti & Catatan -->
+            <div class="mb-3">
+              <label class="form-label text-muted small mb-1">Suku Cadang yang Diganti</label>
+              <textarea name="parts" class="form-control" rows="2" placeholder="Contoh: Oli Mesin SPX2 0.8L, Busi CPR9EA, Filter Oli"></textarea>
+            </div>
             <div class="mb-2">
-              <label class="form-label text-muted small mb-1">Catatan Servis</label>
-              <textarea name="notes" class="form-control" rows="3" placeholder="Contoh: Ganti oli mesin & filter oli, periksa kampas rem."></textarea>
+              <label class="form-label text-muted small mb-1">Catatan Tambahan</label>
+              <textarea name="notes" class="form-control" rows="2" placeholder="Catatan kondisi kendaraan, rekomendasi servis berikutnya, atau garansi bengkel..."></textarea>
             </div>
           </div>
           <div class="modal-footer border-top border-slate-200 py-2.5">
-            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 40px;">Batal</button>
-            <button type="submit" class="btn btn-dark btn-sm px-3" style="min-height: 40px;">Simpan Catatan Servis</button>
+            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
+            <button type="submit" class="btn btn-dark btn-sm px-4" style="min-height: 44px;">Simpan Catatan Servis</button>
           </div>
         </form>
       </div>
@@ -499,6 +639,26 @@
         material.pbrMetallicRoughness.setBaseColorFactor(colorFactor);
       }
     }
+  }
+
+  // Real-time calculation of total service cost
+  function updateServisTotal() {
+    const labor = parseInt(document.getElementById('servisLaborCost')?.value || 0, 10) || 0;
+    const parts = parseInt(document.getElementById('servisPartsCost')?.value || 0, 10) || 0;
+    const total = labor + parts;
+    const display = document.getElementById('servisTotalCost');
+    if (display) {
+      display.textContent = 'Rp ' + total.toLocaleString('id-ID');
+    }
+  }
+
+  const laborInput = document.getElementById('servisLaborCost');
+  const partsInput = document.getElementById('servisPartsCost');
+  if (laborInput) {
+    laborInput.addEventListener('input', updateServisTotal);
+  }
+  if (partsInput) {
+    partsInput.addEventListener('input', updateServisTotal);
   }
 </script>
 @endpush

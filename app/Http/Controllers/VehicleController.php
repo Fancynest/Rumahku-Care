@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Vehicle;
 use App\Models\VehicleModel;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class VehicleController extends Controller
@@ -13,19 +15,40 @@ class VehicleController extends Controller
     public function index(Request $request): View
     {
         $vehicles = $request->user()->vehicles()
-            ->with(['vehicleModel', 'schedules', 'maintenanceRecords'])
+            ->with(['vehicleModel', 'schedules' => fn ($q) => $q->where('is_active', true)])
             ->latest()
             ->get();
 
         $selectedId = $request->query('v');
         $selectedVehicle = $vehicles->firstWhere('id', $selectedId) ?? $vehicles->first();
 
+        $recentRecords = collect();
+        $activeSchedules = collect();
+
+        if ($selectedVehicle) {
+            $recentRecords = $selectedVehicle->maintenanceRecords()
+                ->latest('done_at')
+                ->latest('id')
+                ->take(10)
+                ->get();
+
+            $activeSchedules = $selectedVehicle->schedules()
+                ->where('is_active', true)
+                ->get();
+        }
+
         $modelsGrouped = VehicleModel::orderBy('brand')
             ->orderBy('model')
             ->get()
             ->groupBy('brand');
 
-        return view('vehicles.index', compact('vehicles', 'selectedVehicle', 'modelsGrouped'));
+        return view('vehicles.index', compact(
+            'vehicles',
+            'selectedVehicle',
+            'recentRecords',
+            'activeSchedules',
+            'modelsGrouped'
+        ));
     }
 
     public function store(Request $request): RedirectResponse
@@ -103,28 +126,75 @@ class VehicleController extends Controller
     {
         abort_if($vehicle->user_id !== $request->user()->id, 404);
 
-        $minOdometer = $vehicle->maintenanceRecords()->max('odometer') ?? $vehicle->odometer;
+        if (! $request->has('done_at') && $request->has('serviced_at')) {
+            $request->merge(['done_at' => $request->input('serviced_at')]);
+        }
 
         $validated = $request->validate([
-            'serviced_at' => ['required', 'date'],
-            'odometer' => ['required', 'integer', 'min:'.$minOdometer],
+            'done_at' => ['required', 'date'],
+            'odometer' => ['required', 'integer', 'min:'.$vehicle->odometer],
+            'service_type' => ['nullable', 'string', 'max:100'],
+            'workshop_name' => ['nullable', 'string', 'max:150'],
+            'labor_cost' => ['nullable', 'integer', 'min:0'],
+            'parts_cost' => ['nullable', 'integer', 'min:0'],
+            'parts' => ['nullable', 'string', 'max:1000'],
             'notes' => ['nullable', 'string', 'max:1000'],
+            'schedule_id' => [
+                'nullable',
+                function (string $attribute, mixed $value, \Closure $fail) use ($vehicle, $request): void {
+                    if (empty($value)) {
+                        return;
+                    }
+                    $exists = $vehicle->schedules()
+                        ->where('id', $value)
+                        ->where('user_id', $request->user()->id)
+                        ->exists();
+                    if (! $exists) {
+                        $fail('Jadwal perawatan yang dipilih tidak valid.');
+                    }
+                },
+            ],
         ]);
 
-        $vehicle->maintenanceRecords()->create([
-            'user_id' => $request->user()->id,
-            'done_at' => $validated['serviced_at'],
-            'odometer' => $validated['odometer'],
-            'service_type' => 'Servis Berkala',
-            'workshop_name' => $vehicle->workshop,
-            'labor_cost' => 0,
-            'parts_cost' => 0,
-            'notes' => $validated['notes'],
-        ]);
+        DB::transaction(function () use ($request, $vehicle, $validated): void {
+            $laborCost = (int) ($validated['labor_cost'] ?? 0);
+            $partsCost = (int) ($validated['parts_cost'] ?? 0);
+            $odometer = (int) $validated['odometer'];
 
-        if ($validated['odometer'] > $vehicle->odometer) {
-            $vehicle->update(['odometer' => $validated['odometer']]);
-        }
+            $schedule = null;
+            if (! empty($validated['schedule_id'])) {
+                $schedule = $vehicle->schedules()->find($validated['schedule_id']);
+            }
+
+            $vehicle->maintenanceRecords()->create([
+                'user_id' => $request->user()->id,
+                'schedule_id' => $schedule?->id,
+                'done_at' => $validated['done_at'],
+                'odometer' => $odometer,
+                'service_type' => $validated['service_type'] ?? 'Servis Berkala',
+                'workshop_name' => $validated['workshop_name'] ?? $vehicle->workshop,
+                'labor_cost' => $laborCost,
+                'parts_cost' => $partsCost,
+                'parts' => $validated['parts'] ?? null,
+                'notes' => $validated['notes'] ?? null,
+            ]);
+
+            if ($schedule) {
+                $schedule->last_done_at = $validated['done_at'];
+                if ($schedule->trigger_type === 'kilometer') {
+                    $schedule->last_done_km = $odometer;
+                    $schedule->next_due_km = $odometer + ($schedule->interval_km ?: 5000);
+                } elseif ($schedule->trigger_type === 'interval_hari') {
+                    $days = $schedule->interval_days ?: 30;
+                    $schedule->next_due_date = Carbon::parse($validated['done_at'])->addDays($days)->toDateString();
+                }
+                $schedule->save();
+            }
+
+            if ($odometer > $vehicle->odometer) {
+                $vehicle->update(['odometer' => $odometer]);
+            }
+        });
 
         return redirect()->back()
             ->with('success', 'Catatan servis untuk '.$vehicle->name.' berhasil disimpan.');
