@@ -26,12 +26,19 @@ class AppServiceProvider extends ServiceProvider
             $urgentSchedules = collect();
 
             if (Auth::check() && Schema::hasTable('maintenance_schedules')) {
+                $priorityMap = [
+                    'terlambat' => 0,
+                    'mendesak' => 1,
+                    'perhatian' => 2,
+                ];
+
                 $urgentSchedules = Auth::user()->schedules()
                     ->with('subject')
                     ->where('is_active', true)
                     ->get()
-                    ->filter(fn ($s) => in_array($s->status, ['terlambat', 'mendesak']))
-                    ->sortBy(fn ($s) => $s->status === 'terlambat' ? 0 : 1)
+                    ->filter(fn ($s) => isset($priorityMap[$s->status]))
+                    ->sortBy(fn ($s) => $priorityMap[$s->status])
+                    ->values()
                     ->take(5);
             }
 

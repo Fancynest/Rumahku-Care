@@ -126,7 +126,7 @@
         <div class="small text-muted mb-3" style="font-size: 0.8rem;">
           <div class="mb-1"><i class="bi bi-geo-alt me-1.5 text-dark"></i> Jl. Fatmawati No. 42 (Dekat SPBU)</div>
           <div class="mb-1"><i class="bi bi-telephone me-1.5 text-dark"></i> +62 898-7654-3210</div>
-          <div><i class="bi bi-car-front me-1.5 text-dark"></i> Langganan untuk: <strong>Toyota Avanza</strong></div>
+          <div><i class="bi bi-car-front me-1.5 text-dark"></i> Rujukan Servis: <strong>Kendaraan Pribadi</strong></div>
         </div>
 
         <div class="p-2.5 rounded-3 bg-white bg-opacity-60 border mb-3 small" style="border-color: rgba(226, 232, 240, 0.7); font-size: 0.76rem;">
