@@ -538,6 +538,166 @@
       </div>
     </div>
   </div>
+
+  <!-- ================= MODAL: CATAT BBM ================= -->
+  <div class="modal fade" id="modalCatatBBM" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content glass-panel border-0 shadow-lg">
+        <form action="{{ route('vehicles.fuel-logs.store', $selectedVehicle->id) }}" method="POST" enctype="multipart/form-data">
+          @csrf
+          <div class="modal-header border-bottom border-slate-200 py-3">
+            <h6 class="modal-title fw-bold text-dark"><i class="bi bi-fuel-pump me-1.5"></i> Catat Pengisian BBM — {{ $selectedVehicle->name }}</h6>
+            <button type="button" class="btn-close small" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body py-3">
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label text-muted small mb-1">Tanggal Pengisian <span class="text-danger">*</span></label>
+                <input type="date" name="filled_at" class="form-control" value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" required style="min-height: 44px;">
+              </div>
+              <div class="col-6">
+                <label class="form-label text-muted small mb-1">Odometer (KM) <span class="text-danger">*</span></label>
+                <input type="number" name="odometer" class="form-control" value="{{ $selectedVehicle->odometer }}" min="0" required style="min-height: 44px;">
+              </div>
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label text-muted small mb-1">Volume Bensin (Liter) <span class="text-danger">*</span></label>
+                <input type="text" name="liters" class="form-control" placeholder="mis. 32,5" required style="min-height: 44px;">
+                <small class="text-muted" style="font-size: 0.72rem;">Bisa koma desimal ("32,5")</small>
+              </div>
+              <div class="col-6">
+                <label class="form-label text-muted small mb-1">Total Biaya (Rp) <span class="text-danger">*</span></label>
+                <input type="text" name="total_cost" class="form-control" placeholder="mis. 350.000" required style="min-height: 44px;">
+                <small class="text-muted" style="font-size: 0.72rem;">Bisa titik ribuan</small>
+              </div>
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label text-muted small mb-1">Jenis Bahan Bakar</label>
+                <input type="text" name="fuel_grade" list="fuelGradesList" class="form-control" placeholder="Pertalite / Dexlite..." style="min-height: 44px;">
+                <datalist id="fuelGradesList">
+                  <option value="Pertalite (RON 90)">
+                  <option value="Pertamax (RON 92)">
+                  <option value="Pertamax Turbo (RON 98)">
+                  <option value="Solar">
+                  <option value="Dexlite">
+                  <option value="Pertamina Dex">
+                  <option value="Shell Super">
+                  <option value="Shell V-Power">
+                  <option value="BP 92">
+                  <option value="BP Ultimate">
+                </datalist>
+              </div>
+              <div class="col-6">
+                <label class="form-label text-muted small mb-1">Nama / Lokasi SPBU</label>
+                <input type="text" name="station" class="form-control" placeholder="mis. SPBU Dago" style="min-height: 44px;">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" name="is_full_tank" id="inputIsFullTank" value="1" checked>
+                <label class="form-check-label text-dark fw-medium small" for="inputIsFullTank">
+                  Pengisian Tangki Penuh (Full Tank)
+                </label>
+              </div>
+              <small class="text-muted d-block ps-1" style="font-size: 0.72rem;">Centang untuk menghitung konsumsi efisiensi km/L secara akurat.</small>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label text-muted small mb-1">Catatan Tambahan (Opsional)</label>
+              <textarea name="notes" class="form-control" rows="2" placeholder="Catatan pengisian BBM..."></textarea>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label text-muted small mb-1">Lampiran Struk / Nota (Opsional)</label>
+              <input type="file" name="file" class="form-control" accept=".jpg,.jpeg,.png,.webp,.pdf,image/*,application/pdf" style="min-height: 44px;">
+              <small class="text-muted" style="font-size: 0.72rem;">Format JPG, PNG, atau PDF (maks 5 MB).</small>
+            </div>
+          </div>
+
+          <div class="modal-footer border-top border-slate-200 py-2.5">
+            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
+            <button type="submit" class="btn btn-dark btn-sm px-4" style="min-height: 44px;">Simpan Catatan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: EDIT BBM ================= -->
+  <div class="modal fade" id="modalEditBBM" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content glass-panel border-0 shadow-lg">
+        <form id="formEditBBM" method="POST">
+          @csrf
+          @method('PUT')
+          <div class="modal-header border-bottom border-slate-200 py-3">
+            <h6 class="modal-title fw-bold text-dark"><i class="bi bi-pencil-square me-1.5"></i> Edit Catatan BBM</h6>
+            <button type="button" class="btn-close small" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body py-3">
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label text-muted small mb-1">Tanggal Pengisian <span class="text-danger">*</span></label>
+                <input type="date" name="filled_at" id="inputEditFilledAt" class="form-control" max="{{ date('Y-m-d') }}" required style="min-height: 44px;">
+              </div>
+              <div class="col-6">
+                <label class="form-label text-muted small mb-1">Odometer (KM) <span class="text-danger">*</span></label>
+                <input type="number" name="odometer" id="inputEditOdometer" class="form-control" min="0" required style="min-height: 44px;">
+              </div>
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label text-muted small mb-1">Volume Bensin (Liter) <span class="text-danger">*</span></label>
+                <input type="text" name="liters" id="inputEditLiters" class="form-control" required style="min-height: 44px;">
+              </div>
+              <div class="col-6">
+                <label class="form-label text-muted small mb-1">Total Biaya (Rp) <span class="text-danger">*</span></label>
+                <input type="text" name="total_cost" id="inputEditTotalCost" class="form-control" required style="min-height: 44px;">
+              </div>
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label text-muted small mb-1">Jenis Bahan Bakar</label>
+                <input type="text" name="fuel_grade" id="inputEditFuelGrade" list="fuelGradesList" class="form-control" style="min-height: 44px;">
+              </div>
+              <div class="col-6">
+                <label class="form-label text-muted small mb-1">Nama / Lokasi SPBU</label>
+                <input type="text" name="station" id="inputEditStation" class="form-control" style="min-height: 44px;">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" name="is_full_tank" id="inputEditIsFullTank" value="1">
+                <label class="form-check-label text-dark fw-medium small" for="inputEditIsFullTank">
+                  Pengisian Tangki Penuh (Full Tank)
+                </label>
+              </div>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label text-muted small mb-1">Catatan Tambahan (Opsional)</label>
+              <textarea name="notes" id="inputEditNotes" class="form-control" rows="2"></textarea>
+            </div>
+          </div>
+
+          <div class="modal-footer border-top border-slate-200 py-2.5">
+            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
+            <button type="submit" class="btn btn-dark btn-sm px-4" style="min-height: 44px;">Simpan Perubahan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 @endif
 
 <!-- ================= MODAL: TAMBAH KENDARAAN (Cascading Select) ================= -->

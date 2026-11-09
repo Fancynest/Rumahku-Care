@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Attachment;
 use App\Models\DamageReport;
 use App\Models\Document;
+use App\Models\FuelLog;
 use App\Models\HomeAsset;
 use App\Models\MaintenanceRecord;
 use App\Models\Vehicle;
@@ -31,11 +32,14 @@ class AttachmentController extends Controller
         'damage_reports' => DamageReport::class,
         'document' => Document::class,
         'documents' => Document::class,
+        'fuel_log' => FuelLog::class,
+        'fuel_logs' => FuelLog::class,
         HomeAsset::class => HomeAsset::class,
         Vehicle::class => Vehicle::class,
         MaintenanceRecord::class => MaintenanceRecord::class,
         DamageReport::class => DamageReport::class,
         Document::class => Document::class,
+        FuelLog::class => FuelLog::class,
     ];
 
     public function store(Request $request, AttachmentStorer $storer): RedirectResponse

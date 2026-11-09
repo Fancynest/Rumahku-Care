@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Vehicle;
 use App\Models\VehicleModel;
+use App\Services\FuelCalculator;
 use App\Services\MaintenanceRecorder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -11,7 +12,7 @@ use Illuminate\View\View;
 
 class VehicleController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, FuelCalculator $fuelCalculator): View
     {
         $vehicles = $request->user()->vehicles()
             ->with(['vehicleModel', 'schedules' => fn ($q) => $q->where('is_active', true)])
@@ -23,6 +24,15 @@ class VehicleController extends Controller
 
         $recentRecords = collect();
         $activeSchedules = collect();
+        $fuelMetrics = [
+            'logs' => collect(),
+            'recent_logs' => collect(),
+            'latest_km_l' => null,
+            'average_5_km_l' => null,
+            'cost_per_km' => null,
+            'total_cost_this_month' => 0,
+            'total_liters_this_month' => 0,
+        ];
 
         if ($selectedVehicle) {
             $selectedVehicle->load([
@@ -42,6 +52,8 @@ class VehicleController extends Controller
             $activeSchedules = $selectedVehicle->schedules()
                 ->where('is_active', true)
                 ->get();
+
+            $fuelMetrics = $fuelCalculator->calculate($selectedVehicle);
         }
 
         $modelsGrouped = VehicleModel::orderBy('brand')
@@ -59,6 +71,7 @@ class VehicleController extends Controller
             'selectedVehicle',
             'recentRecords',
             'activeSchedules',
+            'fuelMetrics',
             'modelsGrouped',
             'inspectionTemplates',
             'documentTypes'

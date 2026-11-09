@@ -7,6 +7,7 @@ use App\Services\ScheduleStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
@@ -73,6 +74,14 @@ class Vehicle extends Model
     public function latestMaintenanceRecord(): MorphOne
     {
         return $this->morphOne(MaintenanceRecord::class, 'subject')->latestOfMany('done_at');
+    }
+
+    /**
+     * @return HasMany<FuelLog, $this>
+     */
+    public function fuelLogs(): HasMany
+    {
+        return $this->hasMany(FuelLog::class)->orderByDesc('filled_at')->orderByDesc('id');
     }
 
     /**

@@ -13,44 +13,18 @@ use Illuminate\Support\Facades\DB;
 
 class MaintenanceRecorder
 {
+    public function __construct(
+        protected ?OdometerTimeline $timeline = null
+    ) {
+        $this->timeline = $this->timeline ?? app(OdometerTimeline::class);
+    }
+
     /**
      * Validasi timeline odometer terhadap riwayat servis sebelum dan sesudah tanggal target.
      */
-    public function validateOdometerTimeline(?Vehicle $vehicle, mixed $doneAt): Closure
+    public function validateOdometerTimeline(?Vehicle $vehicle, mixed $doneAt, ?int $ignoreMaintenanceRecordId = null): Closure
     {
-        return function (string $attribute, mixed $value, Closure $fail) use ($vehicle, $doneAt): void {
-            if (! $vehicle || $value === null) {
-                return;
-            }
-
-            if (! $doneAt || ! strtotime((string) $doneAt)) {
-                return;
-            }
-
-            $prevRecord = $vehicle->maintenanceRecords()
-                ->whereNotNull('odometer')
-                ->whereDate('done_at', '<=', $doneAt)
-                ->orderByDesc('done_at')
-                ->orderByDesc('id')
-                ->first();
-
-            if ($prevRecord && (int) $value < (int) $prevRecord->odometer) {
-                $fail('Odometer tidak boleh lebih kecil dari riwayat servis sebelumnya ('.number_format($prevRecord->odometer).' KM pada '.$prevRecord->done_at->format('d/m/Y').').');
-
-                return;
-            }
-
-            $nextRecord = $vehicle->maintenanceRecords()
-                ->whereNotNull('odometer')
-                ->whereDate('done_at', '>', $doneAt)
-                ->orderBy('done_at')
-                ->orderBy('id')
-                ->first();
-
-            if ($nextRecord && (int) $value > (int) $nextRecord->odometer) {
-                $fail('Odometer tidak boleh lebih besar dari riwayat servis berikutnya ('.number_format($nextRecord->odometer).' KM pada '.$nextRecord->done_at->format('d/m/Y').').');
-            }
-        };
+        return $this->timeline->validate($vehicle, $doneAt, ignoreMaintenanceRecordId: $ignoreMaintenanceRecordId);
     }
 
     /**
@@ -118,8 +92,8 @@ class MaintenanceRecorder
             }
 
             // 3. Naikkan Odometer Kendaraan jika lebih tinggi
-            if ($isVehicle && $odometer !== null && $odometer > $subject->odometer) {
-                $subject->update(['odometer' => $odometer]);
+            if ($isVehicle && $odometer !== null) {
+                $this->timeline->updateVehicleOdometerIfHigher($subject, $odometer);
             }
 
             return $record;

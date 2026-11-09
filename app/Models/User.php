@@ -78,4 +78,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(InspectionRun::class);
     }
+
+    /**
+     * @return HasMany<FuelLog, $this>
+     */
+    public function fuelLogs(): HasMany
+    {
+        return $this->hasMany(FuelLog::class);
+    }
 }

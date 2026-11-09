@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DamageReportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\FuelLogController;
 use App\Http\Controllers\HomeAssetController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ScheduleController;
@@ -39,6 +40,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/', [VehicleController::class, 'store'])->name('store');
         Route::patch('/{vehicle}/odometer', [VehicleController::class, 'updateOdometer'])->name('update-odometer');
         Route::post('/{vehicle}/service-logs', [VehicleController::class, 'storeServiceLog'])->name('service-logs.store');
+        Route::post('/{vehicle}/fuel-logs', [FuelLogController::class, 'store'])->name('fuel-logs.store');
+    });
+
+    Route::prefix('fuel-logs')->name('fuel-logs.')->group(function () {
+        Route::put('/{fuelLog}', [FuelLogController::class, 'update'])->name('update');
+        Route::delete('/{fuelLog}', [FuelLogController::class, 'destroy'])->name('destroy');
     });
 
     Route::prefix('schedules')->name('schedules.')->group(function () {

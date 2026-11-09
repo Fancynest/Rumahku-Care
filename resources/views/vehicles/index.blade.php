@@ -101,6 +101,15 @@
       @endif
     </button>
   </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link fw-medium text-secondary d-flex align-items-center gap-1.5 px-3 py-2.5" id="tab-v-bbm-btn" data-bs-toggle="tab" data-bs-target="#bbm" type="button" role="tab" aria-controls="bbm" aria-selected="false" style="min-height: 44px;">
+      <i class="bi bi-fuel-pump"></i>
+      <span>BBM</span>
+      @if ($fuelMetrics['logs']->isNotEmpty())
+        <span class="badge bg-light text-dark border ms-1" style="font-size: 0.65rem;">{{ $fuelMetrics['logs']->count() }}</span>
+      @endif
+    </button>
+  </li>
 </ul>
 
 <!-- Tab Contents -->
@@ -110,6 +119,7 @@
   @include('vehicles.partials.tab-inspeksi')
   @include('vehicles.partials.tab-kerusakan')
   @include('vehicles.partials.tab-dokumen')
+  @include('vehicles.partials.tab-bbm')
 </div>
 @endif
 @endsection
@@ -275,6 +285,34 @@
         document.getElementById('labelPerpanjangTitleKendaraan').textContent = title;
         document.getElementById('inputPerpanjangCostKendaraan').value = cost;
         document.getElementById('inputPerpanjangRefKendaraan').value = ref;
+      }
+    });
+  });
+
+  // 8. Wire Edit Fuel Log Modal
+  document.querySelectorAll('.btn-edit-fuel-log').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const id = this.getAttribute('data-id');
+      const filledAt = this.getAttribute('data-filled-at');
+      const odometer = this.getAttribute('data-odometer');
+      const liters = this.getAttribute('data-liters');
+      const totalCost = this.getAttribute('data-total-cost');
+      const fuelGrade = this.getAttribute('data-fuel-grade');
+      const isFullTank = this.getAttribute('data-is-full-tank') === '1';
+      const station = this.getAttribute('data-station');
+      const notes = this.getAttribute('data-notes');
+
+      const form = document.getElementById('formEditBBM');
+      if (form) {
+        form.action = '/fuel-logs/' + id;
+        document.getElementById('inputEditFilledAt').value = filledAt;
+        document.getElementById('inputEditOdometer').value = odometer;
+        document.getElementById('inputEditLiters').value = liters;
+        document.getElementById('inputEditTotalCost').value = totalCost;
+        document.getElementById('inputEditFuelGrade').value = fuelGrade;
+        document.getElementById('inputEditIsFullTank').checked = isFullTank;
+        document.getElementById('inputEditStation').value = station;
+        document.getElementById('inputEditNotes').value = notes;
       }
     });
   });
