@@ -170,20 +170,20 @@ class AttentionFeed
 
         // 3. Dari Kerusakan (DamageReport) - jika tabel sudah ada di DB
         if (class_exists(DamageReport::class)) {
-            $damageReports = $user->hasMany(DamageReport::class)
-                ->with('subject')
+            $damageReports = $user->damageReports()
+                ->with('reportable')
                 ->whereIn('status', ['dilaporkan', 'dalam_perbaikan'])
                 ->whereIn('severity', ['berat', 'sedang'])
                 ->get();
 
             foreach ($damageReports as $dr) {
-                $isVehicle = $dr->subject instanceof Vehicle;
+                $isVehicle = $dr->reportable instanceof Vehicle;
                 $status = $dr->severity === 'berat' ? 'mendesak' : 'perhatian';
                 $priority = $dr->severity === 'berat' ? 'darurat' : 'perhatian';
 
                 $url = $isVehicle
-                    ? route('vehicles.index', ['v' => $dr->subject_id]).'#kerusakan'
-                    : route('home-assets.show', $dr->subject_id).'#kerusakan';
+                    ? route('vehicles.index', ['v' => $dr->reportable_id]).'#kerusakan'
+                    : route('home-assets.show', $dr->reportable_id).'#kerusakan';
 
                 $items->push(new Fluent([
                     'type' => 'kerusakan',
@@ -191,8 +191,8 @@ class AttentionFeed
                     'id' => $dr->id,
                     'title' => $dr->title,
                     'subject_name' => $dr->subject_name,
-                    'subject_type' => $dr->subject_type,
-                    'subject_id' => $dr->subject_id,
+                    'subject_type' => $dr->reportable_type,
+                    'subject_id' => $dr->reportable_id,
                     'is_vehicle' => $isVehicle,
                     'subject_odometer' => 0,
                     'status' => $status,

@@ -62,4 +62,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Document::class);
     }
+
+    /**
+     * @return HasMany<DamageReport, $this>
+     */
+    public function damageReports(): HasMany
+    {
+        return $this->hasMany(DamageReport::class);
+    }
 }

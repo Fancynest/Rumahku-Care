@@ -91,6 +91,14 @@ class Vehicle extends Model
         return $this->morphMany(Document::class, 'subject')->latest();
     }
 
+    /**
+     * @return MorphMany<DamageReport, $this>
+     */
+    public function damageReports(): MorphMany
+    {
+        return $this->morphMany(DamageReport::class, 'reportable')->orderByDesc('reported_at')->orderByDesc('id');
+    }
+
     public function getNameAttribute(): string
     {
         if ($this->vehicleModel) {

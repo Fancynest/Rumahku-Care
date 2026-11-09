@@ -81,6 +81,35 @@ class HomeAsset extends Model
         return $this->morphMany(Document::class, 'subject')->latest();
     }
 
+    /**
+     * @return MorphMany<DamageReport, $this>
+     */
+    public function damageReports(): MorphMany
+    {
+        return $this->morphMany(DamageReport::class, 'reportable')->orderByDesc('reported_at')->orderByDesc('id');
+    }
+
+    /**
+     * Sinkronkan kondisi fisik aset berdasarkan riwayat kerusakan terbuka.
+     * Jika ada kerusakan berat: rusak.
+     * Jika ada sedang/ringan: perlu_perhatian.
+     * Jika semua selesai atau tidak ada laporan: normal.
+     */
+    public function recalculateCondition(): void
+    {
+        $openReports = $this->damageReports()
+            ->whereIn('status', ['dilaporkan', 'dalam_perbaikan'])
+            ->get();
+
+        if ($openReports->isEmpty()) {
+            $this->update(['condition' => 'normal']);
+        } elseif ($openReports->contains(fn (DamageReport $r) => $r->severity === 'berat')) {
+            $this->update(['condition' => 'rusak']);
+        } else {
+            $this->update(['condition' => 'perlu_perhatian']);
+        }
+    }
+
     public function getConditionChipClassAttribute(): string
     {
         return match ($this->condition) {

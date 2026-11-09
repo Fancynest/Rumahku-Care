@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DamageReportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\HomeAssetController;
@@ -62,5 +63,11 @@ Route::middleware('auth')->group(function () {
         Route::put('/{document}', [DocumentController::class, 'update'])->name('update');
         Route::post('/{document}/renew', [DocumentController::class, 'renew'])->name('renew');
         Route::delete('/{document}', [DocumentController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('damage-reports')->name('damage-reports.')->group(function () {
+        Route::post('/', [DamageReportController::class, 'store'])->name('store');
+        Route::put('/{damageReport}/status', [DamageReportController::class, 'updateStatus'])->name('update-status');
+        Route::delete('/{damageReport}', [DamageReportController::class, 'destroy'])->name('destroy');
     });
 });
