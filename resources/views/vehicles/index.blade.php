@@ -99,7 +99,7 @@
       <div class="p-2.5 rounded-3 bg-white-50 border border-slate-200 h-100">
         <div class="d-flex justify-content-between align-items-center">
           <small class="text-muted" style="font-size: 0.75rem;">Odometer Saat Ini</small>
-          <a href="#" class="text-dark small text-decoration-none fw-medium" data-bs-toggle="modal" data-bs-target="#modalUpdateKM">Update</a>
+          <button type="button" class="btn btn-link text-dark p-0 small text-decoration-none fw-medium" data-bs-toggle="modal" data-bs-target="#modalUpdateKM">Update</button>
         </div>
         <div class="fw-bold fs-5 text-dark mt-0.5">{{ number_format($selectedVehicle->odometer) }} <span class="fs-6 text-muted fw-normal">KM</span></div>
         <small class="text-muted" style="font-size: 0.72rem;">Bahan Bakar: {{ $selectedVehicle->fuel_type }}</small>

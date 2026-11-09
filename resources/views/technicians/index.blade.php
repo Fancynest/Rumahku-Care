@@ -67,13 +67,6 @@
               <span class="glass-pill py-0 px-2 mt-1" style="font-size: 0.72rem;">Teknisi AC & Freon</span>
             </div>
           </div>
-          <div class="dropdown">
-            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></button>
-            <ul class="dropdown-menu dropdown-menu-end glass-panel border-0 small shadow-sm">
-              <li><a class="dropdown-item py-1.5" href="#">Edit Kontak</a></li>
-              <li><a class="dropdown-item py-1.5 text-danger" href="#">Hapus</a></li>
-            </ul>
-          </div>
         </div>
 
         <div class="small text-muted mb-3" style="font-size: 0.8rem;">
@@ -113,13 +106,6 @@
               <h6 class="fw-bold text-dark mb-0">Bengkel Berkah Motor</h6>
               <span class="glass-pill py-0 px-2 mt-1" style="font-size: 0.72rem;">Servis Mobil & Ganti Oli</span>
             </div>
-          </div>
-          <div class="dropdown">
-            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></button>
-            <ul class="dropdown-menu dropdown-menu-end glass-panel border-0 small shadow-sm">
-              <li><a class="dropdown-item py-1.5" href="#">Edit Kontak</a></li>
-              <li><a class="dropdown-item py-1.5 text-danger" href="#">Hapus</a></li>
-            </ul>
           </div>
         </div>
 
@@ -161,13 +147,6 @@
               <span class="glass-pill py-0 px-2 mt-1" style="font-size: 0.72rem;">Bengkel Resmi Honda</span>
             </div>
           </div>
-          <div class="dropdown">
-            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></button>
-            <ul class="dropdown-menu dropdown-menu-end glass-panel border-0 small shadow-sm">
-              <li><a class="dropdown-item py-1.5" href="#">Edit Kontak</a></li>
-              <li><a class="dropdown-item py-1.5 text-danger" href="#">Hapus</a></li>
-            </ul>
-          </div>
         </div>
 
         <div class="small text-muted mb-3" style="font-size: 0.8rem;">
@@ -207,13 +186,6 @@
               <h6 class="fw-bold text-dark mb-0">Mas Joko (Tukang Listrik & Pompa)</h6>
               <span class="glass-pill py-0 px-2 mt-1" style="font-size: 0.72rem;">Instalasi & Pompa Air</span>
             </div>
-          </div>
-          <div class="dropdown">
-            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></button>
-            <ul class="dropdown-menu dropdown-menu-end glass-panel border-0 small shadow-sm">
-              <li><a class="dropdown-item py-1.5" href="#">Edit Kontak</a></li>
-              <li><a class="dropdown-item py-1.5 text-danger" href="#">Hapus</a></li>
-            </ul>
           </div>
         </div>
 

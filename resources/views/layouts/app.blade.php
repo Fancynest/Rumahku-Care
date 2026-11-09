@@ -47,8 +47,20 @@
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
   
   <script>
-    document.getElementById('sidebarToggle')?.addEventListener('click', function() {
-      document.getElementById('sidebar').classList.toggle('show');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarEl = document.getElementById('sidebar');
+
+    sidebarToggle?.addEventListener('click', function(e) {
+      e.stopPropagation();
+      sidebarEl?.classList.toggle('show');
+    });
+
+    document.addEventListener('click', function(e) {
+      if (sidebarEl && sidebarEl.classList.contains('show')) {
+        if (!sidebarEl.contains(e.target) && !sidebarToggle?.contains(e.target)) {
+          sidebarEl.classList.remove('show');
+        }
+      }
     });
   </script>
   @stack('scripts')

@@ -56,4 +56,11 @@ class PageLoadTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Buku Kontak Teknisi');
     }
+
+    public function test_schedules_page_loads_successfully(): void
+    {
+        $response = $this->get('/schedules');
+        $response->assertStatus(200);
+        $response->assertSee('Jadwal');
+    }
 }

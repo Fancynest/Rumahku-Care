@@ -10,24 +10,29 @@
   </div>
 
   <nav class="sidebar-menu pt-3">
-    <a href="{{ route('dashboard') }}" class="nav-item-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+    <a href="{{ route('dashboard') }}" class="nav-item-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" style="min-height: 44px;">
       <i class="bi bi-house"></i>
       <span>Beranda</span>
     </a>
 
-    <a href="{{ route('home-assets.index') }}" class="nav-item-link {{ request()->routeIs('home-assets.*') ? 'active' : '' }}">
+    <a href="{{ route('home-assets.index') }}" class="nav-item-link {{ request()->routeIs('home-assets.*') ? 'active' : '' }}" style="min-height: 44px;">
       <i class="bi bi-grid"></i>
       <span>Rumah</span>
     </a>
 
-    <a href="{{ route('vehicles.index') }}" class="nav-item-link {{ request()->routeIs('vehicles.*') ? 'active' : '' }}">
+    <a href="{{ route('vehicles.index') }}" class="nav-item-link {{ request()->routeIs('vehicles.*') ? 'active' : '' }}" style="min-height: 44px;">
       <i class="bi bi-car-front"></i>
       <span>Kendaraan</span>
     </a>
 
-    <a href="{{ route('technicians.index') }}" class="nav-item-link {{ request()->routeIs('technicians.*') ? 'active' : '' }}">
-      <i class="bi bi-wrench-adjustable"></i>
-      <span>Servis & Kontak</span>
+    <a href="{{ route('schedules.index') }}" class="nav-item-link {{ request()->routeIs('schedules.*') ? 'active' : '' }}" style="min-height: 44px;">
+      <i class="bi bi-calendar-check"></i>
+      <span>Jadwal</span>
+    </a>
+
+    <a href="{{ route('technicians.index') }}" class="nav-item-link {{ request()->routeIs('technicians.*') ? 'active' : '' }}" style="min-height: 44px;">
+      <i class="bi bi-person-lines-fill"></i>
+      <span>Kontak</span>
     </a>
   </nav>
 
