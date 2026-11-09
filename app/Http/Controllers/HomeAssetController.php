@@ -49,9 +49,19 @@ class HomeAssetController extends Controller
     {
         abort_if($homeAsset->user_id !== $request->user()->id, 404);
 
-        $schedules = $homeAsset->schedules()->where('is_active', true)->latest()->get();
+        $homeAsset->load([
+            'attachments',
+            'schedules',
+            'documents.attachments',
+            'damageReports.attachments',
+            'inspectionRuns.items',
+        ]);
 
-        return view('assets.show', compact('homeAsset', 'schedules'));
+        $schedules = $homeAsset->schedules()->where('is_active', true)->latest()->get();
+        $inspectionTemplates = config('maintenance.inspection_templates', []);
+        $documentTypes = config('maintenance.document_types', []);
+
+        return view('assets.show', compact('homeAsset', 'schedules', 'inspectionTemplates', 'documentTypes'));
     }
 
     public function update(Request $request, HomeAsset $homeAsset): RedirectResponse

@@ -25,7 +25,15 @@ class VehicleController extends Controller
         $activeSchedules = collect();
 
         if ($selectedVehicle) {
+            $selectedVehicle->load([
+                'attachments',
+                'documents.attachments',
+                'damageReports.attachments',
+                'inspectionRuns.items',
+            ]);
+
             $recentRecords = $selectedVehicle->maintenanceRecords()
+                ->with('attachments')
                 ->latest('done_at')
                 ->latest('id')
                 ->take(10)
@@ -41,12 +49,17 @@ class VehicleController extends Controller
             ->get()
             ->groupBy('brand');
 
+        $inspectionTemplates = config('maintenance.inspection_templates', []);
+        $documentTypes = config('maintenance.document_types', []);
+
         return view('vehicles.index', compact(
             'vehicles',
             'selectedVehicle',
             'recentRecords',
             'activeSchedules',
-            'modelsGrouped'
+            'modelsGrouped',
+            'inspectionTemplates',
+            'documentTypes'
         ));
     }
 
