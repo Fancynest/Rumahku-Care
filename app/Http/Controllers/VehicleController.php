@@ -29,7 +29,18 @@ class VehicleController extends Controller
     {
         $validated = $request->validate([
             'plate' => ['required', 'string', 'max:20'],
-            'vehicle_model_id' => ['required', 'string'],
+            'vehicle_model_id' => [
+                'required',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if ($value === 'other') {
+                        return;
+                    }
+
+                    if (! is_numeric($value) || ! VehicleModel::where('id', $value)->exists()) {
+                        $fail('Model kendaraan yang dipilih tidak valid.');
+                    }
+                },
+            ],
             'custom_model_name' => ['required_if:vehicle_model_id,other', 'nullable', 'string', 'max:100'],
             'custom_body_type' => ['required_if:vehicle_model_id,other', 'nullable', 'string', 'in:motor_matic,motor_sport,hatchback,sedan,mpv,suv,pickup,van,bus,truk'],
             'year' => ['nullable', 'integer', 'min:1970', 'max:'.(date('Y') + 1)],

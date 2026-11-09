@@ -81,6 +81,20 @@ class VehicleTest extends TestCase
         $response->assertSessionHasErrors(['plate', 'vehicle_model_id', 'odometer', 'color_key', 'fuel_type']);
     }
 
+    public function test_cannot_create_vehicle_with_invalid_model_id(): void
+    {
+        $response = $this->post('/vehicles', [
+            'plate' => 'B 1234 ABC',
+            'vehicle_model_id' => '999999',
+            'odometer' => 1000,
+            'color_key' => 'hitam',
+            'fuel_type' => 'Bensin',
+        ]);
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors(['vehicle_model_id']);
+    }
+
     public function test_can_update_vehicle_odometer(): void
     {
         $vehicle = Vehicle::firstOrFail();
