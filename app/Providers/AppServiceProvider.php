@@ -37,7 +37,27 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(5)
                 ->by($email.'|'.$request->ip())
                 ->response(function (Request $request, array $headers) {
-                    return response('Terlalu banyak percobaan masuk. Silakan coba lagi dalam 1 menit.', 429, $headers);
+                    $seconds = $headers['Retry-After'] ?? 60;
+
+                    return back(fallback: route('login'))
+                        ->withInput($request->only('email'))
+                        ->withErrors([
+                            'email' => "Terlalu banyak percobaan. Coba lagi dalam {$seconds} detik.",
+                        ]);
+                });
+        });
+
+        RateLimiter::for('register', function (Request $request) {
+            return Limit::perMinute(5)
+                ->by($request->ip())
+                ->response(function (Request $request, array $headers) {
+                    $seconds = $headers['Retry-After'] ?? 60;
+
+                    return back(fallback: route('register'))
+                        ->withInput($request->except('password', 'password_confirmation'))
+                        ->withErrors([
+                            'email' => "Terlalu banyak percobaan. Coba lagi dalam {$seconds} detik.",
+                        ]);
                 });
         });
 

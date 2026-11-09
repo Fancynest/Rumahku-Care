@@ -93,20 +93,51 @@ class AuthTest extends TestCase
     public function test_login_rate_limiting_throttles_after_five_failed_attempts(): void
     {
         for ($i = 0; $i < 5; $i++) {
-            $response = $this->post('/login', [
+            $response = $this->from('/login')->post('/login', [
                 'email' => 'throttletest@example.com',
                 'password' => 'wrongpassword',
             ]);
+            $response->assertRedirect('/login');
             $response->assertSessionHasErrors(['email']);
         }
 
-        // 6th attempt should be blocked with HTTP 429
-        $response6 = $this->post('/login', [
+        // 6th attempt should be redirected back with throttle error on email field
+        $response6 = $this->from('/login')->post('/login', [
             'email' => 'throttletest@example.com',
             'password' => 'wrongpassword',
         ]);
 
-        $response6->assertStatus(429);
-        $response6->assertSee('Terlalu banyak percobaan masuk');
+        $response6->assertRedirect('/login');
+        $response6->assertSessionHasErrors(['email']);
+
+        $errorMsg = session('errors')->first('email');
+        $this->assertStringContainsString('Terlalu banyak percobaan. Coba lagi dalam', $errorMsg);
+        $this->assertStringContainsString('detik.', $errorMsg);
+    }
+
+    public function test_register_rate_limiting_throttles_after_five_attempts(): void
+    {
+        for ($i = 0; $i < 5; $i++) {
+            $response = $this->from('/register')->post('/register', [
+                'name' => 'User Failed',
+                'email' => 'invalid-email',
+                'password' => 'short',
+                'password_confirmation' => 'mismatch',
+            ]);
+            $response->assertRedirect('/register');
+        }
+
+        // 6th attempt should be blocked by throttle
+        $response6 = $this->from('/register')->post('/register', [
+            'name' => 'User Sixth',
+            'email' => 'valid@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $response6->assertRedirect('/register');
+        $response6->assertSessionHasErrors(['email']);
+        $errorMsg = session('errors')->first('email');
+        $this->assertStringContainsString('Terlalu banyak percobaan. Coba lagi dalam', $errorMsg);
     }
 }
