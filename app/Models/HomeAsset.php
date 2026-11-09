@@ -26,6 +26,7 @@ class HomeAsset extends Model
         'purchased_at',
         'last_inspected_at',
         'condition',
+        'condition_source',
         'notes',
     ];
 
@@ -99,9 +100,9 @@ class HomeAsset extends Model
 
     /**
      * Sinkronkan kondisi fisik aset berdasarkan riwayat kerusakan terbuka.
-     * Jika ada kerusakan berat: rusak.
-     * Jika ada sedang/ringan: perlu_perhatian.
-     * Jika semua selesai atau tidak ada laporan: normal.
+     * Tidak pernah menurunkan kondisi manual pengguna.
+     * Saat laporan dibuat: condition = max(condition saat ini, turunan severity).
+     * Saat semua laporan selesai/dihapus: set normal HANYA jika source = damage.
      */
     public function recalculateCondition(): void
     {
@@ -110,11 +111,38 @@ class HomeAsset extends Model
             ->get();
 
         if ($openReports->isEmpty()) {
-            $this->update(['condition' => 'normal']);
-        } elseif ($openReports->contains(fn (DamageReport $r) => $r->severity === 'berat')) {
-            $this->update(['condition' => 'rusak']);
-        } else {
-            $this->update(['condition' => 'perlu_perhatian']);
+            if ($this->condition_source === 'damage') {
+                $this->update([
+                    'condition' => 'normal',
+                    'condition_source' => 'manual',
+                ]);
+            }
+
+            return;
+        }
+
+        $derivedCondition = $openReports->contains(fn (DamageReport $r) => $r->severity === 'berat')
+            ? 'rusak'
+            : 'perlu_perhatian';
+
+        $ranks = [
+            'normal' => 0,
+            'perlu_perhatian' => 1,
+            'rusak' => 2,
+        ];
+
+        $currentRank = $ranks[$this->condition] ?? 0;
+        $derivedRank = $ranks[$derivedCondition] ?? 0;
+
+        if ($derivedRank > $currentRank) {
+            $this->update([
+                'condition' => $derivedCondition,
+                'condition_source' => 'damage',
+            ]);
+        } elseif ($this->condition_source === 'damage') {
+            $this->update([
+                'condition' => $derivedCondition,
+            ]);
         }
     }
 

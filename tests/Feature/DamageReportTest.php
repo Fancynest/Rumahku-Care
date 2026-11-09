@@ -338,4 +338,75 @@ class DamageReportTest extends TestCase
         $response->assertSessionHasErrors(['receipt']);
         $this->assertEquals(5, $report->attachments()->count());
     }
+
+    public function test_manual_asset_condition_is_never_downgraded_by_damage_reports(): void
+    {
+        // 1. Aset diset 'rusak' secara manual
+        $brokenManualAsset = HomeAsset::create([
+            'user_id' => $this->user->id,
+            'name' => 'Genset Rusak Manual',
+            'category' => 'listrik',
+            'room' => 'Gudang',
+            'condition' => 'rusak',
+            'condition_source' => 'manual',
+        ]);
+
+        // Lapor kerusakan ringan pada aset ini
+        $this->actingAs($this->user)->post(route('damage-reports.store'), [
+            'reportable_type' => HomeAsset::class,
+            'reportable_id' => $brokenManualAsset->id,
+            'title' => 'Baut Kendor',
+            'severity' => 'ringan',
+            'reported_at' => date('Y-m-d'),
+        ]);
+
+        $brokenManualAsset->refresh();
+        // Kondisi tetap rusak, tidak turun ke perlu_perhatian
+        $this->assertEquals('rusak', $brokenManualAsset->condition);
+        $this->assertEquals('manual', $brokenManualAsset->condition_source);
+
+        // Selesaikan laporan ringan
+        $lightReport = DamageReport::where('title', 'Baut Kendor')->firstOrFail();
+        $this->actingAs($this->user)->put(route('damage-reports.update-status', $lightReport), [
+            'status' => 'selesai',
+            'resolved_at' => date('Y-m-d'),
+        ]);
+
+        $brokenManualAsset->refresh();
+        // Kondisi tetap rusak karena awalnya diset secara manual
+        $this->assertEquals('rusak', $brokenManualAsset->condition);
+        $this->assertEquals('manual', $brokenManualAsset->condition_source);
+
+        // 2. Aset 'normal' -> laporan berat otomatis -> rusak (source damage) -> selesai -> normal
+        $normalAsset = HomeAsset::create([
+            'user_id' => $this->user->id,
+            'name' => 'Toren Air',
+            'category' => 'air',
+            'room' => 'Atap',
+            'condition' => 'normal',
+            'condition_source' => 'manual',
+        ]);
+
+        $this->actingAs($this->user)->post(route('damage-reports.store'), [
+            'reportable_type' => HomeAsset::class,
+            'reportable_id' => $normalAsset->id,
+            'title' => 'Toren Pecah',
+            'severity' => 'berat',
+            'reported_at' => date('Y-m-d'),
+        ]);
+
+        $normalAsset->refresh();
+        $this->assertEquals('rusak', $normalAsset->condition);
+        $this->assertEquals('damage', $normalAsset->condition_source);
+
+        $heavyReport = DamageReport::where('title', 'Toren Pecah')->firstOrFail();
+        $this->actingAs($this->user)->put(route('damage-reports.update-status', $heavyReport), [
+            'status' => 'selesai',
+            'resolved_at' => date('Y-m-d'),
+        ]);
+
+        $normalAsset->refresh();
+        $this->assertEquals('normal', $normalAsset->condition);
+        $this->assertEquals('manual', $normalAsset->condition_source);
+    }
 }

@@ -39,6 +39,7 @@ class HomeAssetController extends Controller
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
+        $validated['condition_source'] = 'manual';
         $asset = $request->user()->homeAssets()->create($validated);
 
         return redirect()->route('home-assets.show', $asset->id)
@@ -80,6 +81,7 @@ class HomeAssetController extends Controller
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
+        $validated['condition_source'] = 'manual';
         $homeAsset->update($validated);
 
         return redirect()->back()
