@@ -62,11 +62,6 @@ class ScheduleStatus
             }
         }
 
-        // Prioritas "darurat" menaikkan tampilan ke kelompok Mendesak minimal
-        if ($schedule->priority === 'darurat' && in_array($status, [self::NORMAL, self::PERHATIAN])) {
-            return self::MENDESAK;
-        }
-
         return $status;
     }
 
