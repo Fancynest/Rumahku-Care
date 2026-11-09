@@ -206,6 +206,28 @@ class DamageReportTest extends TestCase
         $this->assertCount(1, $report->attachments);
     }
 
+    public function test_repair_cost_can_be_updated_to_null_or_empty(): void
+    {
+        $report = DamageReport::create([
+            'user_id' => $this->user->id,
+            'reportable_type' => Vehicle::class,
+            'reportable_id' => $this->vehicle->id,
+            'title' => 'Lampu Putus',
+            'severity' => 'ringan',
+            'status' => 'dalam_perbaikan',
+            'reported_at' => Carbon::today(),
+            'repair_cost' => 50000,
+        ]);
+
+        $this->actingAs($this->user)->put(route('damage-reports.update-status', $report), [
+            'status' => 'dalam_perbaikan',
+            'repair_cost' => '',
+        ])->assertRedirect();
+
+        $report->refresh();
+        $this->assertNull($report->repair_cost);
+    }
+
     public function test_attention_feed_integrates_unresolved_heavy_and_medium_damage_reports(): void
     {
         // 1. Kerusakan berat -> mendesak di feed

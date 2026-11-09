@@ -99,9 +99,11 @@ class DamageReportController extends Controller
             $dataToUpdate = [
                 'status' => $validated['status'],
                 'resolved_at' => $validated['status'] === 'selesai' ? ($validated['resolved_at'] ?? now()->toDateString()) : null,
-                'technician_name' => $validated['technician_name'] ?? $damageReport->technician_name,
-                'repair_cost' => isset($validated['repair_cost']) ? (int) $validated['repair_cost'] : $damageReport->repair_cost,
-                'notes' => $validated['notes'] ?? $damageReport->notes,
+                'technician_name' => $validated['technician_name'] ?? null,
+                'repair_cost' => ($validated['repair_cost'] ?? null) !== null && $validated['repair_cost'] !== ''
+                    ? (int) $validated['repair_cost']
+                    : null,
+                'notes' => $validated['notes'] ?? null,
             ];
 
             $damageReport->update($dataToUpdate);
