@@ -25,8 +25,8 @@
     <div class="glass-panel p-4 h-100">
       <div class="text-muted small fw-medium mb-1">Jadwal Perawatan Bulan Ini</div>
       <div class="d-flex align-items-baseline gap-2">
-        <h2 class="fw-bold text-dark mb-0">3</h2>
-        <span class="text-muted small">agenda terjadwal</span>
+        <h2 class="fw-bold text-dark mb-0">{{ 1 + $urgentVehicles->count() }}</h2>
+        <span class="text-muted small">agenda perlu perhatian</span>
       </div>
     </div>
   </div>
@@ -37,7 +37,7 @@
   <h6 class="fw-bold text-dark mb-3">Perlu Perhatian</h6>
   
   <div class="row g-3">
-    <!-- Card 1 (Paling mendesak - Hari Ini) -->
+    <!-- Card 1 (Aset Rumah - Cuci Filter AC) -->
     <div class="col-md-4">
       <div class="glass-panel p-3.5 h-100 d-flex flex-column justify-content-between">
         <div>
@@ -57,40 +57,67 @@
       </div>
     </div>
 
-    <!-- Card 2 (Mendesak - Servis KM) -->
+    <!-- Card 2 (Kendaraan Perlu Servis dari Database) -->
     <div class="col-md-4">
       <div class="glass-panel p-3.5 h-100 d-flex flex-column justify-content-between">
-        <div>
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="chip chip-urgent"><span class="chip-dot"></span> Sisa 180 KM</span>
-            <small class="text-muted font-monospace">B 1234 GAB</small>
+        @if ($urgentVehicle = $urgentVehicles->first())
+          <div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="chip chip-urgent"><span class="chip-dot"></span> Waktunya Servis</span>
+              <small class="text-muted font-monospace">{{ $urgentVehicle->plate }}</small>
+            </div>
+            <h6 class="fw-bold mb-1 text-dark">Servis Berkala {{ $urgentVehicle->name }}</h6>
+            <p class="text-muted small mb-3">
+              Odometer: {{ number_format($urgentVehicle->odometer) }} KM.
+              @if ($urgentVehicle->latestServiceLog)
+                Terakhir diservis di {{ number_format($urgentVehicle->latestServiceLog->odometer) }} KM.
+              @else
+                Belum ada catatan servis sebelumnya.
+              @endif
+            </p>
           </div>
-          <h6 class="fw-bold mb-1 text-dark">Ganti Oli Mesin Avanza</h6>
-          <p class="text-muted small mb-3">Odometer saat ini 44.820 KM. Target batas servis berkala 45.000 KM.</p>
-        </div>
-        <div class="pt-2 border-top border-slate-200 d-flex justify-content-between align-items-center">
-          <small class="text-muted">Bengkel Resmi</small>
-          <a href="{{ route('vehicles.index', ['v' => $vehicles->firstWhere('plate', 'B 1234 GAB')?->id ?? '']) }}" class="btn btn-dark btn-sm py-1.5 px-3" style="min-height: 44px; display: inline-flex; align-items: center;">
-            Buka Garasi
-          </a>
-        </div>
+          <div class="pt-2 border-top border-slate-200 d-flex justify-content-between align-items-center">
+            <small class="text-muted">{{ $urgentVehicle->workshop ?? 'Bengkel Resmi' }}</small>
+            <a href="{{ route('vehicles.index', ['v' => $urgentVehicle->id]) }}" class="btn btn-dark btn-sm py-1.5 px-3" style="min-height: 44px; display: inline-flex; align-items: center;">
+              Buka Garasi
+            </a>
+          </div>
+        @else
+          <div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="chip chip-success"><span class="chip-dot"></span> Kondisi Prima</span>
+              <small class="text-muted">Garasi</small>
+            </div>
+            <h6 class="fw-bold mb-1 text-dark">Kendaraan Siap Pakai</h6>
+            <p class="text-muted small mb-3">Seluruh kendaraan di garasi belum mencapai batas interval servis berkala.</p>
+          </div>
+          <div class="pt-2 border-top border-slate-200 d-flex justify-content-between align-items-center">
+            <small class="text-muted">{{ $totalVehicles }} Kendaraan</small>
+            <a href="{{ route('vehicles.index') }}" class="btn btn-glass btn-sm py-1.5 px-3" style="min-height: 44px; display: inline-flex; align-items: center;">
+              Lihat Garasi
+            </a>
+          </div>
+        @endif
       </div>
     </div>
 
-    <!-- Card 3 (Mendekati Jatuh Tempo) -->
+    <!-- Card 3 (STNK / Pajak Kendaraan dari Database) -->
     <div class="col-md-4">
       <div class="glass-panel p-3.5 h-100 d-flex flex-column justify-content-between">
+        @php
+          $sampleVehicle = $vehicles->first();
+        @endphp
         <div>
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="chip chip-warning"><span class="chip-dot"></span> H-14 Hari</span>
-            <small class="text-muted font-monospace">B 2341 KLS</small>
+            <span class="chip chip-warning"><span class="chip-dot"></span> Pajak Tahunan</span>
+            <small class="text-muted font-monospace">{{ $sampleVehicle?->plate ?? '-' }}</small>
           </div>
-          <h6 class="fw-bold mb-1 text-dark">Pajak STNK Beat Street</h6>
-          <p class="text-muted small mb-3">Jatuh tempo pembayaran PKB tahunan pada 23 November 2026.</p>
+          <h6 class="fw-bold mb-1 text-dark">Pajak STNK {{ $sampleVehicle?->name ?? 'Kendaraan' }}</h6>
+          <p class="text-muted small mb-3">Periksa masa berlaku STNK dan PKB tahunan di gerai Samsat atau SIGNAL.</p>
         </div>
         <div class="pt-2 border-top border-slate-200 d-flex justify-content-between align-items-center">
-          <small class="text-muted">Samsat Online</small>
-          <a href="{{ route('vehicles.index', ['v' => $vehicles->firstWhere('plate', 'B 2341 KLS')?->id ?? '']) }}" class="btn btn-glass btn-sm py-1.5 px-3" style="min-height: 44px; display: inline-flex; align-items: center;">
+          <small class="text-muted">Dokumen Legal</small>
+          <a href="{{ route('vehicles.index', $sampleVehicle ? ['v' => $sampleVehicle->id] : []) }}" class="btn btn-glass btn-sm py-1.5 px-3" style="min-height: 44px; display: inline-flex; align-items: center;">
             Lihat STNK
           </a>
         </div>
