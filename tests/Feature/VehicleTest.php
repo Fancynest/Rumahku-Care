@@ -109,4 +109,32 @@ class VehicleTest extends TestCase
             'odometer' => $vehicle->odometer + 500,
         ]);
     }
+
+    public function test_vehicle_service_status_based_on_service_logs(): void
+    {
+        $vehicle = Vehicle::create([
+            'plate' => 'B 3333 TST',
+            'odometer' => 10000,
+            'service_interval_km' => 5000,
+            'color_key' => 'hitam',
+            'fuel_type' => 'Bensin',
+        ]);
+
+        // Belum ada log
+        $this->assertSame('Belum ada catatan servis', $vehicle->status_label);
+
+        // Servis terakhir di 5300 KM, sekarang 10000 KM (selisih 4700 < 4800) -> Kondisi Prima
+        $vehicle->serviceLogs()->create([
+            'serviced_at' => '2026-08-01',
+            'odometer' => 5300,
+            'notes' => 'Servis berkala',
+        ]);
+        $vehicle->refresh();
+        $this->assertSame('Kondisi Prima', $vehicle->status_label);
+
+        // Odometer naik jadi 10100 KM (selisih 4800 >= 4800) -> Waktunya Servis
+        $vehicle->update(['odometer' => 10100]);
+        $vehicle->refresh();
+        $this->assertSame('Waktunya Servis', $vehicle->status_label);
+    }
 }

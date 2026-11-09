@@ -43,8 +43,8 @@
           <div class="fw-bold small {{ $isActive ? 'text-dark' : 'text-slate-700' }}">{{ $v->name }}</div>
           <div class="text-muted font-monospace" style="font-size: 0.72rem;">{{ $v->plate }}</div>
         </div>
-        <span class="chip {{ $v->status_label === 'Waktunya Servis' ? 'chip-urgent' : 'chip-success' }} py-0 px-1.5 ms-1" style="font-size: 0.65rem;">
-          {{ $v->status_label === 'Waktunya Servis' ? 'Servis' : 'Prima' }}
+        <span class="chip {{ $v->status_chip_class }} py-0 px-1.5 ms-1" style="font-size: 0.65rem;">
+          {{ $v->status_label }}
         </span>
       </a>
     @endforeach
@@ -105,7 +105,7 @@
       <div class="p-2.5 rounded-3 bg-white-50 border border-slate-200 h-100">
         <small class="text-muted d-block" style="font-size: 0.75rem;">Status Perawatan</small>
         <div class="d-flex align-items-center gap-1.5 mt-1">
-          <span class="chip {{ $selectedVehicle->status_label === 'Waktunya Servis' ? 'chip-urgent' : 'chip-success' }} py-0.5 px-2">
+          <span class="chip {{ $selectedVehicle->status_chip_class }} py-0.5 px-2">
             <span class="chip-dot"></span> {{ $selectedVehicle->status_label }}
           </span>
         </div>

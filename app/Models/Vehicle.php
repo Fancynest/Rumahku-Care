@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Vehicle extends Model
 {
@@ -21,6 +23,7 @@ class Vehicle extends Model
         'year',
         'color_key',
         'odometer',
+        'service_interval_km',
         'fuel_type',
         'workshop',
     ];
@@ -33,6 +36,7 @@ class Vehicle extends Model
         return [
             'year' => 'integer',
             'odometer' => 'integer',
+            'service_interval_km' => 'integer',
         ];
     }
 
@@ -42,6 +46,22 @@ class Vehicle extends Model
     public function vehicleModel(): BelongsTo
     {
         return $this->belongsTo(VehicleModel::class);
+    }
+
+    /**
+     * @return HasMany<ServiceLog, $this>
+     */
+    public function serviceLogs(): HasMany
+    {
+        return $this->hasMany(ServiceLog::class)->orderByDesc('serviced_at')->orderByDesc('id');
+    }
+
+    /**
+     * @return HasOne<ServiceLog, $this>
+     */
+    public function latestServiceLog(): HasOne
+    {
+        return $this->hasOne(ServiceLog::class)->latestOfMany();
     }
 
     public function getNameAttribute(): string
@@ -60,8 +80,13 @@ class Vehicle extends Model
 
     public function getStatusLabelAttribute(): string
     {
-        $rem = $this->odometer % 5000;
-        if ($this->odometer > 0 && ($rem >= 4800 || $rem <= 200)) {
+        $latest = $this->latestServiceLog;
+        if (! $latest) {
+            return 'Belum ada catatan servis';
+        }
+
+        $interval = $this->service_interval_km ?: 5000;
+        if (($this->odometer - $latest->odometer) >= ($interval - 200)) {
             return 'Waktunya Servis';
         }
 
@@ -70,6 +95,10 @@ class Vehicle extends Model
 
     public function getStatusChipClassAttribute(): string
     {
-        return $this->status_label === 'Waktunya Servis' ? 'chip-urgent' : 'chip-success';
+        return match ($this->status_label) {
+            'Waktunya Servis' => 'chip-urgent',
+            'Belum ada catatan servis' => 'chip-neutral',
+            default => 'chip-success',
+        };
     }
 }
