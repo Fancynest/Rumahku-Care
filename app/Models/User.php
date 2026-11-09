@@ -38,4 +38,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Vehicle::class);
     }
+
+    /**
+     * @return HasMany<HomeAsset, $this>
+     */
+    public function homeAssets(): HasMany
+    {
+        return $this->hasMany(HomeAsset::class);
+    }
 }

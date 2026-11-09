@@ -39,7 +39,7 @@ class PageLoadTest extends TestCase
     {
         $response = $this->get('/home-assets/1');
         $response->assertStatus(200);
-        $response->assertSee('Detail Aset');
+        $response->assertSee('AC Ruang Tamu');
     }
 
     public function test_vehicles_page_loads_successfully(): void

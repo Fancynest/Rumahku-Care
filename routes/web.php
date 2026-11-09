@@ -23,7 +23,10 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('home-assets')->name('home-assets.')->group(function () {
         Route::get('/', [HomeAssetController::class, 'index'])->name('index');
-        Route::get('/{id}', [HomeAssetController::class, 'show'])->name('show');
+        Route::post('/', [HomeAssetController::class, 'store'])->name('store');
+        Route::get('/{homeAsset}', [HomeAssetController::class, 'show'])->name('show');
+        Route::put('/{homeAsset}', [HomeAssetController::class, 'update'])->name('update');
+        Route::delete('/{homeAsset}', [HomeAssetController::class, 'destroy'])->name('destroy');
     });
 
     Route::prefix('vehicles')->name('vehicles.')->group(function () {

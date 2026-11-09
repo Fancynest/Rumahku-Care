@@ -1,214 +1,171 @@
 @extends('layouts.app')
 
-@section('title', 'Detail Aset: AC Ruang Tamu - Rumahku Care')
+@section('title', 'Detail: ' . $homeAsset->name . ' - Rumahku Care')
 
 @section('content')
 <!-- Header Back Button & Actions -->
 <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
   <div class="d-flex align-items-center gap-2">
-    <a href="{{ route('home-assets.index') }}" class="btn btn-glass btn-sm p-1.5 rounded-3" title="Kembali">
+    <a href="{{ route('home-assets.index') }}" class="btn btn-glass btn-sm p-2 rounded-3" title="Kembali ke Daftar Aset" style="min-height: 40px; min-width: 40px; display: inline-flex; align-items: center; justify-content: center;">
       <i class="bi bi-arrow-left"></i>
     </a>
     <div>
-      <h4 class="fw-bold mb-0 text-dark" style="letter-spacing: -0.02em;">Detail Aset Rumah</h4>
-      <p class="text-muted mb-0 small">Buku riwayat perawatan & checklist kondisi aset.</p>
+      <h4 class="fw-bold mb-0 text-dark" style="letter-spacing: -0.02em;">{{ $homeAsset->name }}</h4>
+      <p class="text-muted mb-0 small">Kategori: {{ $homeAsset->category_label }} • Ruangan: {{ $homeAsset->room }}</p>
     </div>
   </div>
 
   <div class="d-flex align-items-center gap-2">
-    <button class="btn btn-glass btn-sm"><i class="bi bi-exclamation-triangle me-1"></i> Catat Kerusakan</button>
-    <button class="btn btn-dark btn-sm"><i class="bi bi-check2 me-1"></i> Catat Servis Selesai</button>
+    <button class="btn btn-glass btn-sm px-3" data-bs-toggle="modal" data-bs-target="#modalEditAset" style="min-height: 40px;">
+      <i class="bi bi-pencil me-1.5"></i> Edit Aset
+    </button>
+    <form action="{{ route('home-assets.destroy', $homeAsset->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus aset ini?');" class="m-0">
+      @csrf
+      @method('DELETE')
+      <button type="submit" class="btn btn-glass btn-sm px-3 text-danger" style="min-height: 40px;">
+        <i class="bi bi-trash me-1.5"></i> Hapus
+      </button>
+    </form>
   </div>
 </div>
 
-<!-- Hero Card Glass -->
+<!-- Main Detail Card -->
 <div class="glass-panel p-4 mb-4">
-  <div class="row g-4 align-items-center">
-    
-    <div class="col-md-3">
-      <div class="rounded-3 overflow-hidden position-relative border" style="height: 160px; border-color: rgba(226, 232, 240, 0.7) !important;">
-        <img src="https://images.unsplash.com/photo-1625961332771-3f40b0e2bdcf?auto=format&fit=crop&w=600&q=80" class="w-100 h-100 object-fit-cover" alt="AC Daikin">
-        <span class="position-absolute bottom-0 start-0 m-2 glass-pill" style="font-size: 0.7rem;">AST-001</span>
-      </div>
+  <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom border-slate-200">
+    <div>
+      <span class="badge bg-light text-dark border px-2.5 py-1 text-uppercase me-2" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+        {{ $homeAsset->category_label }}
+      </span>
+      <span class="text-muted small"><i class="bi bi-geo-alt me-1"></i>{{ $homeAsset->room }}</span>
+    </div>
+    <span class="chip {{ $homeAsset->condition_chip_class }} py-1 px-2.5">
+      <span class="chip-dot"></span> Kondisi: {{ $homeAsset->condition_label }}
+    </span>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-6">
+      <table class="table table-sm table-borderless mb-0" style="font-size: 0.88rem;">
+        <tbody>
+          <tr>
+            <td class="text-muted" style="width: 40%;">Merek</td>
+            <td class="fw-semibold text-dark">{{ $homeAsset->brand ?: '-' }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted">Model / Tipe</td>
+            <td class="text-dark">{{ $homeAsset->model ?: '-' }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted">Ruangan / Area</td>
+            <td class="text-dark">{{ $homeAsset->room }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <div class="col-md-6">
-      <div class="d-flex align-items-center gap-2 mb-2">
-        <span class="glass-pill"><i class="bi bi-geo-alt"></i> Ruang Tamu</span>
-        <span class="chip chip-warning"><span class="chip-dot"></span> Waktunya Cuci</span>
-      </div>
-      <h4 class="fw-bold text-dark mb-1">AC Daikin 1 PK Flash Inverter</h4>
-      <p class="text-muted small mb-3">Model: FTKQ25SVM4 • Freon R32 • Daya 680W</p>
-      
-      <div class="row g-2 text-muted small" style="font-size: 0.8rem;">
-        <div class="col-sm-6">
-          <div>Dipasang: 15 Desember 2024</div>
-          <div>Umur Pakai: 1 Th 11 Bln</div>
-        </div>
-        <div class="col-sm-6">
-          <div>Garansi: <span class="text-dark fw-medium">Aktif s.d Des 2027</span></div>
-          <div>Teknisi Langganan: Pak Budi (AC)</div>
-        </div>
-      </div>
+      <table class="table table-sm table-borderless mb-0" style="font-size: 0.88rem;">
+        <tbody>
+          <tr>
+            <td class="text-muted" style="width: 45%;">Tanggal Pasang / Beli</td>
+            <td class="text-dark">{{ $homeAsset->purchased_at ? $homeAsset->purchased_at->format('d F Y') : '-' }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted">Terakhir Diperiksa</td>
+            <td class="text-dark">{{ $homeAsset->last_inspected_at ? $homeAsset->last_inspected_at->format('d F Y') : '-' }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted">Status Kondisi</td>
+            <td class="fw-semibold text-dark">{{ $homeAsset->condition_label }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-
-    <div class="col-md-3 border-start-md ps-md-4">
-      <div class="p-3 rounded-3 bg-white bg-opacity-60 border text-center mb-2" style="border-color: rgba(226, 232, 240, 0.7);">
-        <small class="text-muted d-block">Total Biaya Perawatan</small>
-        <h4 class="fw-bold text-dark mb-0">Rp 375.000</h4>
-        <small class="text-muted" style="font-size: 0.72rem;">3x Servis Tercatat</small>
-      </div>
-      <button class="btn btn-glass btn-sm w-100 mb-1.5"><i class="bi bi-paperclip me-1"></i> Nota & Garansi</button>
-      <button class="btn btn-glass btn-sm w-100"><i class="bi bi-qr-code me-1"></i> Cetak QR Aset</button>
-    </div>
-
   </div>
+
+  @if ($homeAsset->notes)
+    <div class="mt-4 pt-3 border-top border-slate-200">
+      <h6 class="fw-bold text-dark mb-1" style="font-size: 0.85rem;">Catatan Perawatan</h6>
+      <p class="text-muted small mb-0">{{ $homeAsset->notes }}</p>
+    </div>
+  @endif
 </div>
+@endsection
 
-<!-- Grid: Checklist Inspeksi + Riwayat Servis -->
-<div class="row g-4">
-  
-  <!-- Left: Checklist Inspeksi -->
-  <div class="col-lg-6">
-    <div class="glass-panel p-4 h-100">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-          <h6 class="fw-bold text-dark mb-0">Checklist Pemeriksaan Mandiri</h6>
-          <small class="text-muted">Panduan pengecekan fisik kondisi AC</small>
+@section('modals')
+<!-- Modal Edit Aset -->
+<div class="modal fade" id="modalEditAset" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content glass-panel border-0 shadow-lg">
+      <form action="{{ route('home-assets.update', $homeAsset->id) }}" method="POST">
+        @csrf
+        @method('PUT')
+        <div class="modal-header border-bottom border-slate-200 py-3">
+          <h6 class="modal-title fw-bold text-dark">Edit Aset — {{ $homeAsset->name }}</h6>
+          <button type="button" class="btn-close small" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <span class="glass-pill">Template AC</span>
-      </div>
-
-      <div class="space-y-2">
-        <div class="p-2.5 rounded-3 bg-white bg-opacity-60 border mb-2" style="border-color: rgba(226, 232, 240, 0.7);">
-          <div class="d-flex justify-content-between align-items-center">
-            <div class="form-check mb-0">
-              <input class="form-check-input" type="checkbox" id="chk1" checked>
-              <label class="form-check-label small fw-medium text-dark ms-1" for="chk1">
-                Kebersihan Filter Udara
-              </label>
-            </div>
-            <span class="chip chip-warning">Perlu Dicuci</span>
-          </div>
-        </div>
-
-        <div class="p-2.5 rounded-3 bg-white bg-opacity-60 border mb-2" style="border-color: rgba(226, 232, 240, 0.7);">
-          <div class="d-flex justify-content-between align-items-center">
-            <div class="form-check mb-0">
-              <input class="form-check-input" type="checkbox" id="chk2" checked>
-              <label class="form-check-label small fw-medium text-dark ms-1" for="chk2">
-                Suhu Hembusan Dingin
-              </label>
-            </div>
-            <span class="chip chip-success">Normal (18°C)</span>
-          </div>
-        </div>
-
-        <div class="p-2.5 rounded-3 bg-white bg-opacity-60 border mb-2" style="border-color: rgba(226, 232, 240, 0.7);">
-          <div class="d-flex justify-content-between align-items-center">
-            <div class="form-check mb-0">
-              <input class="form-check-input" type="checkbox" id="chk3" checked>
-              <label class="form-check-label small fw-medium text-dark ms-1" for="chk3">
-                Cek Kebocoran Air Indoor
-              </label>
-            </div>
-            <span class="chip chip-success">Kering</span>
-          </div>
-        </div>
-
-        <div class="p-2.5 rounded-3 bg-white bg-opacity-60 border mb-2" style="border-color: rgba(226, 232, 240, 0.7);">
-          <div class="d-flex justify-content-between align-items-center">
-            <div class="form-check mb-0">
-              <input class="form-check-input" type="checkbox" id="chk4">
-              <label class="form-check-label small fw-medium text-dark ms-1" for="chk4">
-                Kelancaran Pipa Pembuangan
-              </label>
-            </div>
-            <span class="chip chip-neutral">Belum Cek</span>
-          </div>
-        </div>
-
-        <div class="p-2.5 rounded-3 bg-white bg-opacity-60 border mb-3" style="border-color: rgba(226, 232, 240, 0.7);">
-          <div class="d-flex justify-content-between align-items-center">
-            <div class="form-check mb-0">
-              <input class="form-check-input" type="checkbox" id="chk5">
-              <label class="form-check-label small fw-medium text-dark ms-1" for="chk5">
-                Kondisi Kipas & Kisi Outdoor
-              </label>
-            </div>
-            <span class="chip chip-neutral">Belum Cek</span>
-          </div>
-        </div>
-
-        <button class="btn btn-dark btn-sm w-100 py-2">
-          Simpan Hasil Pemeriksaan
-        </button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Right: Timeline Servis -->
-  <div class="col-lg-6">
-    <div class="glass-panel p-4 h-100">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-          <h6 class="fw-bold text-dark mb-0">Buku Riwayat Servis</h6>
-          <small class="text-muted">Catatan perawatan terdahulu yang Anda simpan</small>
-        </div>
-        <button class="btn btn-glass btn-sm">+ Catat</button>
-      </div>
-
-      <div class="border-start border-slate-200 ps-3 ms-2 space-y-4">
         
-        <!-- Riwayat 1 -->
-        <div class="position-relative pb-4">
-          <div class="position-absolute top-0 start-0 translate-middle rounded-circle bg-dark" style="width: 8px; height: 8px; margin-left: -13px;"></div>
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="fw-semibold text-dark small">Cuci Rutin & Cek Freon</span>
-            <span class="chip chip-success py-0 px-1.5" style="font-size: 0.68rem;">Selesai</span>
+        <div class="modal-body py-3">
+          <div class="mb-3">
+            <label class="form-label text-muted small mb-1">Nama Aset <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="name" value="{{ $homeAsset->name }}" required style="min-height: 44px;">
           </div>
-          <div class="text-muted" style="font-size: 0.75rem;">9 Agustus 2026 • Oleh: Pak Budi (Teknisi AC)</div>
-          <p class="text-muted small mt-1 mb-1">Cuci evaporator indoor dan blower outdoor. Tekanan freon 78 psi normal.</p>
-          <div class="d-flex justify-content-between align-items-center pt-1" style="font-size: 0.75rem;">
-            <span class="fw-semibold text-dark">Biaya: Rp 75.000</span>
-            <a href="#" class="text-muted text-decoration-none"><i class="bi bi-paperclip"></i> Lihat Nota</a>
+
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label text-muted small mb-1">Kategori <span class="text-danger">*</span></label>
+              <select class="form-select" name="category" required style="min-height: 44px;">
+                @foreach (['bangunan', 'listrik', 'air', 'pendingin', 'dapur', 'kamar_mandi', 'keamanan', 'eksterior', 'peralatan'] as $cat)
+                  <option value="{{ $cat }}" {{ $homeAsset->category === $cat ? 'selected' : '' }}>
+                    {{ ucfirst(str_replace('_', ' ', $cat)) }}
+                  </option>
+                @endforeach
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label text-muted small mb-1">Lokasi / Ruangan <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" name="room" value="{{ $homeAsset->room }}" required style="min-height: 44px;">
+            </div>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label text-muted small mb-1">Merek</label>
+              <input type="text" class="form-control" name="brand" value="{{ $homeAsset->brand }}" style="min-height: 44px;">
+            </div>
+            <div class="col-6">
+              <label class="form-label text-muted small mb-1">Model / Tipe</label>
+              <input type="text" class="form-control" name="model" value="{{ $homeAsset->model }}" style="min-height: 44px;">
+            </div>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label text-muted small mb-1">Tanggal Pasang / Beli</label>
+              <input type="date" class="form-control" name="purchased_at" value="{{ $homeAsset->purchased_at?->format('Y-m-d') }}" style="min-height: 44px;">
+            </div>
+            <div class="col-6">
+              <label class="form-label text-muted small mb-1">Kondisi Saat Ini <span class="text-danger">*</span></label>
+              <select class="form-select" name="condition" required style="min-height: 44px;">
+                <option value="normal" {{ $homeAsset->condition === 'normal' ? 'selected' : '' }}>Normal</option>
+                <option value="perlu_perhatian" {{ $homeAsset->condition === 'perlu_perhatian' ? 'selected' : '' }}>Perlu Perhatian</option>
+                <option value="rusak" {{ $homeAsset->condition === 'rusak' ? 'selected' : '' }}>Rusak</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label text-muted small mb-1">Catatan Tambahan</label>
+            <textarea class="form-control" name="notes" rows="2">{{ $homeAsset->notes }}</textarea>
           </div>
         </div>
 
-        <!-- Riwayat 2 -->
-        <div class="position-relative pb-4">
-          <div class="position-absolute top-0 start-0 translate-middle rounded-circle bg-dark" style="width: 8px; height: 8px; margin-left: -13px;"></div>
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="fw-semibold text-dark small">Cuci AC & Pembersihan Selang Drain</span>
-            <span class="chip chip-success py-0 px-1.5" style="font-size: 0.68rem;">Selesai</span>
-          </div>
-          <div class="text-muted" style="font-size: 0.75rem;">12 Mei 2026 • Oleh: Pak Budi (Teknisi AC)</div>
-          <p class="text-muted small mt-1 mb-1">Selang pembuangan tersumbat lumut. Di-flush sampai lancar.</p>
-          <div class="d-flex justify-content-between align-items-center pt-1" style="font-size: 0.75rem;">
-            <span class="fw-semibold text-dark">Biaya: Rp 100.000</span>
-            <a href="#" class="text-muted text-decoration-none"><i class="bi bi-paperclip"></i> Lihat Nota</a>
-          </div>
+        <div class="modal-footer border-top border-slate-200 py-2.5">
+          <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 40px;">Batal</button>
+          <button type="submit" class="btn btn-dark btn-sm px-3" style="min-height: 40px;">Simpan Perubahan</button>
         </div>
-
-        <!-- Riwayat 3 (Pemasangan) -->
-        <div class="position-relative">
-          <div class="position-absolute top-0 start-0 translate-middle rounded-circle bg-slate-400" style="width: 8px; height: 8px; margin-left: -13px;"></div>
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="fw-semibold text-dark small">Pemasangan Unit Baru</span>
-            <span class="chip chip-neutral py-0 px-1.5" style="font-size: 0.68rem;">Pemasangan</span>
-          </div>
-          <div class="text-muted" style="font-size: 0.75rem;">15 Desember 2024 • Pembelian Unit</div>
-          <div class="d-flex justify-content-between align-items-center pt-1" style="font-size: 0.75rem;">
-            <span class="fw-semibold text-dark">Biaya Jasa: Rp 200.000</span>
-            <a href="#" class="text-muted text-decoration-none"><i class="bi bi-file-earmark-pdf"></i> Kartu Garansi</a>
-          </div>
-        </div>
-
-      </div>
-
+      </form>
     </div>
   </div>
-
 </div>
 @endsection
