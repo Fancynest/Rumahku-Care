@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attachment;
+use App\Models\DamageReport;
+use App\Models\Document;
 use App\Models\HomeAsset;
 use App\Models\MaintenanceRecord;
 use App\Models\Vehicle;
@@ -25,13 +27,15 @@ class AttachmentController extends Controller
         'vehicles' => Vehicle::class,
         'maintenance_record' => MaintenanceRecord::class,
         'maintenance_records' => MaintenanceRecord::class,
-        'damage_report' => 'App\Models\DamageReport',
-        'damage_reports' => 'App\Models\DamageReport',
-        'document' => 'App\Models\Document',
-        'documents' => 'App\Models\Document',
+        'damage_report' => DamageReport::class,
+        'damage_reports' => DamageReport::class,
+        'document' => Document::class,
+        'documents' => Document::class,
         HomeAsset::class => HomeAsset::class,
         Vehicle::class => Vehicle::class,
         MaintenanceRecord::class => MaintenanceRecord::class,
+        DamageReport::class => DamageReport::class,
+        Document::class => Document::class,
     ];
 
     public function store(Request $request): RedirectResponse
@@ -56,9 +60,9 @@ class AttachmentController extends Controller
         ]);
 
         $type = $validated['attachable_type'];
-        $modelClass = $this->morphMap[$type] ?? (class_exists($type) ? $type : null);
+        $modelClass = $this->morphMap[$type] ?? null;
 
-        if (! $modelClass || ! class_exists($modelClass)) {
+        if (! $modelClass) {
             abort(404, 'Tipe objek lampiran tidak valid.');
         }
 

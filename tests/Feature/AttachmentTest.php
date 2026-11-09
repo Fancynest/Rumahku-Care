@@ -301,4 +301,28 @@ class AttachmentTest extends TestCase
         $this->assertStringContainsString('inline', (string) $streamResponse->headers->get('Content-Disposition'));
         $this->assertStringContainsString('filename=gambar.png', (string) $streamResponse->headers->get('Content-Disposition'));
     }
+
+    public function test_upload_with_unmapped_attachable_type_returns_404(): void
+    {
+        Storage::fake('local');
+
+        $user = User::factory()->create();
+        $file = UploadedFile::fake()->image('foto.jpg');
+
+        // Mengirim tipe yang ada sebagai class PHP tetapi tidak ada di morphMap (misal User::class atau stdClass)
+        $responseClassExists = $this->actingAs($user)->post('/attachments', [
+            'attachable_type' => User::class,
+            'attachable_id' => $user->id,
+            'file' => $file,
+        ]);
+        $responseClassExists->assertStatus(404);
+
+        // Mengirim string tipe sembarang yang tidak dikenal
+        $responseUnknown = $this->actingAs($user)->post('/attachments', [
+            'attachable_type' => 'alien_object',
+            'attachable_id' => 1,
+            'file' => $file,
+        ]);
+        $responseUnknown->assertStatus(404);
+    }
 }
