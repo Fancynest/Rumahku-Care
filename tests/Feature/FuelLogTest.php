@@ -343,4 +343,79 @@ class FuelLogTest extends TestCase
         $this->assertSame('nota_bbm.pdf', $attachment->original_name);
         Storage::disk('local')->assertExists($attachment->path);
     }
+
+    public function test_submitting_without_is_full_tank_field_stores_false_and_omits_kml_calculation(): void
+    {
+        $this->actingAs($this->user);
+
+        // 1. Log pertama tangki penuh (baseline): value=1
+        $this->post("/vehicles/{$this->vehicle->id}/fuel-logs", [
+            'filled_at' => '2026-01-01',
+            'odometer' => 10000,
+            'liters' => 30,
+            'total_cost' => 300000,
+            'is_full_tank' => 1,
+        ])->assertRedirect();
+
+        $log1 = FuelLog::where('vehicle_id', $this->vehicle->id)->where('odometer', 10000)->firstOrFail();
+        $this->assertTrue($log1->is_full_tank);
+
+        // 2. Log kedua TANPA field is_full_tank sama sekali (simulasi browser checkbox tidak dicentang)
+        $this->post("/vehicles/{$this->vehicle->id}/fuel-logs", [
+            'filled_at' => '2026-01-10',
+            'odometer' => 10200,
+            'liters' => 10,
+            'total_cost' => 100000,
+            // 'is_full_tank' sengaja TIDAK dikirim
+        ])->assertRedirect();
+
+        $log2 = FuelLog::where('vehicle_id', $this->vehicle->id)->where('odometer', 10200)->firstOrFail();
+        $this->assertFalse($log2->is_full_tank);
+
+        // 3. Log ketiga tangki penuh: value=1
+        $this->post("/vehicles/{$this->vehicle->id}/fuel-logs", [
+            'filled_at' => '2026-01-20',
+            'odometer' => 10600,
+            'liters' => 30,
+            'total_cost' => 300000,
+            'is_full_tank' => '1',
+        ])->assertRedirect();
+
+        $log3 = FuelLog::where('vehicle_id', $this->vehicle->id)->where('odometer', 10600)->firstOrFail();
+        $this->assertTrue($log3->is_full_tank);
+
+        // Hitung metrik konsumsi: interval log kedua (parsial) TIDAK dihitung sendiri
+        $calculator = app(FuelCalculator::class);
+        $metrics = $calculator->calculate($this->vehicle);
+
+        $calcLog1 = $metrics['logs']->firstWhere('id', $log1->id);
+        $calcLog2 = $metrics['logs']->firstWhere('id', $log2->id);
+        $calcLog3 = $metrics['logs']->firstWhere('id', $log3->id);
+
+        $this->assertNull($calcLog1->consumption_km_l);
+        $this->assertNull($calcLog2->consumption_km_l, 'Pengisian parsial tidak boleh menghasilkan km/L sendiri');
+        $this->assertEquals(15.00, $calcLog3->consumption_km_l, 'Interval gabungan 600 km / 40 L harus 15.00 km/L');
+
+        // Uji update TANPA field is_full_tank -> berubah menjadi false
+        $this->put("/fuel-logs/{$log3->id}", [
+            'filled_at' => '2026-01-20',
+            'odometer' => 10600,
+            'liters' => 30,
+            'total_cost' => 300000,
+            // 'is_full_tank' sengaja TIDAK dikirim
+        ])->assertRedirect();
+
+        $this->assertFalse($log3->fresh()->is_full_tank);
+
+        // Uji update DENGAN value=1 -> kembali menjadi true
+        $this->put("/fuel-logs/{$log3->id}", [
+            'filled_at' => '2026-01-20',
+            'odometer' => 10600,
+            'liters' => 30,
+            'total_cost' => 300000,
+            'is_full_tank' => 1,
+        ])->assertRedirect();
+
+        $this->assertTrue($log3->fresh()->is_full_tank);
+    }
 }

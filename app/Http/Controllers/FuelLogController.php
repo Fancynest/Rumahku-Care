@@ -37,9 +37,9 @@ class FuelLogController extends Controller
             $request->merge(['odometer' => $odometer]);
         }
 
-        if ($request->has('is_full_tank')) {
-            $request->merge(['is_full_tank' => filter_var($request->input('is_full_tank'), FILTER_VALIDATE_BOOLEAN)]);
-        }
+        $request->merge([
+            'is_full_tank' => $request->boolean('is_full_tank'),
+        ]);
     }
 
     public function store(
@@ -63,7 +63,7 @@ class FuelLogController extends Controller
             'liters' => ['required', 'numeric', 'min:0.01', 'max:9999.99'],
             'total_cost' => ['required', 'integer', 'min:1'],
             'fuel_grade' => ['nullable', 'string', 'max:50'],
-            'is_full_tank' => ['nullable', 'boolean'],
+            'is_full_tank' => ['boolean'],
             'station' => ['nullable', 'string', 'max:100'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'file' => AttachmentStorer::validationRules(false),
@@ -83,7 +83,7 @@ class FuelLogController extends Controller
                 'liters' => (float) $validated['liters'],
                 'total_cost' => (int) $validated['total_cost'],
                 'fuel_grade' => $validated['fuel_grade'] ?? null,
-                'is_full_tank' => isset($validated['is_full_tank']) ? (bool) $validated['is_full_tank'] : true,
+                'is_full_tank' => $request->boolean('is_full_tank'),
                 'station' => $validated['station'] ?? null,
                 'notes' => $validated['notes'] ?? null,
             ]);
@@ -124,7 +124,7 @@ class FuelLogController extends Controller
             'liters' => ['required', 'numeric', 'min:0.01', 'max:9999.99'],
             'total_cost' => ['required', 'integer', 'min:1'],
             'fuel_grade' => ['nullable', 'string', 'max:50'],
-            'is_full_tank' => ['nullable', 'boolean'],
+            'is_full_tank' => ['boolean'],
             'station' => ['nullable', 'string', 'max:100'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ], [
@@ -134,14 +134,14 @@ class FuelLogController extends Controller
             'total_cost.required' => 'Total biaya BBM wajib diisi.',
         ]);
 
-        DB::transaction(function () use ($fuelLog, $vehicle, $validated, $timeline): void {
+        DB::transaction(function () use ($request, $fuelLog, $vehicle, $validated, $timeline): void {
             $fuelLog->update([
                 'filled_at' => $validated['filled_at'],
                 'odometer' => (int) $validated['odometer'],
                 'liters' => (float) $validated['liters'],
                 'total_cost' => (int) $validated['total_cost'],
                 'fuel_grade' => $validated['fuel_grade'] ?? null,
-                'is_full_tank' => isset($validated['is_full_tank']) ? (bool) $validated['is_full_tank'] : true,
+                'is_full_tank' => $request->boolean('is_full_tank'),
                 'station' => $validated['station'] ?? null,
                 'notes' => $validated['notes'] ?? null,
             ]);
