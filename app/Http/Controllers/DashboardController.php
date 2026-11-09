@@ -10,7 +10,7 @@ class DashboardController extends Controller
     public function index(Request $request): View
     {
         $user = $request->user();
-        $vehicles = $user->vehicles()->with(['vehicleModel', 'latestServiceLog'])->get();
+        $vehicles = $user->vehicles()->with(['vehicleModel', 'schedules', 'latestMaintenanceRecord'])->get();
         $totalVehicles = $vehicles->count();
         $urgentVehicles = $vehicles->filter(fn ($v) => $v->status_label === 'Waktunya Servis');
         $primeVehiclesCount = $vehicles->filter(fn ($v) => $v->status_label === 'Kondisi Prima')->count();

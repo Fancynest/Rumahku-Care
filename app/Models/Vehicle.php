@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use App\Services\ScheduleStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class Vehicle extends Model
 {
@@ -24,7 +25,6 @@ class Vehicle extends Model
         'year',
         'color_key',
         'odometer',
-        'service_interval_km',
         'fuel_type',
         'workshop',
     ];
@@ -38,7 +38,6 @@ class Vehicle extends Model
             'user_id' => 'integer',
             'year' => 'integer',
             'odometer' => 'integer',
-            'service_interval_km' => 'integer',
         ];
     }
 
@@ -59,19 +58,27 @@ class Vehicle extends Model
     }
 
     /**
-     * @return HasMany<ServiceLog, $this>
+     * @return MorphMany<MaintenanceRecord, $this>
      */
-    public function serviceLogs(): HasMany
+    public function maintenanceRecords(): MorphMany
     {
-        return $this->hasMany(ServiceLog::class)->orderByDesc('serviced_at')->orderByDesc('id');
+        return $this->morphMany(MaintenanceRecord::class, 'subject')->orderByDesc('done_at')->orderByDesc('id');
     }
 
     /**
-     * @return HasOne<ServiceLog, $this>
+     * @return MorphOne<MaintenanceRecord, $this>
      */
-    public function latestServiceLog(): HasOne
+    public function latestMaintenanceRecord(): MorphOne
     {
-        return $this->hasOne(ServiceLog::class)->latestOfMany();
+        return $this->morphOne(MaintenanceRecord::class, 'subject')->latestOfMany('done_at');
+    }
+
+    /**
+     * @return MorphMany<MaintenanceSchedule, $this>
+     */
+    public function schedules(): MorphMany
+    {
+        return $this->morphMany(MaintenanceSchedule::class, 'subject')->where('is_active', true);
     }
 
     public function getNameAttribute(): string
@@ -90,24 +97,27 @@ class Vehicle extends Model
 
     public function getStatusLabelAttribute(): string
     {
-        $latest = $this->latestServiceLog;
-        if (! $latest) {
-            return 'Belum ada catatan servis';
+        $activeSchedules = $this->schedules;
+        if ($activeSchedules->isEmpty()) {
+            return 'Belum ada jadwal';
         }
 
-        $interval = $this->service_interval_km ?: 5000;
-        if (($this->odometer - $latest->odometer) >= ($interval - 200)) {
-            return 'Waktunya Servis';
-        }
+        $statuses = $activeSchedules->map(fn ($s) => $s->status);
+        $worst = ScheduleStatus::worst($statuses);
 
-        return 'Kondisi Prima';
+        return match ($worst) {
+            ScheduleStatus::TERLAMBAT, ScheduleStatus::MENDESAK => 'Waktunya Servis',
+            ScheduleStatus::PERHATIAN => 'Perlu Perhatian',
+            default => 'Kondisi Prima',
+        };
     }
 
     public function getStatusChipClassAttribute(): string
     {
         return match ($this->status_label) {
             'Waktunya Servis' => 'chip-urgent',
-            'Belum ada catatan servis' => 'chip-neutral',
+            'Perlu Perhatian' => 'chip-warning',
+            'Belum ada jadwal' => 'chip-neutral',
             default => 'chip-success',
         };
     }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeAssetController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\TechnicianController;
 use App\Http\Controllers\VehicleController;
 use Illuminate\Support\Facades\Route;
@@ -34,6 +35,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/', [VehicleController::class, 'store'])->name('store');
         Route::patch('/{vehicle}/odometer', [VehicleController::class, 'updateOdometer'])->name('update-odometer');
         Route::post('/{vehicle}/service-logs', [VehicleController::class, 'storeServiceLog'])->name('service-logs.store');
+    });
+
+    Route::prefix('schedules')->name('schedules.')->group(function () {
+        Route::get('/', [ScheduleController::class, 'index'])->name('index');
+        Route::post('/', [ScheduleController::class, 'store'])->name('store');
+        Route::post('/{schedule}/complete', [ScheduleController::class, 'complete'])->name('complete');
+        Route::delete('/{schedule}', [ScheduleController::class, 'destroy'])->name('destroy');
     });
 
     Route::prefix('technicians')->name('technicians.')->group(function () {

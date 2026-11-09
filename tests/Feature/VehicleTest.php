@@ -117,30 +117,35 @@ class VehicleTest extends TestCase
         ]);
     }
 
-    public function test_vehicle_service_status_based_on_service_logs(): void
+    public function test_vehicle_service_status_based_on_schedules(): void
     {
+        $user = User::firstOrFail();
         $vehicle = Vehicle::create([
+            'user_id' => $user->id,
             'plate' => 'B 3333 TST',
             'odometer' => 10000,
-            'service_interval_km' => 5000,
             'color_key' => 'hitam',
             'fuel_type' => 'Bensin',
         ]);
 
-        // Belum ada log
-        $this->assertSame('Belum ada catatan servis', $vehicle->status_label);
+        // Belum ada jadwal
+        $this->assertSame('Belum ada jadwal', $vehicle->status_label);
 
-        // Servis terakhir di 5300 KM, sekarang 10000 KM (selisih 4700 < 4800) -> Kondisi Prima
-        $vehicle->serviceLogs()->create([
-            'serviced_at' => '2026-08-01',
-            'odometer' => 5300,
-            'notes' => 'Servis berkala',
+        // Buat jadwal KM: target 15000 KM (selisih 5000 KM > 500) -> Kondisi Prima
+        $schedule = $vehicle->schedules()->create([
+            'user_id' => $user->id,
+            'title' => 'Ganti oli mesin',
+            'trigger_type' => 'kilometer',
+            'interval_km' => 5000,
+            'next_due_km' => 15000,
+            'priority' => 'mendesak',
+            'is_active' => true,
         ]);
         $vehicle->refresh();
         $this->assertSame('Kondisi Prima', $vehicle->status_label);
 
-        // Odometer naik jadi 10100 KM (selisih 4800 >= 4800) -> Waktunya Servis
-        $vehicle->update(['odometer' => 10100]);
+        // Odometer naik jadi 14900 KM (selisih 100 <= 200) -> Waktunya Servis
+        $vehicle->update(['odometer' => 14900]);
         $vehicle->refresh();
         $this->assertSame('Waktunya Servis', $vehicle->status_label);
     }
@@ -156,9 +161,10 @@ class VehicleTest extends TestCase
         ]);
 
         $response->assertRedirect();
-        $this->assertDatabaseHas('service_logs', [
-            'vehicle_id' => $vehicle->id,
-            'serviced_at' => '2026-11-09 00:00:00',
+        $this->assertDatabaseHas('maintenance_records', [
+            'subject_id' => $vehicle->id,
+            'subject_type' => Vehicle::class,
+            'done_at' => '2026-11-09 00:00:00',
             'odometer' => $vehicle->odometer + 100,
             'notes' => 'Ganti oli transmisi dan filter',
         ]);

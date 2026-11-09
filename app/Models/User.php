@@ -46,4 +46,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(HomeAsset::class);
     }
+
+    /**
+     * @return HasMany<MaintenanceSchedule, $this>
+     */
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(MaintenanceSchedule::class);
+    }
 }

@@ -69,8 +69,8 @@
             <h6 class="fw-bold mb-1 text-dark">Servis Berkala {{ $urgentVehicle->name }}</h6>
             <p class="text-muted small mb-3">
               Odometer: {{ number_format($urgentVehicle->odometer) }} KM.
-              @if ($urgentVehicle->latestServiceLog)
-                Terakhir diservis di {{ number_format($urgentVehicle->latestServiceLog->odometer) }} KM.
+              @if ($urgentVehicle->latestMaintenanceRecord)
+                Terakhir diservis di {{ number_format($urgentVehicle->latestMaintenanceRecord->odometer) }} KM.
               @else
                 Belum ada catatan servis sebelumnya.
               @endif

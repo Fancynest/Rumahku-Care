@@ -1,0 +1,160 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\HomeAsset;
+use App\Models\User;
+use App\Models\Vehicle;
+use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class ScheduleTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed();
+
+        $user = User::first();
+        if ($user) {
+            $this->actingAs($user);
+        }
+    }
+
+    public function test_user_can_complete_km_schedule_calculates_next_due_and_updates_odometer(): void
+    {
+        $user = User::firstOrFail();
+        $vehicle = Vehicle::create([
+            'user_id' => $user->id,
+            'plate' => 'B 5555 KM',
+            'odometer' => 10000,
+            'color_key' => 'hitam',
+            'fuel_type' => 'Bensin',
+        ]);
+
+        $schedule = $vehicle->schedules()->create([
+            'user_id' => $user->id,
+            'title' => 'Ganti oli mesin',
+            'trigger_type' => 'kilometer',
+            'interval_km' => 5000,
+            'next_due_km' => 15000,
+            'priority' => 'mendesak',
+            'is_active' => true,
+        ]);
+
+        $response = $this->post("/schedules/{$schedule->id}/complete", [
+            'done_at' => '2026-11-09',
+            'odometer' => 10250,
+            'labor_cost' => 50000,
+            'parts_cost' => 120000,
+            'parts' => 'Oli Shell Advance 10W-40',
+            'notes' => 'Servis beres di bengkel langganan',
+        ]);
+
+        $response->assertRedirect();
+
+        $this->assertDatabaseHas('maintenance_records', [
+            'schedule_id' => $schedule->id,
+            'odometer' => 10250,
+            'labor_cost' => 50000,
+            'parts_cost' => 120000,
+        ]);
+
+        $vehicle->refresh();
+        $this->assertSame(10250, $vehicle->odometer);
+
+        $schedule->refresh();
+        $this->assertSame(10250, $schedule->last_done_km);
+        $this->assertSame(15250, $schedule->next_due_km); // 10250 + 5000
+    }
+
+    public function test_user_can_complete_date_schedule_calculates_next_due_date(): void
+    {
+        $user = User::firstOrFail();
+        $asset = HomeAsset::firstOrFail();
+
+        $schedule = $asset->schedules()->create([
+            'user_id' => $user->id,
+            'title' => 'Cuci filter AC rutin',
+            'trigger_type' => 'interval_hari',
+            'interval_days' => 90,
+            'next_due_date' => '2026-11-09',
+            'priority' => 'perhatian',
+            'is_active' => true,
+        ]);
+
+        $response = $this->post("/schedules/{$schedule->id}/complete", [
+            'done_at' => '2026-11-09',
+            'labor_cost' => 75000,
+            'notes' => 'Filter bersih',
+        ]);
+
+        $response->assertRedirect();
+
+        $schedule->refresh();
+        $expectedNextDue = Carbon::parse('2026-11-09')->addDays(90)->toDateString();
+        $this->assertSame($expectedNextDue, $schedule->next_due_date->toDateString());
+    }
+
+    public function test_cannot_complete_km_schedule_with_decreased_odometer(): void
+    {
+        $user = User::firstOrFail();
+        $vehicle = Vehicle::create([
+            'user_id' => $user->id,
+            'plate' => 'B 6666 KM',
+            'odometer' => 10000,
+            'color_key' => 'hitam',
+            'fuel_type' => 'Bensin',
+        ]);
+
+        $schedule = $vehicle->schedules()->create([
+            'user_id' => $user->id,
+            'title' => 'Ganti oli mesin',
+            'trigger_type' => 'kilometer',
+            'interval_km' => 5000,
+            'next_due_km' => 15000,
+            'priority' => 'mendesak',
+            'is_active' => true,
+        ]);
+
+        $response = $this->post("/schedules/{$schedule->id}/complete", [
+            'done_at' => '2026-11-09',
+            'odometer' => 9500, // lower than current vehicle odometer (10000)
+        ]);
+
+        $response->assertSessionHasErrors(['odometer']);
+    }
+
+    public function test_user_a_cannot_complete_user_b_schedule(): void
+    {
+        $userA = User::firstOrFail();
+        $userB = User::factory()->create(['email' => 'userb_sched@example.com']);
+
+        $vehicleB = Vehicle::create([
+            'user_id' => $userB->id,
+            'plate' => 'D 9999 SBD',
+            'odometer' => 2000,
+            'color_key' => 'putih',
+            'fuel_type' => 'Bensin',
+        ]);
+
+        $scheduleB = $vehicleB->schedules()->create([
+            'user_id' => $userB->id,
+            'title' => 'Servis Berkala B',
+            'trigger_type' => 'kilometer',
+            'interval_km' => 5000,
+            'next_due_km' => 7000,
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($userA)->post("/schedules/{$scheduleB->id}/complete", [
+            'done_at' => '2026-11-09',
+            'odometer' => 3000,
+        ]);
+
+        $response->assertStatus(404);
+    }
+}
