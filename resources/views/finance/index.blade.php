@@ -86,6 +86,90 @@
   </div>
 </div>
 
+<!-- Section: Anggaran Bulan Ini (Budgets) -->
+<div class="glass-panel p-4 mb-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+      <h6 class="fw-bold text-dark mb-0">Anggaran Pengeluaran Periode {{ $month_label }}</h6>
+      <span class="text-muted small">Target batas pengeluaran bulanan dan pemantauan realisasi biaya aset Anda.</span>
+    </div>
+    <button type="button" class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center gap-1.5" data-bs-toggle="modal" data-bs-target="#modalAturAnggaran" style="min-height: 38px;">
+      <i class="bi bi-sliders"></i>
+      <span>Atur Anggaran</span>
+    </button>
+  </div>
+
+  @if (! $budgetSummary['has_any_budget'])
+    <div class="p-3.5 text-center text-muted bg-white-50 rounded-3 border border-dashed border-slate-200">
+      <i class="bi bi-piggy-bank d-block fs-4 mb-1 text-secondary"></i>
+      <div class="fw-medium text-dark small">Belum ada anggaran yang diatur</div>
+      <p class="text-muted mb-2.5" style="font-size: 0.78rem;">Atur batas anggaran bulanan untuk mengontrol pengeluaran servis, BBM, dan operasional aset.</p>
+      <button type="button" class="btn btn-glass btn-sm px-3" data-bs-toggle="modal" data-bs-target="#modalAturAnggaran" style="min-height: 38px;">
+        <i class="bi bi-plus-lg me-1"></i> Mulai Pasang Target Anggaran
+      </button>
+    </div>
+  @else
+    <div class="row g-3">
+      @if ($budgetSummary['total'])
+        @php $b = $budgetSummary['total']; @endphp
+        <div class="col-12">
+          <div class="p-3 rounded-3 bg-white border border-slate-200 shadow-2xs">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+              <div>
+                <span class="fw-bold text-dark fs-6">Anggaran Total (Semua Kategori)</span>
+                <span class="chip {{ $b['chip_class'] }} ms-2 py-0 px-2">
+                  <span class="chip-dot"></span> {{ $b['label'] }} ({{ $b['percentage'] }}%)
+                </span>
+              </div>
+              <div class="text-end">
+                <span class="fw-bold text-dark">Rp {{ number_format($b['spent'], 0, ',', '.') }}</span>
+                <span class="text-muted small">/ Rp {{ number_format($b['budget'], 0, ',', '.') }}</span>
+              </div>
+            </div>
+            <div class="progress" style="height: 10px; background-color: rgba(226, 232, 240, 0.6); border-radius: 9999px;">
+              <div class="progress-bar {{ $b['percentage'] >= 100 ? 'bg-danger' : ($b['percentage'] >= 80 ? 'bg-warning' : 'bg-success') }}" 
+                   role="progressbar" 
+                   style="width: {{ min(100, $b['percentage']) }}%; border-radius: 9999px;" 
+                   aria-valuenow="{{ $b['percentage'] }}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+          </div>
+        </div>
+      @endif
+
+      @foreach ($budgetSummary['categories'] as $catKey => $b)
+        @if ($b)
+          <div class="col-md-6 col-lg-3">
+            <div class="p-3 rounded-3 bg-white border border-slate-200 h-100 d-flex flex-column justify-content-between shadow-2xs">
+              <div>
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <small class="fw-bold text-dark text-capitalize">{{ $categories[$catKey]['label'] ?? ucfirst($catKey) }}</small>
+                  <span class="chip {{ $b['chip_class'] }} py-0 px-1.5" style="font-size: 0.65rem;">
+                    {{ $b['label'] }}
+                  </span>
+                </div>
+                <div class="d-flex justify-content-between align-items-baseline mb-2">
+                  <span class="fw-bold text-dark small">Rp {{ number_format($b['spent'], 0, ',', '.') }}</span>
+                  <span class="text-muted" style="font-size: 0.72rem;">/ {{ number_format($b['budget'], 0, ',', '.') }}</span>
+                </div>
+              </div>
+              <div>
+                <div class="progress" style="height: 6px; background-color: rgba(226, 232, 240, 0.6); border-radius: 9999px;">
+                  <div class="progress-bar {{ $b['percentage'] >= 100 ? 'bg-danger' : ($b['percentage'] >= 80 ? 'bg-warning' : 'bg-success') }}" 
+                       role="progressbar" 
+                       style="width: {{ min(100, $b['percentage']) }}%; border-radius: 9999px;"></div>
+                </div>
+                <div class="text-end mt-1">
+                  <small class="text-muted" style="font-size: 0.7rem;">{{ $b['percentage'] }}% terpakai</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        @endif
+      @endforeach
+    </div>
+  @endif
+</div>
+
 <!-- Section: Rincian Kategori & Tren 6 Bulan -->
 <div class="row g-3 mb-4">
   <!-- Kolom Kiri: Breakdown 4 Kategori (Bar CSS) -->
@@ -277,5 +361,91 @@
       </div>
     </div>
   @endif
+</div>
+
+<!-- Modal Atur Anggaran -->
+<div class="modal fade" id="modalAturAnggaran" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content glass-panel border-0 shadow-lg">
+      <form action="{{ route('finance.budgets.update') }}" method="POST">
+        @csrf
+        <input type="hidden" name="month" value="{{ $month }}">
+
+        <div class="modal-header border-bottom border-slate-200 py-3">
+          <h6 class="modal-title fw-bold text-dark"><i class="bi bi-sliders me-1.5"></i> Atur Anggaran Bulanan</h6>
+          <button type="button" class="btn-close small" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body py-3">
+          <p class="text-muted small mb-3">
+            Tentukan batas pengeluaran maksimal per bulan. Kosongkan nilai jika tidak ingin membatasi kategori tertentu.
+          </p>
+
+          <div class="mb-3">
+            <label class="form-label text-dark fw-semibold small mb-1">Anggaran Total (Semua Kategori)</label>
+            <div class="input-group">
+              <span class="input-group-text bg-transparent text-muted small">Rp</span>
+              <input type="text" name="budgets[total]" class="form-control" 
+                     placeholder="mis. 5.000.000" 
+                     value="{{ $budgetSummary['raw_budgets']->firstWhere('category', null)?->monthly_amount }}" 
+                     style="min-height: 44px;">
+            </div>
+            <small class="text-muted" style="font-size: 0.72rem;">Batas gabungan servis, BBM, perbaikan, dan dokumen.</small>
+          </div>
+
+          <hr class="my-3 border-slate-200">
+
+          <div class="mb-3">
+            <label class="form-label text-muted small mb-1">Servis & Perawatan</label>
+            <div class="input-group">
+              <span class="input-group-text bg-transparent text-muted small">Rp</span>
+              <input type="text" name="budgets[servis]" class="form-control" 
+                     placeholder="mis. 1.000.000" 
+                     value="{{ $budgetSummary['raw_budgets']->firstWhere('category', 'servis')?->monthly_amount }}" 
+                     style="min-height: 44px;">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-muted small mb-1">Bahan Bakar (BBM)</label>
+            <div class="input-group">
+              <span class="input-group-text bg-transparent text-muted small">Rp</span>
+              <input type="text" name="budgets[bbm]" class="form-control" 
+                     placeholder="mis. 1.500.000" 
+                     value="{{ $budgetSummary['raw_budgets']->firstWhere('category', 'bbm')?->monthly_amount }}" 
+                     style="min-height: 44px;">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-muted small mb-1">Perbaikan Kerusakan</label>
+            <div class="input-group">
+              <span class="input-group-text bg-transparent text-muted small">Rp</span>
+              <input type="text" name="budgets[perbaikan]" class="form-control" 
+                     placeholder="mis. 1.000.000" 
+                     value="{{ $budgetSummary['raw_budgets']->firstWhere('category', 'perbaikan')?->monthly_amount }}" 
+                     style="min-height: 44px;">
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label text-muted small mb-1">Dokumen & Pajak</label>
+            <div class="input-group">
+              <span class="input-group-text bg-transparent text-muted small">Rp</span>
+              <input type="text" name="budgets[dokumen]" class="form-control" 
+                     placeholder="mis. 500.000" 
+                     value="{{ $budgetSummary['raw_budgets']->firstWhere('category', 'dokumen')?->monthly_amount }}" 
+                     style="min-height: 44px;">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer border-top border-slate-200 py-2.5">
+          <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
+          <button type="submit" class="btn btn-dark btn-sm px-4" style="min-height: 44px;">Simpan Anggaran</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 @endsection

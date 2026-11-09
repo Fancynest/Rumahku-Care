@@ -52,6 +52,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('finance')->name('finance.')->group(function () {
         Route::get('/', [FinanceController::class, 'index'])->name('index');
         Route::get('/export', [FinanceController::class, 'export'])->name('export');
+        Route::post('/budgets', [FinanceController::class, 'updateBudgets'])->name('budgets.update');
     });
 
     Route::prefix('schedules')->name('schedules.')->group(function () {

@@ -94,4 +94,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(MaintenanceRecord::class);
     }
+
+    /**
+     * @return HasMany<Budget, $this>
+     */
+    public function budgets(): HasMany
+    {
+        return $this->hasMany(Budget::class);
+    }
 }
