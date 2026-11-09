@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Vehicle;
+use App\Services\ScheduleStatus;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -11,37 +13,8 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        $statusRank = [
-            'terlambat' => 0,
-            'mendesak' => 1,
-            'perhatian' => 2,
-            'normal' => 3,
-        ];
-
-        $priorityRank = [
-            'darurat' => 0,
-            'mendesak' => 1,
-            'perhatian' => 2,
-            'normal' => 3,
-        ];
-
-        $allSchedules = $user->schedules()
-            ->with('subject')
-            ->where('is_active', true)
-            ->get();
-
-        // Urgent schedules sorted by urgency: terlambat -> mendesak -> perhatian, with priority tie-breaker (darurat > mendesak > perhatian > normal)
-        $urgentSchedules = $allSchedules
-            ->filter(fn ($s) => in_array($s->status, ['terlambat', 'mendesak', 'perhatian']))
-            ->sort(function ($a, $b) use ($statusRank, $priorityRank) {
-                $statusCmp = ($statusRank[$a->status] ?? 99) <=> ($statusRank[$b->status] ?? 99);
-                if ($statusCmp !== 0) {
-                    return $statusCmp;
-                }
-
-                return ($priorityRank[$a->priority] ?? 99) <=> ($priorityRank[$b->priority] ?? 99);
-            })
-            ->values();
+        $allSchedules = ScheduleStatus::forUser($user);
+        $urgentSchedules = ScheduleStatus::urgentForUser($user);
 
         // Max 3 most urgent schedules for the cards
         $topUrgentCards = $urgentSchedules->take(3);
@@ -49,11 +22,14 @@ class DashboardController extends Controller
         // 2 Summary numbers:
         // 1. Jumlah jadwal terlambat / mendesak
         $urgentCount = $allSchedules
-            ->filter(fn ($s) => in_array($s->status, ['terlambat', 'mendesak']))
+            ->filter(fn ($s) => in_array($s->status, [ScheduleStatus::TERLAMBAT, ScheduleStatus::MENDESAK]))
             ->count();
 
         // 2. Jumlah aset dalam kondisi prima (kendaraan prima + aset rumah normal)
-        $vehicles = $user->vehicles()->with('schedules')->get();
+        $vehicleSchedules = $allSchedules->where('subject_type', Vehicle::class)->groupBy('subject_id');
+        $vehicles = $user->vehicles()->get()->each(function ($v) use ($vehicleSchedules) {
+            $v->setRelation('schedules', $vehicleSchedules->get($v->id, collect()));
+        });
         $primeVehiclesCount = $vehicles->filter(fn ($v) => $v->status_label === 'Kondisi Prima')->count();
 
         $homeAssets = $user->homeAssets()->get();

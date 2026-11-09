@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Vehicle;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class DashboardTest extends TestCase
@@ -191,5 +192,45 @@ class DashboardTest extends TestCase
         $response->assertSee('Tambah Aset Rumah');
         $response->assertDontSee('kondisi prima', false);
         $response->assertDontSee('Semua Aset Terawat Baik');
+    }
+
+    public function test_schedules_query_is_memoized_between_dashboard_and_header_composer(): void
+    {
+        $user = User::factory()->create();
+        $vehicle = Vehicle::create([
+            'user_id' => $user->id,
+            'plate' => 'B 7777 MEM',
+            'odometer' => 5000,
+            'color_key' => 'hitam',
+            'fuel_type' => 'Bensin',
+        ]);
+        $vehicle->schedules()->create([
+            'user_id' => $user->id,
+            'title' => 'Cek Oli Rutin',
+            'trigger_type' => 'kilometer',
+            'interval_km' => 5000,
+            'next_due_km' => 5100,
+            'priority' => 'mendesak',
+            'is_active' => true,
+        ]);
+
+        DB::enableQueryLog();
+
+        $response = $this->actingAs($user)->get('/');
+        $response->assertStatus(200);
+
+        $queries = DB::getQueryLog();
+        $scheduleQueries = array_filter($queries, function ($q) {
+            return str_contains($q['query'], 'maintenance_schedules');
+        });
+
+        // The query to active schedules is executed only once across controller and header view composer
+        $this->assertCount(1, $scheduleQueries);
+    }
+
+    public function test_app_service_provider_does_not_contain_has_table_check(): void
+    {
+        $code = (string) file_get_contents(app_path('Providers/AppServiceProvider.php'));
+        $this->assertStringNotContainsString('hasTable', $code);
     }
 }
