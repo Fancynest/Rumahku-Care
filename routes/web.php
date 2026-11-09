@@ -15,6 +15,8 @@ Route::prefix('home-assets')->name('home-assets.')->group(function () {
 
 Route::prefix('vehicles')->name('vehicles.')->group(function () {
     Route::get('/', [VehicleController::class, 'index'])->name('index');
+    Route::post('/', [VehicleController::class, 'store'])->name('store');
+    Route::patch('/{vehicle}/odometer', [VehicleController::class, 'updateOdometer'])->name('update-odometer');
 });
 
 Route::prefix('technicians')->name('technicians.')->group(function () {

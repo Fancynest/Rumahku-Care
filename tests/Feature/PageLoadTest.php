@@ -2,10 +2,19 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class PageLoadTest extends TestCase
 {
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed();
+    }
+
     public function test_dashboard_page_loads_successfully(): void
     {
         $response = $this->get('/');
@@ -32,7 +41,7 @@ class PageLoadTest extends TestCase
         $response = $this->get('/vehicles');
         $response->assertStatus(200);
         $response->assertSee('Kendaraan Saya');
-        $response->assertSee('HONDA BEAT');
+        $response->assertSee('Beat Street');
     }
 
     public function test_technicians_page_loads_successfully(): void
