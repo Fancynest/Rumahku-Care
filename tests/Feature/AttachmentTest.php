@@ -252,4 +252,53 @@ class AttachmentTest extends TestCase
         Storage::disk('local')->assertMissing($path2);
         $this->assertDatabaseMissing('attachments', ['id' => $att2->id]);
     }
+
+    public function test_attachment_stored_with_server_detected_mime_and_served_with_safe_headers(): void
+    {
+        Storage::fake('local');
+
+        $user = User::factory()->create();
+        $asset = HomeAsset::create([
+            'user_id' => $user->id,
+            'name' => 'Kulkas 2 Pintu',
+            'category' => 'dapur',
+            'room' => 'Dapur',
+            'condition' => 'normal',
+        ]);
+
+        // Buat file PNG valid tapi client MIME diklaim sebagai image/jpeg
+        $realPng = UploadedFile::fake()->image('gambar.png', 100, 100);
+        $spoofedFile = new UploadedFile(
+            $realPng->getPathname(),
+            'gambar.png',
+            'image/jpeg',
+            null,
+            true
+        );
+
+        $response = $this->actingAs($user)->post('/attachments', [
+            'attachable_type' => HomeAsset::class,
+            'attachable_id' => $asset->id,
+            'file' => $spoofedFile,
+        ]);
+
+        $response->assertRedirect();
+
+        // Server mendeteksi MIME asli (image/png), bukan klaim klien (image/jpeg)
+        $this->assertDatabaseHas('attachments', [
+            'attachable_id' => $asset->id,
+            'original_name' => 'gambar.png',
+            'mime' => 'image/png',
+        ]);
+
+        $attachment = Attachment::where('original_name', 'gambar.png')->firstOrFail();
+
+        $streamResponse = $this->actingAs($user)->get("/attachments/{$attachment->id}");
+        $streamResponse->assertOk();
+        $streamResponse->assertHeader('Content-Type', 'image/png');
+        $streamResponse->assertHeader('X-Content-Type-Options', 'nosniff');
+        $streamResponse->assertHeader('Content-Security-Policy', "sandbox; default-src 'none'");
+        $this->assertStringContainsString('inline', (string) $streamResponse->headers->get('Content-Disposition'));
+        $this->assertStringContainsString('filename=gambar.png', (string) $streamResponse->headers->get('Content-Disposition'));
+    }
 }

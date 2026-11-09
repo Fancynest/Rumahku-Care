@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AttachmentController extends Controller
@@ -80,6 +81,20 @@ class AttachmentController extends Controller
         }
 
         $file = $request->file('file');
+        $detectedMime = $file->getMimeType();
+        $allowedMimes = config('maintenance.attachments.allowed_mimes', [
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'application/pdf',
+        ]);
+
+        if (! in_array($detectedMime, $allowedMimes, true)) {
+            throw ValidationException::withMessages([
+                'file' => 'Tipe konten berkas tidak diizinkan.',
+            ]);
+        }
+
         $userId = $request->user()->id;
 
         // Simpan ke disk 'local' di direktori khusus user dengan nama acak hashName
@@ -89,7 +104,7 @@ class AttachmentController extends Controller
             'user_id' => $userId,
             'path' => $path,
             'original_name' => $file->getClientOriginalName(),
-            'mime' => $file->getClientMimeType() ?: $file->getMimeType(),
+            'mime' => $detectedMime,
             'size' => $file->getSize(),
         ]);
 
@@ -101,13 +116,30 @@ class AttachmentController extends Controller
         abort_if((int) $attachment->user_id !== (int) $request->user()->id, 404);
         abort_if(! Storage::disk('local')->exists($attachment->path), 404);
 
+        $allowedMimes = config('maintenance.attachments.allowed_mimes', [
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'application/pdf',
+        ]);
+
+        $contentType = in_array($attachment->mime, $allowedMimes, true)
+            ? $attachment->mime
+            : 'application/octet-stream';
+
+        $disposition = HeaderUtils::makeDisposition(
+            HeaderUtils::DISPOSITION_INLINE,
+            $attachment->original_name
+        );
+
         return Storage::disk('local')->response(
             $attachment->path,
             $attachment->original_name,
             [
-                'Content-Type' => $attachment->mime,
-                'Content-Disposition' => 'inline; filename="'.addslashes($attachment->original_name).'"',
+                'Content-Type' => $contentType,
+                'Content-Disposition' => $disposition,
                 'X-Content-Type-Options' => 'nosniff',
+                'Content-Security-Policy' => "sandbox; default-src 'none'",
             ]
         );
     }
