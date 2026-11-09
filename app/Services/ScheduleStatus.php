@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Models\Vehicle;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use InvalidArgumentException;
+use Illuminate\Support\Facades\Log;
 
 class ScheduleStatus
 {
@@ -25,7 +25,13 @@ class ScheduleStatus
 
         if ($schedule->trigger_type === 'kilometer') {
             if ($schedule->subject_type !== Vehicle::class && ! ($schedule->subject instanceof Vehicle)) {
-                throw new InvalidArgumentException('Jadwal berbasis kilometer hanya valid untuk subjek Kendaraan (Vehicle).');
+                Log::warning('Jadwal berbasis kilometer ditemukan pada subjek non-kendaraan.', [
+                    'schedule_id' => $schedule->id,
+                    'subject_type' => $schedule->subject_type,
+                    'subject_id' => $schedule->subject_id,
+                ]);
+
+                return self::NORMAL;
             }
 
             if ($schedule->next_due_km !== null) {

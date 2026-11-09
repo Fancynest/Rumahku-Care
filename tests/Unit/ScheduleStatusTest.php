@@ -7,7 +7,7 @@ use App\Models\MaintenanceSchedule;
 use App\Models\Vehicle;
 use App\Services\ScheduleStatus;
 use Carbon\Carbon;
-use InvalidArgumentException;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 class ScheduleStatusTest extends TestCase
@@ -114,9 +114,11 @@ class ScheduleStatusTest extends TestCase
         $this->assertSame(ScheduleStatus::NORMAL, $this->service->determine($schedule));
     }
 
-    public function test_km_trigger_throws_exception_for_non_vehicle_subject(): void
+    public function test_km_trigger_returns_normal_and_logs_warning_for_non_vehicle_subject(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        Log::shouldReceive('warning')
+            ->once()
+            ->with('Jadwal berbasis kilometer ditemukan pada subjek non-kendaraan.', \Mockery::any());
 
         $homeAsset = new HomeAsset(['name' => 'Pompa']);
         $schedule = new MaintenanceSchedule([
@@ -126,7 +128,8 @@ class ScheduleStatusTest extends TestCase
         $schedule->setRelation('subject', $homeAsset);
         $schedule->subject_type = HomeAsset::class;
 
-        $this->service->determine($schedule);
+        $status = $this->service->determine($schedule);
+        $this->assertSame(ScheduleStatus::NORMAL, $status);
     }
 
     public function test_priority_darurat_does_not_change_status(): void
