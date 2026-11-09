@@ -8,10 +8,10 @@ use App\Models\Document;
 use App\Models\HomeAsset;
 use App\Models\MaintenanceRecord;
 use App\Models\Vehicle;
+use App\Services\AttachmentStorer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -38,23 +38,15 @@ class AttachmentController extends Controller
         Document::class => Document::class,
     ];
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, AttachmentStorer $storer): RedirectResponse
     {
-        $maxKb = (int) config('maintenance.attachments.max_kb', 5120);
-
         $validated = $request->validate([
             'attachable_type' => ['required', 'string'],
             'attachable_id' => ['required', 'integer'],
-            'file' => [
-                'required',
-                'file',
-                'max:'.$maxKb,
-                'mimes:jpg,jpeg,png,webp,pdf',
-                'mimetypes:image/jpeg,image/png,image/webp,application/pdf',
-            ],
+            'file' => AttachmentStorer::validationRules(true),
         ], [
             'file.required' => 'Silakan pilih berkas lampiran yang akan diunggah.',
-            'file.max' => 'Ukuran berkas melebihi batas maksimal 5 MB.',
+            'file.max' => 'Ukuran berkas melebihi batas maksimal.',
             'file.mimes' => 'Format berkas harus berupa JPG, PNG, WEBP, atau PDF.',
             'file.mimetypes' => 'Format atau konten berkas tidak valid (hanya JPG, PNG, WEBP, atau PDF).',
         ]);
@@ -76,41 +68,7 @@ class AttachmentController extends Controller
             abort(404, 'Anda tidak memiliki hak akses terhadap objek ini.');
         }
 
-        // Batas maksimal 5 lampiran per objek
-        $maxPerObject = (int) config('maintenance.attachments.max_per_object', 5);
-        if ($parent->attachments()->count() >= $maxPerObject) {
-            throw ValidationException::withMessages([
-                'file' => "Jumlah lampiran untuk objek ini sudah mencapai batas maksimal ({$maxPerObject} berkas).",
-            ]);
-        }
-
-        $file = $request->file('file');
-        $detectedMime = $file->getMimeType();
-        $allowedMimes = config('maintenance.attachments.allowed_mimes', [
-            'image/jpeg',
-            'image/png',
-            'image/webp',
-            'application/pdf',
-        ]);
-
-        if (! in_array($detectedMime, $allowedMimes, true)) {
-            throw ValidationException::withMessages([
-                'file' => 'Tipe konten berkas tidak diizinkan.',
-            ]);
-        }
-
-        $userId = $request->user()->id;
-
-        // Simpan ke disk 'local' di direktori khusus user dengan nama acak hashName
-        $path = $file->store("attachments/{$userId}", 'local');
-
-        $parent->attachments()->create([
-            'user_id' => $userId,
-            'path' => $path,
-            'original_name' => $file->getClientOriginalName(),
-            'mime' => $detectedMime,
-            'size' => $file->getSize(),
-        ]);
+        $storer->store($parent, $request->file('file'), $request->user(), 'file');
 
         return redirect()->back()->with('success', 'Lampiran berhasil diunggah.');
     }

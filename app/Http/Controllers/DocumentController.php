@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Document;
 use App\Models\HomeAsset;
 use App\Models\Vehicle;
+use App\Services\AttachmentStorer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,7 @@ class DocumentController extends Controller
         HomeAsset::class => HomeAsset::class,
     ];
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, AttachmentStorer $storer): RedirectResponse
     {
         $validated = $request->validate([
             'subject_type' => ['required', 'string'],
@@ -35,10 +36,10 @@ class DocumentController extends Controller
             'expires_at' => ['nullable', 'date', 'after_or_equal:issued_at'],
             'cost' => ['nullable', 'integer', 'min:0'],
             'notes' => ['nullable', 'string', 'max:1000'],
-            'file' => ['nullable', 'file', 'max:5120', 'mimes:jpg,jpeg,png,webp,pdf', 'mimetypes:image/jpeg,image/png,image/webp,application/pdf'],
+            'file' => AttachmentStorer::validationRules(false),
         ], [
             'expires_at.after_or_equal' => 'Tanggal kedaluwarsa tidak boleh lebih awal dari tanggal terbit.',
-            'file.max' => 'Ukuran berkas lampiran maksimal 5 MB.',
+            'file.max' => 'Ukuran berkas lampiran melebihi batas maksimal.',
             'file.mimes' => 'Format berkas harus berupa JPG, PNG, WEBP, atau PDF.',
         ]);
 
@@ -52,7 +53,7 @@ class DocumentController extends Controller
             abort(404, 'Subjek tidak ditemukan atau bukan milik Anda.');
         }
 
-        DB::transaction(function () use ($request, $subject, $validated): void {
+        DB::transaction(function () use ($request, $subject, $validated, $storer): void {
             $document = $subject->documents()->create([
                 'user_id' => $request->user()->id,
                 'type' => $validated['type'],
@@ -65,17 +66,7 @@ class DocumentController extends Controller
             ]);
 
             if ($request->hasFile('file')) {
-                $file = $request->file('file');
-                $userId = $request->user()->id;
-                $path = $file->store("attachments/{$userId}", 'local');
-
-                $document->attachments()->create([
-                    'user_id' => $userId,
-                    'path' => $path,
-                    'original_name' => $file->getClientOriginalName(),
-                    'mime' => $file->getClientMimeType() ?: $file->getMimeType(),
-                    'size' => $file->getSize(),
-                ]);
+                $storer->store($document, $request->file('file'), $request->user(), 'file');
             }
         });
 
@@ -105,7 +96,7 @@ class DocumentController extends Controller
             ->with('success', 'Dokumen "'.$document->title.'" berhasil diperbarui.');
     }
 
-    public function renew(Request $request, Document $document): RedirectResponse
+    public function renew(Request $request, Document $document, AttachmentStorer $storer): RedirectResponse
     {
         abort_if((int) $document->user_id !== (int) $request->user()->id, 404);
 
@@ -115,15 +106,15 @@ class DocumentController extends Controller
             'cost' => ['nullable', 'integer', 'min:0'],
             'reference_number' => ['nullable', 'string', 'max:100'],
             'notes' => ['nullable', 'string', 'max:1000'],
-            'file' => ['nullable', 'file', 'max:5120', 'mimes:jpg,jpeg,png,webp,pdf', 'mimetypes:image/jpeg,image/png,image/webp,application/pdf'],
+            'file' => AttachmentStorer::validationRules(false),
         ], [
             'expires_at.required' => 'Tanggal kedaluwarsa baru wajib diisi untuk perpanjangan.',
             'expires_at.after_or_equal' => 'Tanggal kedaluwarsa baru tidak boleh lebih awal dari tanggal terbit.',
-            'file.max' => 'Ukuran berkas lampiran maksimal 5 MB.',
+            'file.max' => 'Ukuran berkas lampiran melebihi batas maksimal.',
             'file.mimes' => 'Format berkas harus berupa JPG, PNG, WEBP, atau PDF.',
         ]);
 
-        DB::transaction(function () use ($request, $document, $validated): void {
+        DB::transaction(function () use ($request, $document, $validated, $storer): void {
             // 1. Arsipkan dokumen lama
             $document->update(['archived_at' => now()]);
 
@@ -144,17 +135,7 @@ class DocumentController extends Controller
 
             // 3. Simpan lampiran bila disertakan
             if ($request->hasFile('file')) {
-                $file = $request->file('file');
-                $userId = $request->user()->id;
-                $path = $file->store("attachments/{$userId}", 'local');
-
-                $newDocument->attachments()->create([
-                    'user_id' => $userId,
-                    'path' => $path,
-                    'original_name' => $file->getClientOriginalName(),
-                    'mime' => $file->getClientMimeType() ?: $file->getMimeType(),
-                    'size' => $file->getSize(),
-                ]);
+                $storer->store($newDocument, $request->file('file'), $request->user(), 'file');
             }
         });
 

@@ -299,4 +299,43 @@ class DamageReportTest extends TestCase
             ->delete(route('damage-reports.destroy', $report))
             ->assertNotFound();
     }
+
+    public function test_attachment_limit_of_five_is_enforced_in_damage_report_status_update(): void
+    {
+        Storage::fake('local');
+
+        $report = DamageReport::create([
+            'user_id' => $this->user->id,
+            'reportable_type' => Vehicle::class,
+            'reportable_id' => $this->vehicle->id,
+            'title' => 'Knalpot Bocor',
+            'severity' => 'sedang',
+            'status' => 'dilaporkan',
+            'reported_at' => Carbon::today(),
+        ]);
+
+        // Buat 5 lampiran awal pada damage report
+        for ($i = 1; $i <= 5; $i++) {
+            $report->attachments()->create([
+                'user_id' => $this->user->id,
+                'path' => "attachments/{$this->user->id}/foto_{$i}.jpg",
+                'original_name' => "foto_{$i}.jpg",
+                'mime' => 'image/jpeg',
+                'size' => 1024,
+            ]);
+        }
+
+        $this->assertEquals(5, $report->attachments()->count());
+
+        $newReceipt = UploadedFile::fake()->create('nota_ke_6.pdf', 100, 'application/pdf');
+
+        $response = $this->actingAs($this->user)->put(route('damage-reports.update-status', $report), [
+            'status' => 'selesai',
+            'resolved_at' => Carbon::today()->format('Y-m-d'),
+            'receipt' => $newReceipt,
+        ]);
+
+        $response->assertSessionHasErrors(['receipt']);
+        $this->assertEquals(5, $report->attachments()->count());
+    }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DamageReport;
 use App\Models\HomeAsset;
 use App\Models\Vehicle;
+use App\Services\AttachmentStorer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,7 @@ class DamageReportController extends Controller
         HomeAsset::class => HomeAsset::class,
     ];
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, AttachmentStorer $storer): RedirectResponse
     {
         $validated = $request->validate([
             'reportable_type' => ['required', 'string'],
@@ -32,12 +33,12 @@ class DamageReportController extends Controller
             'description' => ['nullable', 'string', 'max:2000'],
             'severity' => ['required', 'string', 'in:ringan,sedang,berat'],
             'reported_at' => ['required', 'date', 'before_or_equal:today'],
-            'photo' => ['nullable', 'file', 'max:5120', 'mimes:jpg,jpeg,png,webp,pdf', 'mimetypes:image/jpeg,image/png,image/webp,application/pdf'],
+            'photo' => AttachmentStorer::validationRules(false),
         ], [
             'title.required' => 'Judul kerusakan wajib diisi.',
             'severity.in' => 'Tingkat keparahan tidak valid.',
             'reported_at.before_or_equal' => 'Tanggal pelaporan tidak boleh di masa depan.',
-            'photo.max' => 'Ukuran foto maksimal 5 MB.',
+            'photo.max' => 'Ukuran foto melebihi batas maksimal.',
             'photo.mimes' => 'Format foto harus berupa JPG, PNG, WEBP, atau PDF.',
         ]);
 
@@ -51,7 +52,7 @@ class DamageReportController extends Controller
             abort(404, 'Objek tidak ditemukan atau bukan milik Anda.');
         }
 
-        DB::transaction(function () use ($request, $parent, $validated): void {
+        DB::transaction(function () use ($request, $parent, $validated, $storer): void {
             /** @var DamageReport $report */
             $report = $parent->damageReports()->create([
                 'user_id' => $request->user()->id,
@@ -63,17 +64,7 @@ class DamageReportController extends Controller
             ]);
 
             if ($request->hasFile('photo')) {
-                $file = $request->file('photo');
-                $userId = $request->user()->id;
-                $path = $file->store("attachments/{$userId}", 'local');
-
-                $report->attachments()->create([
-                    'user_id' => $userId,
-                    'path' => $path,
-                    'original_name' => $file->getClientOriginalName(),
-                    'mime' => $file->getClientMimeType() ?: $file->getMimeType(),
-                    'size' => $file->getSize(),
-                ]);
+                $storer->store($report, $request->file('photo'), $request->user(), 'photo');
             }
 
             if ($parent instanceof HomeAsset) {
@@ -85,7 +76,7 @@ class DamageReportController extends Controller
             ->with('success', 'Laporan kerusakan "'.$validated['title'].'" berhasil dicatat.');
     }
 
-    public function updateStatus(Request $request, DamageReport $damageReport): RedirectResponse
+    public function updateStatus(Request $request, DamageReport $damageReport, AttachmentStorer $storer): RedirectResponse
     {
         abort_if((int) $damageReport->user_id !== (int) $request->user()->id, 404);
 
@@ -95,16 +86,16 @@ class DamageReportController extends Controller
             'technician_name' => ['nullable', 'string', 'max:100'],
             'repair_cost' => ['nullable', 'integer', 'min:0'],
             'notes' => ['nullable', 'string', 'max:1000'],
-            'receipt' => ['nullable', 'file', 'max:5120', 'mimes:jpg,jpeg,png,webp,pdf', 'mimetypes:image/jpeg,image/png,image/webp,application/pdf'],
+            'receipt' => AttachmentStorer::validationRules(false),
         ], [
             'status.in' => 'Status perbaikan tidak valid.',
             'resolved_at.required_if' => 'Tanggal selesai wajib diisi bila status telah selesai.',
             'resolved_at.before_or_equal' => 'Tanggal selesai tidak boleh di masa depan.',
-            'receipt.max' => 'Ukuran nota/bukti maksimal 5 MB.',
+            'receipt.max' => 'Ukuran nota/bukti melebihi batas maksimal.',
             'receipt.mimes' => 'Format berkas harus berupa JPG, PNG, WEBP, atau PDF.',
         ]);
 
-        DB::transaction(function () use ($request, $damageReport, $validated): void {
+        DB::transaction(function () use ($request, $damageReport, $validated, $storer): void {
             $dataToUpdate = [
                 'status' => $validated['status'],
                 'resolved_at' => $validated['status'] === 'selesai' ? ($validated['resolved_at'] ?? now()->toDateString()) : null,
@@ -116,17 +107,7 @@ class DamageReportController extends Controller
             $damageReport->update($dataToUpdate);
 
             if ($request->hasFile('receipt')) {
-                $file = $request->file('receipt');
-                $userId = $request->user()->id;
-                $path = $file->store("attachments/{$userId}", 'local');
-
-                $damageReport->attachments()->create([
-                    'user_id' => $userId,
-                    'path' => $path,
-                    'original_name' => $file->getClientOriginalName(),
-                    'mime' => $file->getClientMimeType() ?: $file->getMimeType(),
-                    'size' => $file->getSize(),
-                ]);
+                $storer->store($damageReport, $request->file('receipt'), $request->user(), 'receipt');
             }
 
             $parent = $damageReport->reportable;
