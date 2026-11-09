@@ -26,6 +26,23 @@ class AuthTest extends TestCase
         $responseVehicles->assertRedirect('/login');
     }
 
+    public function test_guest_does_not_see_sidebar_or_top_header_on_auth_pages(): void
+    {
+        $loginRes = $this->get('/login');
+        $loginRes->assertOk();
+        $loginRes->assertSee('Masuk ke Rumahku Care');
+        $loginRes->assertDontSee('id="sidebar"', false);
+        $loginRes->assertDontSee('class="sidebar', false);
+        $loginRes->assertDontSee('top-header', false);
+
+        $registerRes = $this->get('/register');
+        $registerRes->assertOk();
+        $registerRes->assertSee('Daftar Akun Baru');
+        $registerRes->assertDontSee('id="sidebar"', false);
+        $registerRes->assertDontSee('class="sidebar', false);
+        $registerRes->assertDontSee('top-header', false);
+    }
+
     public function test_user_can_login_and_logout(): void
     {
         $user = User::firstOrFail();

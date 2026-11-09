@@ -20,24 +20,40 @@
 </head>
 <body>
 
-  <!-- Sidebar -->
-  @include('layouts.sidebar')
+  @auth
+    <!-- Sidebar -->
+    @include('layouts.sidebar')
 
-  <!-- Main Content Wrapper -->
-  <div class="main-wrapper">
-    @include('layouts.header')
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+      @include('layouts.header')
 
-    <main class="content-body">
+      <main class="content-body">
+        @if (session('success'))
+          <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+            <i class="bi bi-check-circle me-1.5"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        @endif
+
+        @yield('content')
+      </main>
+    </div>
+  @else
+    <!-- Guest Layout (Login, Register) -->
+    <div class="min-vh-100 d-flex flex-column justify-content-center align-items-center p-3">
       @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert" style="max-width: 480px; width: 100%;">
           <i class="bi bi-check-circle me-1.5"></i> {{ session('success') }}
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       @endif
 
-      @yield('content')
-    </main>
-  </div>
+      <div class="w-100">
+        @yield('content')
+      </div>
+    </div>
+  @endauth
 
   <!-- Global Modals -->
   @yield('modals')
@@ -46,6 +62,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
   
+  @auth
   <script>
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebarEl = document.getElementById('sidebar');
@@ -63,6 +80,7 @@
       }
     });
   </script>
+  @endauth
   @stack('scripts')
 </body>
 </html>

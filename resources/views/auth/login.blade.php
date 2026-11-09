@@ -3,8 +3,8 @@
 @section('title', 'Masuk - Rumahku Care')
 
 @section('content')
-<div class="row justify-content-center align-items-center" style="min-height: 75vh;">
-  <div class="col-md-5 col-sm-8 col-11">
+<div class="row justify-content-center w-100">
+  <div class="col-lg-4 col-md-6 col-sm-8 col-11">
     <div class="glass-panel p-4 p-md-5 shadow-sm">
       <div class="text-center mb-4">
         <div class="brand-symbol mx-auto mb-2" style="width: 44px; height: 44px; font-size: 1.25rem;">
