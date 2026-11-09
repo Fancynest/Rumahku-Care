@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 220" fill="none">
+  <ellipse cx="230" cy="205" rx="190" ry="12" fill="rgba(15,23,42,0.18)"/>
+  <circle cx="115" cy="170" r="32" stroke="#0f172a" stroke-width="8" fill="#94a3b8"/>
+  <circle cx="345" cy="170" r="32" stroke="#0f172a" stroke-width="8" fill="#94a3b8"/>
+  <!-- Bus body -->
+  <path d="M40 165 L40 60 Q40 45 60 45 L415 45 Q430 45 430 60 L430 165 Q410 170 377 170 M313 170 L147 170 M83 170 L40 165" stroke="#0f172a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="#cbd5e1" fill-opacity="0.35"/>
+  <path d="M55 58 L115 58 L115 105 L55 105 Z" fill="#64748b" fill-opacity="0.4" stroke="#0f172a" stroke-width="4"/>
+  <path d="M125 58 L200 58 L200 105 L125 105 Z" fill="#64748b" fill-opacity="0.4" stroke="#0f172a" stroke-width="4"/>
+  <path d="M210 58 L285 58 L285 105 L210 105 Z" fill="#64748b" fill-opacity="0.4" stroke="#0f172a" stroke-width="4"/>
+  <path d="M295 58 L370 58 L370 105 L295 105 Z" fill="#64748b" fill-opacity="0.4" stroke="#0f172a" stroke-width="4"/>
+  <path d="M380 58 L415 58 L415 105 L380 105 Z" fill="#64748b" fill-opacity="0.4" stroke="#0f172a" stroke-width="4"/>
+</svg>

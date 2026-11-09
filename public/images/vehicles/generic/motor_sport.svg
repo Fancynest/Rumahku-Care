@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" fill="none">
+  <ellipse cx="200" cy="220" rx="140" ry="12" fill="rgba(15,23,42,0.18)"/>
+  <circle cx="110" cy="180" r="32" stroke="#0f172a" stroke-width="8" fill="#cbd5e1"/>
+  <circle cx="290" cy="180" r="32" stroke="#0f172a" stroke-width="8" fill="#cbd5e1"/>
+  <!-- Sport fairing & frame -->
+  <path d="M110 180 L165 175 L200 130 L260 115 L290 180" stroke="#0f172a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Upswept tail -->
+  <path d="M200 130 L160 100 L135 105" stroke="#0f172a" stroke-width="8" stroke-linecap="round"/>
+  <!-- Fuel tank & front windshield fairing -->
+  <path d="M190 125 L215 90 L260 85 L285 115 L250 145 Z" stroke="#0f172a" stroke-width="7" stroke-linejoin="round" fill="#cbd5e1" fill-opacity="0.4"/>
+  <path d="M260 85 L275 68 L260 68" stroke="#0f172a" stroke-width="6" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 220" fill="none">
+  <ellipse cx="230" cy="205" rx="180" ry="12" fill="rgba(15,23,42,0.18)"/>
+  <circle cx="120" cy="170" r="32" stroke="#0f172a" stroke-width="8" fill="#94a3b8"/>
+  <circle cx="340" cy="170" r="32" stroke="#0f172a" stroke-width="8" fill="#94a3b8"/>
+  <!-- Tall van commuter body -->
+  <path d="M55 165 L60 115 L100 55 Q115 50 150 50 L395 50 Q410 50 415 65 L415 165 Q395 170 372 170 M308 170 L152 170 M88 170 L55 165" stroke="#0f172a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="#cbd5e1" fill-opacity="0.35"/>
+  <path d="M105 65 L175 65 L175 110 L80 110 Z" fill="#64748b" fill-opacity="0.4" stroke="#0f172a" stroke-width="4"/>
+  <path d="M185 65 L285 65 L285 110 L185 110 Z" fill="#64748b" fill-opacity="0.4" stroke="#0f172a" stroke-width="4"/>
+  <path d="M295 65 L395 65 L395 110 L295 110 Z" fill="#64748b" fill-opacity="0.4" stroke="#0f172a" stroke-width="4"/>
+</svg>

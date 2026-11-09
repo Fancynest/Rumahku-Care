@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 220" fill="none">
+  <ellipse cx="230" cy="205" rx="175" ry="12" fill="rgba(15,23,42,0.18)"/>
+  <circle cx="120" cy="170" r="34" stroke="#0f172a" stroke-width="9" fill="#94a3b8"/>
+  <circle cx="340" cy="170" r="34" stroke="#0f172a" stroke-width="9" fill="#94a3b8"/>
+  <!-- Cab and flat cargo bed -->
+  <path d="M60 165 L80 135 L145 75 Q160 68 200 68 L260 68 L265 115 L410 115 L415 165 Q400 170 375 170 M305 170 L155 170 M85 170 L60 165" stroke="#0f172a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="#cbd5e1" fill-opacity="0.35"/>
+  <path d="M150 80 L245 80 L245 120 L115 120 Z" fill="#64748b" fill-opacity="0.4" stroke="#0f172a" stroke-width="4"/>
+</svg>

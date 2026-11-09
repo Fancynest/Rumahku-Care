@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 220" fill="none">
+  <ellipse cx="230" cy="205" rx="165" ry="12" fill="rgba(15,23,42,0.18)"/>
+  <circle cx="125" cy="170" r="32" stroke="#0f172a" stroke-width="8" fill="#94a3b8"/>
+  <circle cx="335" cy="170" r="32" stroke="#0f172a" stroke-width="8" fill="#94a3b8"/>
+  <!-- Compact Hatchback -->
+  <path d="M70 165 L95 130 L160 80 Q175 75 220 75 L310 75 L370 120 L385 165 Q370 170 355 170 M303 170 L157 170 M93 170 L70 165" stroke="#0f172a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="#cbd5e1" fill-opacity="0.35"/>
+  <path d="M165 85 L240 85 L240 120 L125 120 Z" fill="#64748b" fill-opacity="0.4" stroke="#0f172a" stroke-width="4"/>
+  <path d="M250 85 L305 85 L350 120 L250 120 Z" fill="#64748b" fill-opacity="0.4" stroke="#0f172a" stroke-width="4"/>
+</svg>
