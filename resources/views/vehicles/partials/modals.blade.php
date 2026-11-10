@@ -22,12 +22,12 @@
                        required>
                 <span class="input-group-text bg-transparent text-muted">KM</span>
               </div>
-              <small class="text-muted" style="font-size: 0.72rem;">Masukkan angka total KM terbaru di dashboard fisik.</small>
+              <small class="text-muted" >Masukkan angka total KM terbaru di dashboard fisik.</small>
             </div>
           </div>
           <div class="modal-footer border-top border-slate-200 py-2.5">
-            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 40px;">Batal</button>
-            <button type="submit" class="btn btn-dark btn-sm px-3" style="min-height: 40px;">Simpan Perubahan</button>
+            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" >Batal</button>
+            <button type="submit" class="btn btn-dark btn-sm px-3" >Simpan Perubahan</button>
           </div>
         </form>
       </div>
@@ -59,7 +59,7 @@
                        value="{{ $selectedVehicle->odometer }}" 
                        min="0" 
                        required>
-                <small class="text-muted" style="font-size: 0.72rem;">Sesuai angka odometer pada tanggal pelaksanaan servis.</small>
+                <small class="text-muted" >Sesuai angka odometer pada tanggal pelaksanaan servis.</small>
               </div>
             </div>
 
@@ -92,7 +92,7 @@
                   </option>
                 @endforeach
               </select>
-              <small class="text-muted" style="font-size: 0.72rem;">Jika dipilih, siklus jadwal terkait akan otomatis diperbarui.</small>
+              <small class="text-muted" >Jika dipilih, siklus jadwal terkait akan otomatis diperbarui.</small>
             </div>
 
             <!-- Baris 4: Biaya Jasa & Suku Cadang + Total -->
@@ -107,7 +107,7 @@
                   <input type="number" id="servisPartsCost" name="parts_cost" class="form-control" value="0" min="0" step="1000">
                 </div>
                 <div class="col-md-4 text-md-end pt-2 pt-md-0">
-                  <small class="text-muted d-block" style="font-size: 0.72rem;">Total Biaya Perawatan:</small>
+                  <small class="text-muted d-block" >Total Biaya Perawatan:</small>
                   <div class="fw-bold fs-5 text-dark" id="servisTotalCost">Rp 0</div>
                 </div>
               </div>
@@ -124,8 +124,8 @@
             </div>
           </div>
           <div class="modal-footer border-top border-slate-200 py-2.5">
-            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
-            <button type="submit" class="btn btn-dark btn-sm px-4" style="min-height: 44px;">Simpan Catatan Servis</button>
+            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" >Batal</button>
+            <button type="submit" class="btn btn-dark btn-sm px-4" >Simpan Catatan Servis</button>
           </div>
         </form>
       </div>
@@ -141,10 +141,10 @@
           <button type="button" class="btn-close small" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body py-3">
-          <table class="table table-sm table-borderless mb-0" style="font-size: 0.85rem;">
+          <table class="table table-sm table-borderless mb-0" >
             <tbody>
               <tr>
-                <td class="text-muted" style="width: 40%;">Merek & Model</td>
+                <td class="text-muted" >Merek & Model</td>
                 <td class="fw-semibold text-dark">{{ $selectedVehicle->name }}</td>
               </tr>
               <tr>
@@ -175,7 +175,7 @@
           </table>
         </div>
         <div class="modal-footer border-top border-slate-200 py-2.5">
-          <button type="button" class="btn btn-dark btn-sm px-3" data-bs-dismiss="modal" style="min-height: 40px;">Tutup</button>
+          <button type="button" class="btn btn-dark btn-sm px-3" data-bs-dismiss="modal" >Tutup</button>
         </div>
       </div>
     </div>
@@ -197,20 +197,20 @@
 
           <div class="modal-body py-3">
             <div class="p-2.5 rounded-3 bg-light border mb-3">
-              <small class="text-muted d-block" style="font-size: 0.72rem;">Catatan Servis Terkait:</small>
+              <small class="text-muted d-block" >Catatan Servis Terkait:</small>
               <div class="fw-bold text-dark" id="labelNotaRecordTitle">-</div>
             </div>
 
             <div class="mb-2">
               <label class="form-label text-muted small mb-1">Pilih Berkas Nota (Foto atau PDF, Maks 5 MB) <span class="text-danger">*</span></label>
-              <input type="file" name="file" class="form-control" accept="image/*,application/pdf" required style="min-height: 44px;">
-              <small class="text-muted" style="font-size: 0.72rem;">Berkas disimpan secara privat dan hanya dapat diakses oleh Anda.</small>
+              <input type="file" name="file" class="form-control" accept="image/*,application/pdf" required >
+              <small class="text-muted" >Berkas disimpan secara privat dan hanya dapat diakses oleh Anda.</small>
             </div>
           </div>
 
           <div class="modal-footer border-top border-slate-200 py-2.5">
-            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
-            <button type="submit" class="btn btn-dark btn-sm px-4" style="min-height: 44px;">Upload Nota</button>
+            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" >Batal</button>
+            <button type="submit" class="btn btn-dark btn-sm px-4" >Upload Nota</button>
           </div>
         </form>
       </div>
@@ -236,11 +236,11 @@
             <div class="row g-2 mb-3">
               <div class="col-md-6">
                 <label class="form-label text-muted small mb-1">Judul Pemeriksaan <span class="text-danger">*</span></label>
-                <input type="text" name="title" class="form-control" value="Inspeksi Pra-Perjalanan Kendaraan" required style="min-height: 44px;">
+                <input type="text" name="title" class="form-control" value="Inspeksi Pra-Perjalanan Kendaraan" required >
               </div>
               <div class="col-md-6">
                 <label class="form-label text-muted small mb-1">Tanggal Inspeksi <span class="text-danger">*</span></label>
-                <input type="date" name="inspected_at" class="form-control" value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" required style="min-height: 44px;">
+                <input type="date" name="inspected_at" class="form-control" value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" required >
               </div>
             </div>
 
@@ -260,18 +260,18 @@
                 @endphp
                 @foreach ($defaultVehicleItems as $idx => $itemText)
                   <div class="p-2.5 rounded-2 bg-light border d-flex flex-wrap align-items-center justify-content-between gap-2">
-                    <div class="fw-medium text-dark small" style="flex: 1 1 200px;">
+                    <div class="fw-medium text-dark small" >
                       {{ $itemText }}
                       <input type="hidden" name="items[{{ $idx }}][label]" value="{{ $itemText }}">
                     </div>
-                    <div class="d-flex align-items-center gap-1.5" style="flex: 0 0 auto;">
-                      <select name="items[{{ $idx }}][status]" class="form-select form-select-sm" style="min-height: 38px; width: 140px;">
+                    <div class="d-flex align-items-center gap-1.5" >
+                      <select name="items[{{ $idx }}][status]" class="form-select form-select-sm" >
                         <option value="ok" selected>Kondisi OK</option>
                         <option value="perhatian">Perhatian</option>
                         <option value="bermasalah">Bermasalah</option>
                         <option value="na">N/A</option>
                       </select>
-                      <input type="text" name="items[{{ $idx }}][notes]" class="form-control form-control-sm" placeholder="Catatan (opsional)" style="min-height: 38px; width: 150px;">
+                      <input type="text" name="items[{{ $idx }}][notes]" class="form-control form-control-sm" placeholder="Catatan (opsional)" >
                     </div>
                   </div>
                 @endforeach
@@ -285,8 +285,8 @@
           </div>
 
           <div class="modal-footer border-top border-slate-200 py-2.5">
-            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
-            <button type="submit" class="btn btn-dark btn-sm px-4" style="min-height: 44px;">Simpan Hasil Inspeksi</button>
+            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" >Batal</button>
+            <button type="submit" class="btn btn-dark btn-sm px-4" >Simpan Hasil Inspeksi</button>
           </div>
         </form>
       </div>
@@ -310,13 +310,13 @@
           <div class="modal-body py-3">
             <div class="mb-3">
               <label class="form-label text-muted small mb-1">Judul Kendala / Kerusakan <span class="text-danger">*</span></label>
-              <input type="text" name="title" class="form-control" placeholder="Contoh: Bunyi decit saat rem mendadak" required style="min-height: 44px;">
+              <input type="text" name="title" class="form-control" placeholder="Contoh: Bunyi decit saat rem mendadak" required >
             </div>
 
             <div class="row g-2 mb-3">
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Tingkat Keparahan <span class="text-danger">*</span></label>
-                <select name="severity" class="form-select" required style="min-height: 44px;">
+                <select name="severity" class="form-select" required >
                   <option value="ringan">Ringan (Baret / Lecet)</option>
                   <option value="sedang" selected>Sedang (Bunyi / Getar)</option>
                   <option value="berat">Berat (Mogok / Rem Blong)</option>
@@ -324,7 +324,7 @@
               </div>
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Tanggal Diketahui <span class="text-danger">*</span></label>
-                <input type="date" name="reported_at" class="form-control" value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" required style="min-height: 44px;">
+                <input type="date" name="reported_at" class="form-control" value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" required >
               </div>
             </div>
 
@@ -335,13 +335,13 @@
 
             <div class="mb-2">
               <label class="form-label text-muted small mb-1">Foto Bukti / Video Kerusakan (Maks 5 MB)</label>
-              <input type="file" name="photo" class="form-control" accept="image/*,application/pdf" style="min-height: 44px;">
+              <input type="file" name="photo" class="form-control" accept="image/*,application/pdf" >
             </div>
           </div>
 
           <div class="modal-footer border-top border-slate-200 py-2.5">
-            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
-            <button type="submit" class="btn btn-dark btn-sm px-4" style="min-height: 44px;">Catat Laporan</button>
+            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" >Batal</button>
+            <button type="submit" class="btn btn-dark btn-sm px-4" >Catat Laporan</button>
           </div>
         </form>
       </div>
@@ -365,7 +365,7 @@
             <div class="row g-2 mb-3">
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Status Perbaikan <span class="text-danger">*</span></label>
-                <select name="status" id="inputStatusDamageKendaraan" class="form-select" required style="min-height: 44px;">
+                <select name="status" id="inputStatusDamageKendaraan" class="form-select" required >
                   <option value="dilaporkan">Dilaporkan</option>
                   <option value="dalam_perbaikan">Dalam Perbaikan</option>
                   <option value="selesai">Selesai Diperbaiki</option>
@@ -373,18 +373,18 @@
               </div>
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Tanggal Selesai</label>
-                <input type="date" name="resolved_at" id="inputStatusResolvedAtKendaraan" class="form-control" value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" style="min-height: 44px;">
+                <input type="date" name="resolved_at" id="inputStatusResolvedAtKendaraan" class="form-control" value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" >
               </div>
             </div>
 
             <div class="row g-2 mb-3">
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Bengkel / Teknisi</label>
-                <input type="text" name="technician_name" id="inputStatusTechKendaraan" class="form-control" placeholder="Nama bengkel / mekanik" style="min-height: 44px;">
+                <input type="text" name="technician_name" id="inputStatusTechKendaraan" class="form-control" placeholder="Nama bengkel / mekanik" >
               </div>
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Biaya Perbaikan (Rp)</label>
-                <input type="number" name="repair_cost" id="inputStatusCostKendaraan" class="form-control" value="0" min="0" step="5000" style="min-height: 44px;">
+                <input type="number" name="repair_cost" id="inputStatusCostKendaraan" class="form-control" value="0" min="0" step="5000" >
               </div>
             </div>
 
@@ -395,13 +395,13 @@
 
             <div class="mb-2">
               <label class="form-label text-muted small mb-1">Nota / Bukti Servis Bengkel (Opsional)</label>
-              <input type="file" name="receipt" class="form-control" accept="image/*,application/pdf" style="min-height: 44px;">
+              <input type="file" name="receipt" class="form-control" accept="image/*,application/pdf" >
             </div>
           </div>
 
           <div class="modal-footer border-top border-slate-200 py-2.5">
-            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
-            <button type="submit" class="btn btn-dark btn-sm px-4" style="min-height: 44px;">Perbarui Status</button>
+            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" >Batal</button>
+            <button type="submit" class="btn btn-dark btn-sm px-4" >Perbarui Status</button>
           </div>
         </form>
       </div>
@@ -426,7 +426,7 @@
             <div class="row g-2 mb-3">
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Tipe Dokumen <span class="text-danger">*</span></label>
-                <select name="type" class="form-select" required style="min-height: 44px;">
+                <select name="type" class="form-select" required >
                   @foreach ($documentTypes as $typeKey => $typeLabel)
                     <option value="{{ $typeKey }}" {{ $typeKey === 'stnk_pajak' ? 'selected' : '' }}>{{ $typeLabel }}</option>
                   @endforeach
@@ -434,29 +434,29 @@
               </div>
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Nomor Registrasi / Polis</label>
-                <input type="text" name="reference_number" class="form-control" placeholder="Contoh: No. STNK / No. Polis" style="min-height: 44px;">
+                <input type="text" name="reference_number" class="form-control" placeholder="Contoh: No. STNK / No. Polis" >
               </div>
             </div>
 
             <div class="mb-3">
               <label class="form-label text-muted small mb-1">Judul Dokumen <span class="text-danger">*</span></label>
-              <input type="text" name="title" class="form-control" placeholder="Contoh: Pajak STNK Tahunan / Asuransi TLO" required style="min-height: 44px;">
+              <input type="text" name="title" class="form-control" placeholder="Contoh: Pajak STNK Tahunan / Asuransi TLO" required >
             </div>
 
             <div class="row g-2 mb-3">
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Tanggal Terbit</label>
-                <input type="date" name="issued_at" class="form-control" value="{{ date('Y-m-d') }}" style="min-height: 44px;">
+                <input type="date" name="issued_at" class="form-control" value="{{ date('Y-m-d') }}" >
               </div>
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Tanggal Jatuh Tempo / Habis</label>
-                <input type="date" name="expires_at" class="form-control" style="min-height: 44px;">
+                <input type="date" name="expires_at" class="form-control" >
               </div>
             </div>
 
             <div class="mb-3">
               <label class="form-label text-muted small mb-1">Biaya / Pokok PKB (Rp)</label>
-              <input type="number" name="cost" class="form-control" value="0" min="0" step="1000" style="min-height: 44px;">
+              <input type="number" name="cost" class="form-control" value="0" min="0" step="1000" >
             </div>
 
             <div class="mb-3">
@@ -466,13 +466,13 @@
 
             <div class="mb-2">
               <label class="form-label text-muted small mb-1">Foto STNK / Berkas Polis (Maks 5 MB)</label>
-              <input type="file" name="file" class="form-control" accept="image/*,application/pdf" style="min-height: 44px;">
+              <input type="file" name="file" class="form-control" accept="image/*,application/pdf" >
             </div>
           </div>
 
           <div class="modal-footer border-top border-slate-200 py-2.5">
-            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
-            <button type="submit" class="btn btn-dark btn-sm px-4" style="min-height: 44px;">Simpan Dokumen</button>
+            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" >Batal</button>
+            <button type="submit" class="btn btn-dark btn-sm px-4" >Simpan Dokumen</button>
           </div>
         </form>
       </div>
@@ -492,30 +492,30 @@
 
           <div class="modal-body py-3">
             <div class="p-2.5 rounded-3 bg-light border mb-3">
-              <small class="text-muted d-block" style="font-size: 0.72rem;">Dokumen yang Diperpanjang:</small>
+              <small class="text-muted d-block" >Dokumen yang Diperpanjang:</small>
               <div class="fw-bold text-dark" id="labelPerpanjangTitleKendaraan">-</div>
-              <small class="text-muted" style="font-size: 0.72rem;">Dokumen lama otomatis diarsipkan ke riwayat kepemilikan.</small>
+              <small class="text-muted" >Dokumen lama otomatis diarsipkan ke riwayat kepemilikan.</small>
             </div>
 
             <div class="row g-2 mb-3">
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Tanggal Terbit Baru</label>
-                <input type="date" name="issued_at" class="form-control" value="{{ date('Y-m-d') }}" style="min-height: 44px;">
+                <input type="date" name="issued_at" class="form-control" value="{{ date('Y-m-d') }}" >
               </div>
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Jatuh Tempo Baru <span class="text-danger">*</span></label>
-                <input type="date" name="expires_at" class="form-control" required style="min-height: 44px;">
+                <input type="date" name="expires_at" class="form-control" required >
               </div>
             </div>
 
             <div class="row g-2 mb-3">
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Nomor Polis / Bukti Baru</label>
-                <input type="text" name="reference_number" id="inputPerpanjangRefKendaraan" class="form-control" style="min-height: 44px;">
+                <input type="text" name="reference_number" id="inputPerpanjangRefKendaraan" class="form-control" >
               </div>
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Biaya Bayar (Rp)</label>
-                <input type="number" name="cost" id="inputPerpanjangCostKendaraan" class="form-control" value="0" min="0" step="1000" style="min-height: 44px;">
+                <input type="number" name="cost" id="inputPerpanjangCostKendaraan" class="form-control" value="0" min="0" step="1000" >
               </div>
             </div>
 
@@ -526,13 +526,13 @@
 
             <div class="mb-2">
               <label class="form-label text-muted small mb-1">Unggah Lembar Pajak Baru (PDF / Foto)</label>
-              <input type="file" name="file" class="form-control" accept="image/*,application/pdf" style="min-height: 44px;">
+              <input type="file" name="file" class="form-control" accept="image/*,application/pdf" >
             </div>
           </div>
 
           <div class="modal-footer border-top border-slate-200 py-2.5">
-            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
-            <button type="submit" class="btn btn-dark btn-sm px-4" style="min-height: 44px;">Perpanjang & Arsipkan Lama</button>
+            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" >Batal</button>
+            <button type="submit" class="btn btn-dark btn-sm px-4" >Perpanjang & Arsipkan Lama</button>
           </div>
         </form>
       </div>
@@ -554,31 +554,31 @@
             <div class="row g-2 mb-3">
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Tanggal Pengisian <span class="text-danger">*</span></label>
-                <input type="date" name="filled_at" class="form-control" value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" required style="min-height: 44px;">
+                <input type="date" name="filled_at" class="form-control" value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" required >
               </div>
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Odometer (KM) <span class="text-danger">*</span></label>
-                <input type="number" name="odometer" class="form-control" value="{{ $selectedVehicle->odometer }}" min="0" required style="min-height: 44px;">
+                <input type="number" name="odometer" class="form-control" value="{{ $selectedVehicle->odometer }}" min="0" required >
               </div>
             </div>
 
             <div class="row g-2 mb-3">
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Volume Bensin (Liter) <span class="text-danger">*</span></label>
-                <input type="text" name="liters" class="form-control" placeholder="mis. 32,5" required style="min-height: 44px;">
-                <small class="text-muted" style="font-size: 0.72rem;">Bisa koma desimal ("32,5")</small>
+                <input type="text" name="liters" class="form-control" placeholder="mis. 32,5" required >
+                <small class="text-muted" >Bisa koma desimal ("32,5")</small>
               </div>
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Total Biaya (Rp) <span class="text-danger">*</span></label>
-                <input type="text" name="total_cost" class="form-control" placeholder="mis. 350.000" required style="min-height: 44px;">
-                <small class="text-muted" style="font-size: 0.72rem;">Bisa titik ribuan</small>
+                <input type="text" name="total_cost" class="form-control" placeholder="mis. 350.000" required >
+                <small class="text-muted" >Bisa titik ribuan</small>
               </div>
             </div>
 
             <div class="row g-2 mb-3">
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Jenis Bahan Bakar</label>
-                <input type="text" name="fuel_grade" list="fuelGradesList" class="form-control" placeholder="Pertalite / Dexlite..." style="min-height: 44px;">
+                <input type="text" name="fuel_grade" list="fuelGradesList" class="form-control" placeholder="Pertalite / Dexlite..." >
                 <datalist id="fuelGradesList">
                   <option value="Pertalite (RON 90)">
                   <option value="Pertamax (RON 92)">
@@ -594,7 +594,7 @@
               </div>
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Nama / Lokasi SPBU</label>
-                <input type="text" name="station" class="form-control" placeholder="mis. SPBU Dago" style="min-height: 44px;">
+                <input type="text" name="station" class="form-control" placeholder="mis. SPBU Dago" >
               </div>
             </div>
 
@@ -605,7 +605,7 @@
                   Pengisian Tangki Penuh (Full Tank)
                 </label>
               </div>
-              <small class="text-muted d-block ps-1" style="font-size: 0.72rem;">Centang untuk menghitung konsumsi efisiensi km/L secara akurat.</small>
+              <small class="text-muted d-block ps-1" >Centang untuk menghitung konsumsi efisiensi km/L secara akurat.</small>
             </div>
 
             <div class="mb-3">
@@ -615,14 +615,14 @@
 
             <div class="mb-2">
               <label class="form-label text-muted small mb-1">Lampiran Struk / Nota (Opsional)</label>
-              <input type="file" name="file" class="form-control" accept=".jpg,.jpeg,.png,.webp,.pdf,image/*,application/pdf" style="min-height: 44px;">
-              <small class="text-muted" style="font-size: 0.72rem;">Format JPG, PNG, atau PDF (maks 5 MB).</small>
+              <input type="file" name="file" class="form-control" accept=".jpg,.jpeg,.png,.webp,.pdf,image/*,application/pdf" >
+              <small class="text-muted" >Format JPG, PNG, atau PDF (maks 5 MB).</small>
             </div>
           </div>
 
           <div class="modal-footer border-top border-slate-200 py-2.5">
-            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
-            <button type="submit" class="btn btn-dark btn-sm px-4" style="min-height: 44px;">Simpan Catatan</button>
+            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" >Batal</button>
+            <button type="submit" class="btn btn-dark btn-sm px-4" >Simpan Catatan</button>
           </div>
         </form>
       </div>
@@ -645,33 +645,33 @@
             <div class="row g-2 mb-3">
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Tanggal Pengisian <span class="text-danger">*</span></label>
-                <input type="date" name="filled_at" id="inputEditFilledAt" class="form-control" max="{{ date('Y-m-d') }}" required style="min-height: 44px;">
+                <input type="date" name="filled_at" id="inputEditFilledAt" class="form-control" max="{{ date('Y-m-d') }}" required >
               </div>
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Odometer (KM) <span class="text-danger">*</span></label>
-                <input type="number" name="odometer" id="inputEditOdometer" class="form-control" min="0" required style="min-height: 44px;">
+                <input type="number" name="odometer" id="inputEditOdometer" class="form-control" min="0" required >
               </div>
             </div>
 
             <div class="row g-2 mb-3">
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Volume Bensin (Liter) <span class="text-danger">*</span></label>
-                <input type="text" name="liters" id="inputEditLiters" class="form-control" required style="min-height: 44px;">
+                <input type="text" name="liters" id="inputEditLiters" class="form-control" required >
               </div>
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Total Biaya (Rp) <span class="text-danger">*</span></label>
-                <input type="text" name="total_cost" id="inputEditTotalCost" class="form-control" required style="min-height: 44px;">
+                <input type="text" name="total_cost" id="inputEditTotalCost" class="form-control" required >
               </div>
             </div>
 
             <div class="row g-2 mb-3">
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Jenis Bahan Bakar</label>
-                <input type="text" name="fuel_grade" id="inputEditFuelGrade" list="fuelGradesList" class="form-control" style="min-height: 44px;">
+                <input type="text" name="fuel_grade" id="inputEditFuelGrade" list="fuelGradesList" class="form-control" >
               </div>
               <div class="col-6">
                 <label class="form-label text-muted small mb-1">Nama / Lokasi SPBU</label>
-                <input type="text" name="station" id="inputEditStation" class="form-control" style="min-height: 44px;">
+                <input type="text" name="station" id="inputEditStation" class="form-control" >
               </div>
             </div>
 
@@ -691,8 +691,8 @@
           </div>
 
           <div class="modal-footer border-top border-slate-200 py-2.5">
-            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
-            <button type="submit" class="btn btn-dark btn-sm px-4" style="min-height: 44px;">Simpan Perubahan</button>
+            <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" >Batal</button>
+            <button type="submit" class="btn btn-dark btn-sm px-4" >Simpan Perubahan</button>
           </div>
         </form>
       </div>
@@ -715,7 +715,7 @@
           <!-- Pilih Merek -->
           <div class="mb-3">
             <label class="form-label text-muted small mb-1">Merek Kendaraan <span class="text-danger">*</span></label>
-            <select class="form-select" id="selectBrand" required style="min-height: 44px;">
+            <select class="form-select" id="selectBrand" required >
               <option value="" disabled selected>Pilih Merek...</option>
               @foreach ($modelsGrouped as $brand => $brandModels)
                 <option value="{{ $brand }}">{{ $brand }}</option>
@@ -727,7 +727,7 @@
           <!-- Pilih Model (Cascading) -->
           <div class="mb-3" id="wrapperModel">
             <label class="form-label text-muted small mb-1">Model Kendaraan <span class="text-danger">*</span></label>
-            <select class="form-select" id="selectModel" name="vehicle_model_id" required style="min-height: 44px;">
+            <select class="form-select" id="selectModel" name="vehicle_model_id" required >
               <option value="" disabled selected>Pilih merek terlebih dahulu...</option>
             </select>
           </div>
@@ -736,11 +736,11 @@
           <div id="wrapperOtherModel" class="p-3 rounded-3 bg-light border mb-3 d-none">
             <div class="mb-2">
               <label class="form-label text-muted small mb-1">Nama Model Lengkap <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" name="custom_model_name" placeholder="Misal: Vespa Primavera 150" style="min-height: 44px;">
+              <input type="text" class="form-control" name="custom_model_name" placeholder="Misal: Vespa Primavera 150" >
             </div>
             <div>
               <label class="form-label text-muted small mb-1">Jenis Bodi <span class="text-danger">*</span></label>
-              <select class="form-select" name="custom_body_type" style="min-height: 44px;">
+              <select class="form-select" name="custom_body_type" >
                 <option value="motor_matic">Motor Matic (Skuter)</option>
                 <option value="motor_sport">Motor Sport / Manual</option>
                 <option value="hatchback">Hatchback (City Car)</option>
@@ -759,11 +759,11 @@
           <div class="row g-2 mb-3">
             <div class="col-7">
               <label class="form-label text-muted small mb-1">Nomor Plat Polisi <span class="text-danger">*</span></label>
-              <input type="text" class="form-control font-monospace text-uppercase" name="plate" placeholder="B 1234 ABC" required style="min-height: 44px;">
+              <input type="text" class="form-control font-monospace text-uppercase" name="plate" placeholder="B 1234 ABC" required >
             </div>
             <div class="col-5">
               <label class="form-label text-muted small mb-1">Tahun Perakitan</label>
-              <input type="number" class="form-control" name="year" placeholder="{{ date('Y') }}" min="1970" max="{{ date('Y') + 1 }}" style="min-height: 44px;">
+              <input type="number" class="form-control" name="year" placeholder="{{ date('Y') }}" min="1970" max="{{ date('Y') + 1 }}" >
             </div>
           </div>
 
@@ -771,11 +771,11 @@
           <div class="row g-2 mb-3">
             <div class="col-6">
               <label class="form-label text-muted small mb-1">Odometer Awal (KM) <span class="text-danger">*</span></label>
-              <input type="number" class="form-control" name="odometer" placeholder="0" min="0" required style="min-height: 44px;">
+              <input type="number" class="form-control" name="odometer" placeholder="0" min="0" required >
             </div>
             <div class="col-6">
               <label class="form-label text-muted small mb-1">Bahan Bakar <span class="text-danger">*</span></label>
-              <select class="form-select" name="fuel_type" required style="min-height: 44px;">
+              <select class="form-select" name="fuel_type" required >
                 <option value="Bensin" selected>Bensin</option>
                 <option value="Diesel">Diesel</option>
                 <option value="Listrik (EV)">Listrik (EV)</option>
@@ -788,7 +788,7 @@
           <div class="row g-2 mb-2">
             <div class="col-6">
               <label class="form-label text-muted small mb-1">Warna Bodi <span class="text-danger">*</span></label>
-              <select class="form-select" name="color_key" required style="min-height: 44px;">
+              <select class="form-select" name="color_key" required >
                 <option value="hitam" selected>Hitam</option>
                 <option value="putih">Putih</option>
                 <option value="silver">Silver / Abu-abu</option>
@@ -799,14 +799,14 @@
             </div>
             <div class="col-6">
               <label class="form-label text-muted small mb-1">Bengkel Langganan</label>
-              <input type="text" class="form-control" name="workshop" placeholder="Opsional (misal: AHASS)" style="min-height: 44px;">
+              <input type="text" class="form-control" name="workshop" placeholder="Opsional (misal: AHASS)" >
             </div>
           </div>
         </div>
 
         <div class="modal-footer border-top border-slate-200 py-2.5">
-          <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
-          <button type="submit" class="btn btn-dark btn-sm px-4" style="min-height: 44px;">Simpan ke Garasi</button>
+          <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" >Batal</button>
+          <button type="submit" class="btn btn-dark btn-sm px-4" >Simpan ke Garasi</button>
         </div>
       </form>
     </div>
@@ -830,7 +830,7 @@
           <!-- Pilih Merek -->
           <div class="mb-3">
             <label class="form-label text-muted small mb-1">Merek Kendaraan <span class="text-danger">*</span></label>
-            <select class="form-select" id="selectBrandEdit" required style="min-height: 44px;">
+            <select class="form-select" id="selectBrandEdit" required >
               <option value="" disabled>Pilih Merek...</option>
               @foreach ($modelsGrouped as $brand => $brandModels)
                 <option value="{{ $brand }}" {{ $selectedVehicle->vehicleModel?->brand === $brand ? 'selected' : '' }}>{{ $brand }}</option>
@@ -842,7 +842,7 @@
           <!-- Pilih Model (Cascading) -->
           <div class="mb-3" id="wrapperModelEdit">
             <label class="form-label text-muted small mb-1">Model Kendaraan <span class="text-danger">*</span></label>
-            <select class="form-select" id="selectModelEdit" name="vehicle_model_id" required style="min-height: 44px;">
+            <select class="form-select" id="selectModelEdit" name="vehicle_model_id" required >
               @if ($selectedVehicle->vehicleModel)
                 @foreach ($modelsGrouped[$selectedVehicle->vehicleModel->brand] ?? [] as $m)
                   <option value="{{ $m->id }}" {{ $selectedVehicle->vehicle_model_id === $m->id ? 'selected' : '' }}>
@@ -860,11 +860,11 @@
           <div id="wrapperOtherModelEdit" class="p-3 rounded-3 bg-light border mb-3 {{ $selectedVehicle->vehicle_model_id ? 'd-none' : '' }}">
             <div class="mb-2">
               <label class="form-label text-muted small mb-1">Nama Model Lengkap <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" name="custom_model_name" value="{{ $selectedVehicle->custom_model_name }}" placeholder="Misal: Vespa Primavera 150" style="min-height: 44px;">
+              <input type="text" class="form-control" name="custom_model_name" value="{{ $selectedVehicle->custom_model_name }}" placeholder="Misal: Vespa Primavera 150" >
             </div>
             <div>
               <label class="form-label text-muted small mb-1">Jenis Bodi <span class="text-danger">*</span></label>
-              <select class="form-select" name="custom_body_type" style="min-height: 44px;">
+              <select class="form-select" name="custom_body_type" >
                 @foreach (['motor_matic' => 'Motor Matic (Skuter)', 'motor_sport' => 'Motor Sport / Manual', 'hatchback' => 'Hatchback (City Car)', 'sedan' => 'Sedan', 'mpv' => 'MPV (Mobil Keluarga)', 'suv' => 'SUV', 'pickup' => 'Pickup', 'van' => 'Van', 'bus' => 'Bus', 'truk' => 'Truk'] as $bKey => $bLabel)
                   <option value="{{ $bKey }}" {{ $selectedVehicle->custom_body_type === $bKey ? 'selected' : '' }}>{{ $bLabel }}</option>
                 @endforeach
@@ -876,11 +876,11 @@
           <div class="row g-2 mb-3">
             <div class="col-7">
               <label class="form-label text-muted small mb-1">Nomor Plat Polisi <span class="text-danger">*</span></label>
-              <input type="text" class="form-control font-monospace text-uppercase" name="plate" value="{{ $selectedVehicle->plate }}" required style="min-height: 44px;">
+              <input type="text" class="form-control font-monospace text-uppercase" name="plate" value="{{ $selectedVehicle->plate }}" required >
             </div>
             <div class="col-5">
               <label class="form-label text-muted small mb-1">Tahun Perakitan</label>
-              <input type="number" class="form-control" name="year" value="{{ $selectedVehicle->year }}" placeholder="{{ date('Y') }}" min="1970" max="{{ date('Y') + 1 }}" style="min-height: 44px;">
+              <input type="number" class="form-control" name="year" value="{{ $selectedVehicle->year }}" placeholder="{{ date('Y') }}" min="1970" max="{{ date('Y') + 1 }}" >
             </div>
           </div>
 
@@ -888,7 +888,7 @@
           <div class="row g-2 mb-3">
             <div class="col-6">
               <label class="form-label text-muted small mb-1">Bahan Bakar <span class="text-danger">*</span></label>
-              <select class="form-select" name="fuel_type" required style="min-height: 44px;">
+              <select class="form-select" name="fuel_type" required >
                 @foreach (['Bensin', 'Diesel', 'Listrik (EV)', 'Hybrid'] as $ft)
                   <option value="{{ $ft }}" {{ $selectedVehicle->fuel_type === $ft ? 'selected' : '' }}>{{ $ft }}</option>
                 @endforeach
@@ -896,7 +896,7 @@
             </div>
             <div class="col-6">
               <label class="form-label text-muted small mb-1">Warna Bodi <span class="text-danger">*</span></label>
-              <select class="form-select text-capitalize" name="color_key" required style="min-height: 44px;">
+              <select class="form-select text-capitalize" name="color_key" required >
                 @foreach (['hitam', 'putih', 'silver', 'merah', 'biru', 'lainnya'] as $ck)
                   <option value="{{ $ck }}" {{ strtolower($selectedVehicle->color_key) === $ck ? 'selected' : '' }}>{{ ucfirst($ck) }}</option>
                 @endforeach
@@ -907,13 +907,13 @@
           <!-- Bengkel Langganan -->
           <div class="mb-2">
             <label class="form-label text-muted small mb-1">Bengkel Langganan</label>
-            <input type="text" class="form-control" name="workshop" value="{{ $selectedVehicle->workshop }}" placeholder="Opsional (misal: AHASS)" style="min-height: 44px;">
+            <input type="text" class="form-control" name="workshop" value="{{ $selectedVehicle->workshop }}" placeholder="Opsional (misal: AHASS)" >
           </div>
         </div>
 
         <div class="modal-footer border-top border-slate-200 py-2.5">
-          <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
-          <button type="submit" class="btn btn-dark btn-sm px-4" style="min-height: 44px;">Simpan Perubahan</button>
+          <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" >Batal</button>
+          <button type="submit" class="btn btn-dark btn-sm px-4" >Simpan Perubahan</button>
         </div>
       </form>
     </div>
@@ -938,7 +938,7 @@
 
           <div class="mb-3">
             <label class="form-label text-muted small mb-1">Alasan Pengarsipan <span class="text-danger">*</span></label>
-            <select class="form-select" name="archive_reason" required style="min-height: 44px;">
+            <select class="form-select" name="archive_reason" required >
               <option value="dijual" selected>Kendaraan Telah Dijual</option>
               <option value="rusak_berat">Rusak Berat / Tidak Digunakan</option>
               <option value="lainnya">Alasan Lainnya</option>
@@ -947,8 +947,8 @@
         </div>
 
         <div class="modal-footer border-top border-slate-200 py-2.5">
-          <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
-          <button type="submit" class="btn btn-danger btn-sm px-4" style="min-height: 44px;">Arsipkan Sekarang</button>
+          <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" >Batal</button>
+          <button type="submit" class="btn btn-danger btn-sm px-4" >Arsipkan Sekarang</button>
         </div>
       </form>
     </div>
@@ -978,13 +978,13 @@
           </p>
 
           <div class="mb-2">
-            <input type="text" name="confirm_plate" class="form-control font-monospace text-uppercase" placeholder="Ketik {{ $selectedVehicle->plate }}" required style="min-height: 44px;">
+            <input type="text" name="confirm_plate" class="form-control font-monospace text-uppercase" placeholder="Ketik {{ $selectedVehicle->plate }}" required >
           </div>
         </div>
 
         <div class="modal-footer border-top border-slate-200 py-2.5">
-          <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
-          <button type="submit" class="btn btn-danger btn-sm px-4" style="min-height: 44px;">Hapus Permanen</button>
+          <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" >Batal</button>
+          <button type="submit" class="btn btn-danger btn-sm px-4" >Hapus Permanen</button>
         </div>
       </form>
     </div>

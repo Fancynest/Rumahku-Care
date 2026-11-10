@@ -8,7 +8,7 @@
 <!-- Header Riwayat -->
 <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
   <div>
-    <h5 class="fw-bold text-dark mb-0" style="letter-spacing: -0.02em;">Riwayat Aktivitas Terpadu</h5>
+    <h5 class="fw-bold text-dark mb-0">Riwayat Aktivitas Terpadu</h5>
     <span class="text-muted small">Catatan kronologis seluruh servis, pengisian BBM, kerusakan, inspeksi, dan dokumen.</span>
   </div>
   <div class="text-muted small">
@@ -22,7 +22,7 @@
     <!-- Filter Jenis Kejadian -->
     <div class="col-12 col-sm-6 col-md-3">
       <label class="form-label text-muted small fw-semibold mb-1" for="filterType">Jenis Kejadian</label>
-      <select name="type" id="filterType" class="form-select form-select-sm" style="min-height: 44px;">
+      <select name="type" id="filterType" class="form-select form-select-sm">
         <option value="all" {{ $filters['type'] === 'all' ? 'selected' : '' }}>Semua Jenis</option>
         <option value="maintenance" {{ $filters['type'] === 'maintenance' ? 'selected' : '' }}>🔧 Perawatan Selesai</option>
         <option value="fuel" {{ $filters['type'] === 'fuel' ? 'selected' : '' }}>⛽ Pengisian BBM</option>
@@ -35,7 +35,7 @@
     <!-- Filter Subjek -->
     <div class="col-12 col-sm-6 col-md-3">
       <label class="form-label text-muted small fw-semibold mb-1" for="filterSubject">Subjek / Objek</label>
-      <select name="subject" id="filterSubject" class="form-select form-select-sm" style="min-height: 44px;">
+      <select name="subject" id="filterSubject" class="form-select form-select-sm">
         <option value="all" {{ $filters['subject'] === 'all' ? 'selected' : '' }}>Semua Subjek</option>
         @if ($vehicles->isNotEmpty())
           <optgroup label="Kendaraan">
@@ -61,22 +61,22 @@
     <!-- Filter Rentang Tanggal -->
     <div class="col-6 col-sm-3 col-md-2">
       <label class="form-label text-muted small fw-semibold mb-1" for="filterFrom">Dari Tanggal</label>
-      <input type="date" name="from" id="filterFrom" class="form-control form-control-sm" value="{{ $filters['from'] }}" style="min-height: 44px;">
+      <input type="date" name="from" id="filterFrom" class="form-control form-control-sm" value="{{ $filters['from'] }}">
     </div>
 
     <div class="col-6 col-sm-3 col-md-2">
       <label class="form-label text-muted small fw-semibold mb-1" for="filterTo">Sampai Tanggal</label>
-      <input type="date" name="to" id="filterTo" class="form-control form-control-sm" value="{{ $filters['to'] }}" style="min-height: 44px;">
+      <input type="date" name="to" id="filterTo" class="form-control form-control-sm" value="{{ $filters['to'] }}">
     </div>
 
     <!-- Tombol Filter & Reset -->
     <div class="col-12 col-md-2 d-flex gap-2">
-      <button type="submit" class="btn btn-dark btn-sm flex-fill d-flex align-items-center justify-content-center gap-1.5" style="min-height: 44px;">
+      <button type="submit" class="btn btn-dark btn-sm flex-fill d-flex align-items-center justify-content-center gap-1.5">
         <i class="bi bi-funnel"></i>
         <span>Saring</span>
       </button>
       @if ($filters['type'] !== 'all' || $filters['subject'] !== 'all' || $filters['from'] || $filters['to'])
-        <a href="{{ route('schedules.history') }}" class="btn btn-glass btn-sm d-flex align-items-center justify-content-center p-2 text-secondary" title="Reset Filter" style="min-height: 44px; min-width: 44px;">
+        <a href="{{ route('schedules.history') }}" class="btn btn-glass btn-touch btn-sm d-flex align-items-center justify-content-center p-2 text-secondary" title="Reset Filter">
           <i class="bi bi-x-lg"></i>
         </a>
       @endif
@@ -97,41 +97,40 @@
       <div>
         <!-- Penanda Tanggal -->
         <div class="d-flex align-items-center gap-2 mb-2.5">
-          <span class="badge bg-slate-200 text-slate-800 fw-semibold px-2.5 py-1.5 rounded-pill" style="font-size: 0.78rem;">
+          <span class="badge bg-slate-200 text-slate-800 fw-semibold px-2.5 py-1.5 rounded-pill text-xs">
             <i class="bi bi-calendar-event me-1"></i> {{ $dateLabel }}
           </span>
           <div class="flex-grow-1 border-bottom border-slate-200"></div>
-          <span class="text-muted small" style="font-size: 0.72rem;">{{ $items->count() }} kejadian</span>
+          <span class="text-muted text-2xs">{{ $items->count() }} kejadian</span>
         </div>
 
         <!-- Daftar Kartu Kejadian -->
         <div class="d-flex flex-column gap-2">
           @foreach ($items as $item)
             <div class="p-3 rounded-3 bg-white border border-slate-200 shadow-2xs d-flex flex-wrap align-items-center justify-content-between gap-3 hover-lift">
-              <div class="d-flex align-items-start gap-3 flex-grow-1" style="min-width: 240px;">
+              <div class="d-flex align-items-start gap-3 flex-grow-1">
                 <!-- Icon Lingkaran -->
-                <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" 
-                     style="width: 42px; height: 42px; background: rgba(241, 245, 249, 0.9); color: #1e293b;">
+                <div class="avatar-lg rounded-3 bg-light text-dark flex-shrink-0">
                   <i class="bi {{ $item->icon }} fs-5"></i>
                 </div>
 
                 <div class="overflow-hidden">
                   <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-                    <span class="chip {{ $item->chip_class }} py-0 px-2" style="font-size: 0.7rem;">
+                    <span class="chip {{ $item->chip_class }} py-0 px-2 text-2xs">
                       {{ $item->type_label }}
                     </span>
-                    <span class="badge bg-light text-secondary border py-0 px-2" style="font-size: 0.7rem;">
+                    <span class="badge bg-light text-secondary border py-0 px-2 text-2xs">
                       {{ $item->subject_name }}
                     </span>
                   </div>
-                  <h6 class="fw-bold text-dark mb-1" style="font-size: 0.9rem;">{{ $item->title }}</h6>
-                  <p class="text-muted small mb-0" style="font-size: 0.78rem;">{{ $item->summary }}</p>
+                  <h6 class="fw-bold text-dark mb-1">{{ $item->title }}</h6>
+                  <p class="text-muted small mb-0">{{ $item->summary }}</p>
                 </div>
               </div>
 
               <!-- Tombol Aksi Buka Objek -->
               <div class="d-flex align-items-center">
-                <a href="{{ $item->url }}" class="btn btn-glass btn-sm px-3.5 py-2 text-dark d-flex align-items-center gap-1.5" style="min-height: 44px; font-size: 0.8rem;">
+                <a href="{{ $item->url }}" class="btn btn-glass btn-sm px-3.5 py-2 text-dark d-flex align-items-center gap-1.5">
                   <span>Detail</span>
                   <i class="bi bi-arrow-right"></i>
                 </a>

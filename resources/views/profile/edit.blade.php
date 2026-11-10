@@ -17,12 +17,12 @@
       <!-- Form 1: Data Profil -->
       <div class="glass-panel p-4 shadow-sm">
         <div class="d-flex align-items-center gap-2 mb-3">
-          <div class="brand-symbol" style="width: 36px; height: 36px; font-size: 1rem;">
+          <div class="brand-symbol avatar-md">
             <i class="bi bi-person"></i>
           </div>
           <div>
             <h6 class="fw-bold text-dark mb-0">Informasi Pribadi</h6>
-            <span class="text-muted small" style="font-size: 0.78rem;">Perbarui nama dan alamat email terdaftar</span>
+            <span class="text-muted text-xs">Perbarui nama dan alamat email terdaftar</span>
           </div>
         </div>
 
@@ -32,7 +32,7 @@
 
           <div class="mb-3">
             <label class="form-label text-muted small mb-1">Nama Lengkap</label>
-            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $user->name) }}" required style="min-height: 44px;">
+            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $user->name) }}" required>
             @error('name')
               <div class="invalid-feedback">{{ $message }}</div>
             @enderror
@@ -40,7 +40,7 @@
 
           <div class="mb-3">
             <label class="form-label text-muted small mb-1">Alamat Email</label>
-            <input type="email" name="email" id="profileEmailInput" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $user->email) }}" required style="min-height: 44px;">
+            <input type="email" name="email" id="profileEmailInput" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $user->email) }}" required>
             @error('email')
               <div class="invalid-feedback">{{ $message }}</div>
             @enderror
@@ -50,13 +50,13 @@
             <label class="form-label text-muted small mb-1">
               Kata Sandi Saat Ini <span class="text-muted fw-normal">(Wajib diisi jika mengubah email)</span>
             </label>
-            <input type="password" name="current_password" class="form-control @error('current_password') is-invalid @enderror" placeholder="Masukkan kata sandi saat ini jika email diubah" style="min-height: 44px;">
+            <input type="password" name="current_password" class="form-control @error('current_password') is-invalid @enderror" placeholder="Masukkan kata sandi saat ini jika email diubah">
             @error('current_password')
               <div class="invalid-feedback">{{ $message }}</div>
             @enderror
           </div>
 
-          <button type="submit" class="btn btn-dark fw-semibold" style="min-height: 44px;">
+          <button type="submit" class="btn btn-dark fw-semibold">
             <i class="bi bi-check2 me-1"></i> Simpan Perubahan Profil
           </button>
         </form>
@@ -65,12 +65,12 @@
       <!-- Form 2: Ganti Password -->
       <div class="glass-panel p-4 shadow-sm">
         <div class="d-flex align-items-center gap-2 mb-3">
-          <div class="brand-symbol" style="width: 36px; height: 36px; font-size: 1rem;">
+          <div class="brand-symbol avatar-md">
             <i class="bi bi-shield-lock"></i>
           </div>
           <div>
             <h6 class="fw-bold text-dark mb-0">Keamanan Kata Sandi</h6>
-            <span class="text-muted small" style="font-size: 0.78rem;">Perbarui kata sandi secara berkala untuk menjaga akun tetap aman</span>
+            <span class="text-muted text-xs">Perbarui kata sandi secara berkala untuk menjaga akun tetap aman</span>
           </div>
         </div>
 
@@ -80,7 +80,7 @@
 
           <div class="mb-3">
             <label class="form-label text-muted small mb-1">Kata Sandi Saat Ini</label>
-            <input type="password" name="current_password" class="form-control @error('current_password', 'updatePassword') is-invalid @enderror" required style="min-height: 44px;">
+            <input type="password" name="current_password" class="form-control @error('current_password', 'updatePassword') is-invalid @enderror" required>
             @error('current_password', 'updatePassword')
               <div class="invalid-feedback">{{ $message }}</div>
             @enderror
@@ -88,7 +88,7 @@
 
           <div class="mb-3">
             <label class="form-label text-muted small mb-1">Kata Sandi Baru</label>
-            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required style="min-height: 44px;">
+            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required>
             @error('password')
               <div class="invalid-feedback">{{ $message }}</div>
             @enderror
@@ -97,14 +97,14 @@
 
           <div class="mb-3">
             <label class="form-label text-muted small mb-1">Konfirmasi Kata Sandi Baru</label>
-            <input type="password" name="password_confirmation" class="form-control" required style="min-height: 44px;">
+            <input type="password" name="password_confirmation" class="form-control" required>
           </div>
 
           <div class="alert alert-light border small text-muted mb-3 py-2">
             <i class="bi bi-info-circle me-1"></i> Mengubah kata sandi akan otomatis mengeluarkan (logout) sesi aktif Anda pada peramban dan perangkat lain.
           </div>
 
-          <button type="submit" class="btn btn-dark fw-semibold" style="min-height: 44px;">
+          <button type="submit" class="btn btn-dark fw-semibold">
             <i class="bi bi-key me-1"></i> Perbarui Kata Sandi
           </button>
         </form>
@@ -116,13 +116,13 @@
       <div class="glass-panel p-4 shadow-sm">
         <h6 class="fw-bold text-dark mb-3">Ringkasan Akun</h6>
         <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom">
-          <div class="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center fw-bold fs-4" style="width: 54px; height: 54px;">
+          <div class="avatar-xl bg-dark text-white fs-4">
             {{ strtoupper(substr($user->name, 0, 2)) }}
           </div>
           <div>
             <div class="fw-bold text-dark fs-6">{{ $user->name }}</div>
             <div class="text-muted small">{{ $user->email }}</div>
-            <span class="badge bg-success-subtle text-success mt-1" style="font-size: 0.7rem;">Akun Aktif</span>
+            <span class="badge bg-success-subtle text-success mt-1 text-2xs">Akun Aktif</span>
           </div>
         </div>
 
@@ -152,7 +152,7 @@
           Menghapus akun akan menghapus seluruh data Anda secara permanen: seluruh aset rumah, kendaraan di garasi, jadwal perawatan, catatan servis, riwayat BBM, dokumen garansi/pajak, serta seluruh file lampiran fisik di penyimpanan server.
         </p>
 
-        <button type="button" class="btn btn-outline-danger fw-semibold w-100" data-bs-toggle="modal" data-bs-target="#modalHapusAkun" style="min-height: 44px;">
+        <button type="button" class="btn btn-outline-danger fw-semibold w-100" data-bs-toggle="modal" data-bs-target="#modalHapusAkun">
           <i class="bi bi-trash3 me-1"></i> Hapus Akun Saya Permanen
         </button>
       </div>
@@ -184,15 +184,15 @@
             <label class="form-label text-muted small mb-1">
               Masukkan Kata Sandi Anda untuk Mengonfirmasi
             </label>
-            <input type="password" name="password" class="form-control @error('password', 'destroy') is-invalid @enderror" placeholder="Kata sandi akun Anda" required style="min-height: 44px;">
+            <input type="password" name="password" class="form-control @error('password', 'destroy') is-invalid @enderror" placeholder="Kata sandi akun Anda" required>
             @error('password', 'destroy')
               <div class="invalid-feedback">{{ $message }}</div>
             @enderror
           </div>
         </div>
         <div class="modal-footer border-0 pt-0">
-          <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="min-height: 44px;">Batal</button>
-          <button type="submit" class="btn btn-danger fw-semibold" style="min-height: 44px;">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-danger fw-semibold">
             <i class="bi bi-trash3 me-1"></i> Ya, Hapus Akun Permanen
           </button>
         </div>

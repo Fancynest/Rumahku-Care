@@ -5,7 +5,7 @@
         <h6 class="fw-bold text-dark mb-0">Jadwal Perawatan Aset</h6>
         <span class="text-muted small">Agenda pemeliharaan berkala untuk {{ $homeAsset->name }}.</span>
       </div>
-      <a href="{{ route('schedules.index', ['filter' => 'home_asset']) }}" class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center gap-1.5" style="min-height: 40px; font-weight: 500;">
+      <a href="{{ route('schedules.index', ['filter' => 'home_asset']) }}" class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center gap-1.5 fw-medium min-h-40">
         <i class="bi bi-calendar-plus"></i>
         <span>Kelola di Jadwal</span>
       </a>
@@ -15,8 +15,8 @@
       <div class="p-4 text-center text-muted bg-white-50 rounded-3 border border-dashed border-slate-200">
         <i class="bi bi-calendar2-x d-block fs-3 mb-1 text-secondary"></i>
         <div class="fw-medium text-dark small">Belum ada jadwal perawatan aktif untuk aset ini</div>
-        <p class="text-muted mb-3" style="font-size: 0.78rem;">Buat pengingat berkala untuk servis rutin agar aset tetap prima.</p>
-        <a href="{{ route('schedules.index', ['filter' => 'home_asset']) }}" class="btn btn-dark btn-sm px-3" style="min-height: 44px; display: inline-flex; align-items: center;">
+        <p class="text-muted mb-3 text-xs">Buat pengingat berkala untuk servis rutin agar aset tetap prima.</p>
+        <a href="{{ route('schedules.index', ['filter' => 'home_asset']) }}" class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center min-h-44">
           <i class="bi bi-plus-lg me-1"></i> Buat Jadwal Baru
         </a>
       </div>
@@ -33,7 +33,7 @@
                 @endif
               </div>
               @if ($sch->notes)
-                <div class="text-muted small mt-1" style="font-size: 0.75rem;">{{ $sch->notes }}</div>
+                <div class="text-muted small mt-1 text-xs">{{ $sch->notes }}</div>
               @endif
             </div>
             <div class="d-flex align-items-center gap-2">
@@ -43,7 +43,7 @@
               <form action="{{ route('schedules.complete', $sch->id) }}" method="POST" class="m-0">
                 @csrf
                 <input type="hidden" name="done_at" value="{{ date('Y-m-d') }}">
-                <button type="submit" class="btn btn-glass btn-sm px-3 text-nowrap" style="min-height: 40px;" title="Tandai Selesai Hari Ini">
+                <button type="submit" class="btn btn-glass btn-sm px-3 text-nowrap min-h-40" title="Tandai Selesai Hari Ini">
                   <i class="bi bi-check2 me-1"></i> Selesai
                 </button>
               </form>

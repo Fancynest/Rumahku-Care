@@ -7,7 +7,7 @@
   <div class="col-lg-4 col-md-6 col-sm-8 col-11">
     <div class="glass-panel p-4 p-md-5 shadow-sm">
       <div class="text-center mb-4">
-        <div class="brand-symbol mx-auto mb-2" style="width: 44px; height: 44px; font-size: 1.25rem;">
+        <div class="brand-symbol avatar-lg mx-auto mb-2">
           <i class="bi bi-shield-check"></i>
         </div>
         <h4 class="fw-bold text-dark mb-1">Masuk ke Rumahku Care</h4>
@@ -18,7 +18,7 @@
         @csrf
         <div class="mb-3">
           <label class="form-label text-muted small mb-1">Alamat Email</label>
-          <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" required autofocus style="min-height: 44px;">
+          <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" required autofocus>
           @error('email')
             <div class="invalid-feedback">{{ $message }}</div>
           @enderror
@@ -26,7 +26,7 @@
 
         <div class="mb-3">
           <label class="form-label text-muted small mb-1">Kata Sandi</label>
-          <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required style="min-height: 44px;">
+          <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required>
           @error('password')
             <div class="invalid-feedback">{{ $message }}</div>
           @enderror
@@ -40,7 +40,7 @@
           <a href="{{ route('password.request') }}" class="small text-muted text-decoration-none">Lupa kata sandi?</a>
         </div>
 
-        <button type="submit" class="btn btn-dark w-100 fw-semibold mb-3" style="min-height: 44px;">
+        <button type="submit" class="btn btn-dark w-100 fw-semibold mb-3">
           Masuk Sekarang
         </button>
 

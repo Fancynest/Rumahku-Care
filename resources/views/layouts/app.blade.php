@@ -42,9 +42,9 @@
     </div>
   @else
     <!-- Guest Layout (Login, Register) -->
-    <div class="d-flex flex-column justify-content-center align-items-center p-3" style="min-height: 100dvh;">
+    <div class="d-flex flex-column justify-content-center align-items-center p-3 min-vh-100">
       @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert" style="max-width: 480px; width: 100%;">
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4 w-100 w-max-480" role="alert">
           <i class="bi bi-check-circle me-1.5"></i> {{ session('success') }}
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>

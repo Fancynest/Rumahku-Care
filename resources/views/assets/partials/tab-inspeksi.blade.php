@@ -5,7 +5,7 @@
         <h6 class="fw-bold text-dark mb-0">Pemeriksaan Rutin & Keselamatan</h6>
         <span class="text-muted small">Catatan checklist berkala kondisi teknis aset.</span>
       </div>
-      <button class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center gap-1.5" data-bs-toggle="modal" data-bs-target="#modalMulaiInspeksi" style="min-height: 40px; font-weight: 500;">
+      <button class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center gap-1.5 fw-medium min-h-40" data-bs-toggle="modal" data-bs-target="#modalMulaiInspeksi">
         <i class="bi bi-clipboard-plus"></i>
         <span>Mulai Inspeksi</span>
       </button>
@@ -15,8 +15,8 @@
       <div class="p-4 text-center text-muted bg-white-50 rounded-3 border border-dashed border-slate-200">
         <i class="bi bi-clipboard-x d-block fs-3 mb-1 text-secondary"></i>
         <div class="fw-medium text-dark small">Belum ada riwayat inspeksi tercatat</div>
-        <p class="text-muted mb-3" style="font-size: 0.78rem;">Lakukan inspeksi keselamatan atau kelayakan rutin untuk mendeteksi potensi masalah lebih dini.</p>
-        <button class="btn btn-dark btn-sm px-3" data-bs-toggle="modal" data-bs-target="#modalMulaiInspeksi" style="min-height: 44px;">
+        <p class="text-muted mb-3 text-xs">Lakukan inspeksi keselamatan atau kelayakan rutin untuk mendeteksi potensi masalah lebih dini.</p>
+        <button class="btn btn-dark btn-sm px-3 min-h-44" data-bs-toggle="modal" data-bs-target="#modalMulaiInspeksi">
           <i class="bi bi-clipboard-plus me-1"></i> Mulai Inspeksi Pertama
         </button>
       </div>
@@ -44,7 +44,7 @@
               @foreach ($run->items as $item)
                 <div class="list-group-item d-flex flex-wrap justify-content-between align-items-center py-2 px-3 gap-2">
                   <div class="d-flex align-items-center gap-2">
-                    <span class="badge {{ $item->status_badge_class }} px-2 py-0.5" style="font-size: 0.72rem;">
+                    <span class="badge {{ $item->status_badge_class }} px-2 py-0.5 text-2xs">
                       {{ $item->status_label }}
                     </span>
                     <span class="text-dark small fw-medium">{{ $item->item_label }}</span>
@@ -54,13 +54,13 @@
                   </div>
                   @if (in_array($item->status, ['perhatian', 'bermasalah']))
                     @if ($item->damage_report_id)
-                      <span class="badge bg-secondary-subtle text-secondary border px-2 py-1" style="font-size: 0.72rem;">
+                      <span class="badge bg-secondary-subtle text-secondary border px-2 py-1 text-2xs">
                         <i class="bi bi-check-circle me-1"></i>Sudah Dikonversi
                       </span>
                     @else
                       <form action="{{ route('inspections.convert-damage', $item->id) }}" method="POST" class="m-0" onsubmit="return confirm('Konversikan temuan ini menjadi laporan kerusakan aktif?');">
                         @csrf
-                        <button type="submit" class="btn btn-glass btn-sm py-1 px-2.5 text-danger d-inline-flex align-items-center gap-1" style="min-height: 36px; font-size: 0.75rem;">
+                        <button type="submit" class="btn btn-glass btn-sm py-1 px-2.5 text-danger d-inline-flex align-items-center gap-1 btn-action-sm text-xs">
                           <i class="bi bi-tools"></i>
                           <span>Jadikan Kerusakan</span>
                         </button>

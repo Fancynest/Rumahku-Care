@@ -5,7 +5,7 @@
         <h6 class="fw-bold text-dark mb-0">Riwayat Kerusakan & Trouble Kendaraan</h6>
         <span class="text-muted small">Pencatatan kendala mesin, kelistrikan, bodi, dan perbaikan bengkel.</span>
       </div>
-      <button class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center gap-1.5" data-bs-toggle="modal" data-bs-target="#modalLaporKerusakanKendaraan" style="min-height: 40px; font-weight: 500;">
+      <button class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center gap-1.5 fw-medium min-h-40" data-bs-toggle="modal" data-bs-target="#modalLaporKerusakanKendaraan">
         <i class="bi bi-tools"></i>
         <span>Laporkan Kerusakan</span>
       </button>
@@ -15,8 +15,8 @@
       <div class="p-4 text-center text-muted bg-white-50 rounded-3 border border-dashed border-slate-200">
         <i class="bi bi-shield-check d-block fs-3 mb-1 text-success"></i>
         <div class="fw-medium text-dark small">Tidak ada laporan kerusakan aktif</div>
-        <p class="text-muted mb-3" style="font-size: 0.78rem;">Kendaraan dalam kondisi fisik normal tanpa catatan kendala terbuka.</p>
-        <button class="btn btn-glass btn-sm px-3" data-bs-toggle="modal" data-bs-target="#modalLaporKerusakanKendaraan" style="min-height: 44px;">
+        <p class="text-muted mb-3 text-xs">Kendaraan dalam kondisi fisik normal tanpa catatan kendala terbuka.</p>
+        <button class="btn btn-glass btn-sm px-3 min-h-44" data-bs-toggle="modal" data-bs-target="#modalLaporKerusakanKendaraan">
           <i class="bi bi-plus-lg me-1"></i> Catat Kerusakan Baru
         </button>
       </div>
@@ -27,15 +27,15 @@
             <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
               <div>
                 <div class="d-flex align-items-center gap-1.5 mb-1">
-                  <span class="badge {{ $report->severity_badge_class }} px-2 py-0.5" style="font-size: 0.72rem;">
+                  <span class="badge {{ $report->severity_badge_class }} px-2 py-0.5 text-2xs">
                     {{ $report->severity_label }}
                   </span>
-                  <span class="badge {{ $report->status_badge_class }} px-2 py-0.5" style="font-size: 0.72rem;">
+                  <span class="badge {{ $report->status_badge_class }} px-2 py-0.5 text-2xs">
                     {{ $report->status_label }}
                   </span>
                 </div>
                 <h6 class="fw-bold text-dark mb-0.5">{{ $report->title }}</h6>
-                <small class="text-muted font-monospace" style="font-size: 0.75rem;">
+                <small class="text-muted font-monospace text-xs">
                   Dilaporkan: {{ $report->reported_at?->format('d M Y') }}
                   @if ($report->resolved_at)
                     • Selesai: {{ $report->resolved_at->format('d M Y') }}
@@ -45,8 +45,7 @@
 
               <div class="d-flex align-items-center gap-2">
                 @if ($report->status !== 'selesai')
-                  <button class="btn btn-dark btn-sm px-3 btn-edit-damage-status" 
-                          style="min-height: 38px; font-size: 0.78rem;"
+                  <button class="btn btn-dark btn-sm px-3 btn-edit-damage-status min-h-40 text-xs" 
                           data-bs-toggle="modal" 
                           data-bs-target="#modalStatusKerusakanKendaraan"
                           data-id="{{ $report->id }}"
@@ -61,7 +60,7 @@
                 <form action="{{ route('damage-reports.destroy', $report->id) }}" method="POST" onsubmit="return confirm('Hapus laporan kerusakan ini?');" class="m-0">
                   @csrf
                   @method('DELETE')
-                  <button type="submit" class="btn btn-glass btn-sm text-danger p-2" title="Hapus Laporan" style="min-height: 38px; min-width: 38px;">
+                  <button type="submit" class="btn btn-glass btn-action text-danger" title="Hapus Laporan">
                     <i class="bi bi-trash"></i>
                   </button>
                 </form>
@@ -74,16 +73,16 @@
 
             <div class="p-2.5 rounded-2 bg-light border small text-muted d-flex flex-wrap gap-3">
               <div>
-                <span class="text-muted d-block" style="font-size: 0.7rem;">Bengkel / Teknisi:</span>
+                <span class="text-muted d-block text-2xs">Bengkel / Teknisi:</span>
                 <span class="fw-medium text-dark">{{ $report->technician_name ?: '-' }}</span>
               </div>
               <div>
-                <span class="text-muted d-block" style="font-size: 0.7rem;">Biaya Perbaikan:</span>
+                <span class="text-muted d-block text-2xs">Biaya Perbaikan:</span>
                 <span class="fw-medium text-dark">{{ $report->repair_cost ? 'Rp ' . number_format($report->repair_cost) : '-' }}</span>
               </div>
               @if ($report->notes)
                 <div class="w-100 mt-1 pt-1 border-top border-slate-200">
-                  <span class="text-muted d-block" style="font-size: 0.7rem;">Catatan:</span>
+                  <span class="text-muted d-block text-2xs">Catatan:</span>
                   <span class="text-dark">{{ $report->notes }}</span>
                 </div>
               @endif
@@ -93,7 +92,7 @@
             @if ($report->attachments->isNotEmpty())
               <div class="mt-2.5 pt-2 border-top border-slate-100 d-flex flex-wrap gap-2">
                 @foreach ($report->attachments as $att)
-                  <a href="{{ route('attachments.show', $att->id) }}" target="_blank" class="btn btn-glass btn-sm py-1 px-2.5 d-inline-flex align-items-center gap-1.5" style="min-height: 32px; font-size: 0.75rem;">
+                  <a href="{{ route('attachments.show', $att->id) }}" target="_blank" class="btn btn-glass btn-sm py-1 px-2.5 d-inline-flex align-items-center gap-1.5 btn-action-sm text-xs">
                     <i class="bi {{ str_contains($att->mime, 'pdf') ? 'bi-file-earmark-pdf text-danger' : 'bi-image text-primary' }}"></i>
                     <span>{{ Str::limit($att->original_name, 20) }}</span>
                   </a>

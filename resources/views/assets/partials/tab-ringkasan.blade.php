@@ -4,11 +4,11 @@
       <div class="d-flex align-items-center gap-2.5">
         @if ($homeAsset->primary_image_url)
           <a href="{{ $homeAsset->primary_image_url }}" target="_blank">
-            <img src="{{ $homeAsset->primary_image_url }}" alt="{{ $homeAsset->name }}" class="rounded-2 object-fit-cover border" style="width: 52px; height: 52px;">
+            <img src="{{ $homeAsset->primary_image_url }}" alt="{{ $homeAsset->name }}" class="rounded-2 object-fit-cover border preview-thumb">
           </a>
         @endif
         <div>
-          <span class="badge bg-light text-dark border px-2.5 py-1 text-uppercase me-2" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+          <span class="badge bg-light text-dark border px-2.5 py-1 text-uppercase me-2 text-2xs tracking-wider">
             {{ $homeAsset->category_label }}
           </span>
           <span class="text-muted small"><i class="bi bi-geo-alt me-1"></i>{{ $homeAsset->room }}</span>
@@ -21,10 +21,10 @@
 
     <div class="row g-3">
       <div class="col-md-6">
-        <table class="table table-sm table-borderless mb-0" style="font-size: 0.88rem;">
+        <table class="table table-sm table-borderless mb-0 text-sm">
           <tbody>
             <tr>
-              <td class="text-muted" style="width: 40%;">Merek</td>
+              <td class="text-muted w-max-160">Merek</td>
               <td class="fw-semibold text-dark">{{ $homeAsset->brand ?: '-' }}</td>
             </tr>
             <tr>
@@ -40,10 +40,10 @@
       </div>
 
       <div class="col-md-6">
-        <table class="table table-sm table-borderless mb-0" style="font-size: 0.88rem;">
+        <table class="table table-sm table-borderless mb-0 text-sm">
           <tbody>
             <tr>
-              <td class="text-muted" style="width: 45%;">Tanggal Pasang / Beli</td>
+              <td class="text-muted w-max-180">Tanggal Pasang / Beli</td>
               <td class="text-dark">{{ $homeAsset->purchased_at ? $homeAsset->purchased_at->format('d F Y') : '-' }}</td>
             </tr>
             <tr>
@@ -61,7 +61,7 @@
 
     @if ($homeAsset->notes)
       <div class="mt-4 pt-3 border-top border-slate-200">
-        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.85rem;">Catatan Perawatan</h6>
+        <h6 class="fw-bold text-dark mb-1 text-sm">Catatan Perawatan</h6>
         <p class="text-muted small mb-0">{{ $homeAsset->notes }}</p>
       </div>
     @endif

@@ -22,7 +22,7 @@
     };
 @endphp
 
-<div class="vehicle-visual-container position-relative d-flex flex-column align-items-center justify-content-center w-100" style="min-height: 250px;">
+<div class="vehicle-visual-container position-relative d-flex flex-column align-items-center justify-content-center w-100">
     @if ($glb)
         {{-- Layer A: True 3D with <model-viewer> --}}
         <model-viewer
@@ -35,7 +35,7 @@
             shadow-intensity="1.5"
             shadow-softness="1"
             loading="lazy"
-            style="width: 100%; height: 260px; background-color: transparent;"
+            class="vehicle-model-viewer"
         >
         </model-viewer>
 
@@ -62,8 +62,7 @@
             <img 
                 src="{{ $image }}" 
                 alt="{{ $vehicle->name }}"
-                class="img-fluid"
-                style="max-height: 230px; object-fit: contain; filter: drop-shadow(0 16px 20px rgba(15, 23, 42, 0.22));"
+                class="img-fluid vehicle-studio-img"
             >
             <div class="vehicle-ground-shadow"></div>
         </div>
@@ -73,10 +72,9 @@
             <img 
                 src="{{ $genericAsset }}" 
                 alt="{{ $vehicle->name }}"
-                class="img-fluid"
-                style="max-height: 180px; object-fit: contain; opacity: 0.85;"
+                class="img-fluid vehicle-generic-img"
             >
-            <small class="text-muted d-block mt-2" style="font-size: 0.72rem;">Ilustrasi Kategori: {{ strtoupper(str_replace('_', ' ', $bodyType)) }}</small>
+            <small class="text-muted d-block mt-2 text-2xs">Ilustrasi Kategori: {{ strtoupper(str_replace('_', ' ', $bodyType)) }}</small>
         </div>
     @endif
 </div>

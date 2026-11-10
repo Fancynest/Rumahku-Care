@@ -5,7 +5,7 @@
 @section('content')
 <!-- (a) 1 Kalimat Sapaan Kontekstual -->
 <div class="mb-4">
-  <h4 class="fw-bold mb-1 text-dark" style="letter-spacing: -0.02em;">{{ $greetingMessage }}</h4>
+  <h4 class="fw-bold mb-1 text-dark">{{ $greetingMessage }}</h4>
   @if ($hasNoData)
     <p class="text-muted mb-0 small">Mulai kelola inventaris aset dan jadwalkan perawatan berkala Anda di satu tempat.</p>
   @else
@@ -16,19 +16,19 @@
 @if ($hasNoData)
   <!-- Empty State Onboarding -->
   <div class="glass-panel p-5 text-center my-4">
-    <div class="mx-auto mb-3 d-inline-flex align-items-center justify-content-center rounded-circle bg-light border" style="width: 64px; height: 64px;">
+    <div class="mx-auto mb-3 avatar-xl bg-light border">
       <i class="bi bi-house-add text-dark fs-3"></i>
     </div>
     <h5 class="fw-bold text-dark mb-2">Mulai Kelola Rumah dan Kendaraan Anda</h5>
-    <p class="text-muted small mx-auto mb-4" style="max-width: 500px;">
+    <p class="text-muted small mx-auto mb-4 w-max-480">
       Anda belum memiliki kendaraan, aset rumah, maupun jadwal perawatan yang terdaftar. Tambahkan aset pertama Anda untuk mulai memantau servis berkala dan pengingat jatuh tempo secara otomatis.
     </p>
     <div class="d-flex flex-wrap justify-content-center gap-3">
-      <a href="{{ route('vehicles.index') }}" class="btn btn-dark px-4 py-2 d-inline-flex align-items-center gap-2" style="min-height: 44px; font-weight: 500;">
+      <a href="{{ route('vehicles.index') }}" class="btn btn-dark px-4 py-2">
         <i class="bi bi-car-front"></i>
         <span>Tambah Kendaraan</span>
       </a>
-      <a href="{{ route('home-assets.index') }}" class="btn btn-glass px-4 py-2 d-inline-flex align-items-center gap-2" style="min-height: 44px; font-weight: 500;">
+      <a href="{{ route('home-assets.index') }}" class="btn btn-glass px-4 py-2">
         <i class="bi bi-grid"></i>
         <span>Tambah Aset Rumah</span>
       </a>
@@ -78,10 +78,10 @@
         <div class="fw-bold text-dark mb-1">Semua Aset Terawat Baik</div>
         <p class="text-muted small mb-3">Tidak ada jadwal perawatan yang mendesak atau terlambat saat ini.</p>
         <div class="d-flex justify-content-center gap-2">
-          <a href="{{ route('vehicles.index') }}" class="btn btn-glass btn-sm px-3" style="min-height: 40px;">
+          <a href="{{ route('vehicles.index') }}" class="btn btn-glass btn-sm px-3">
             <i class="bi bi-car-front me-1"></i> Buka Garasi
           </a>
-          <a href="{{ route('home-assets.index') }}" class="btn btn-glass btn-sm px-3" style="min-height: 40px;">
+          <a href="{{ route('home-assets.index') }}" class="btn btn-glass btn-sm px-3">
             <i class="bi bi-grid me-1"></i> Aset Rumah
           </a>
         </div>
@@ -98,12 +98,12 @@
                       <span class="chip-dot"></span> {{ ucfirst($card->status_label) }}
                     </span>
                     @if ($card->priority && $card->priority !== 'normal')
-                      <span class="badge {{ $card->priority === 'darurat' ? 'bg-danger text-white' : ($card->priority === 'mendesak' ? 'bg-warning-subtle text-warning-emphasis border border-warning' : 'bg-info-subtle text-info-emphasis border border-info') }} py-0.5 px-1.5 text-capitalize" style="font-size: 0.65rem;">
+                      <span class="badge {{ $card->priority === 'darurat' ? 'bg-danger text-white' : ($card->priority === 'mendesak' ? 'bg-warning-subtle text-warning-emphasis border border-warning' : 'bg-info-subtle text-info-emphasis border border-info') }} py-0.5 px-1.5 text-capitalize text-2xs">
                         {{ ucfirst($card->priority) }}
                       </span>
                     @endif
                   </div>
-                  <span class="badge bg-light text-dark border px-2 py-0.5" style="font-size: 0.68rem;">
+                  <span class="badge bg-light text-dark border px-2 py-0.5 text-2xs">
                     {{ $card->type_badge }}
                   </span>
                 </div>
@@ -112,24 +112,23 @@
                 <h6 class="fw-bold mb-1 text-dark">{{ $card->title }}</h6>
 
                 <!-- Sisa KM / Hari / Keterangan -->
-                <div class="text-muted small mb-3" style="font-size: 0.8rem;">
+                <div class="text-muted small mb-3">
                   <span class="{{ in_array($card->status, ['terlambat', 'mendesak']) ? 'text-danger fw-bold' : 'text-secondary' }}">
                     <i class="bi bi-clock-history me-1"></i>{{ $card->due_label }}
                   </span>
                   @if (!empty($card->due_detail))
-                    <span class="text-muted d-block" style="font-size: 0.72rem;">{{ $card->due_detail }}</span>
+                    <span class="text-muted d-block text-2xs">{{ $card->due_detail }}</span>
                   @endif
                 </div>
               </div>
 
               <!-- Tombol Cepat: Sesuai Tipe Item -->
               <div class="pt-2.5 border-top border-slate-200 d-flex justify-content-between align-items-center">
-                <span class="badge bg-white text-dark border px-2 py-1 font-monospace" style="font-size: 0.7rem;">
+                <span class="badge bg-white text-dark border px-2 py-1 font-monospace text-2xs">
                   {{ $card->trigger_label }}
                 </span>
                 @if ($card->type === 'jadwal')
                   <button class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center gap-1.5 btn-dashboard-complete" 
-                          style="min-height: 40px; font-weight: 500;"
                           data-bs-toggle="modal" 
                           data-bs-target="#modalTandaiSelesai"
                           data-id="{{ $card->id }}"
@@ -142,12 +141,12 @@
                     <span>Tandai Selesai</span>
                   </button>
                 @elseif ($card->type === 'dokumen')
-                  <a href="{{ $card->url }}" class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center gap-1.5" style="min-height: 40px; font-weight: 500;">
+                  <a href="{{ $card->url }}" class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center gap-1.5">
                     <i class="bi bi-file-earmark-text"></i>
                     <span>Kelola Dokumen</span>
                   </a>
                 @else
-                  <a href="{{ $card->url }}" class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center gap-1.5" style="min-height: 40px; font-weight: 500;">
+                  <a href="{{ $card->url }}" class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center gap-1.5">
                     <i class="bi bi-wrench"></i>
                     <span>Lihat Detail</span>
                   </a>
@@ -175,7 +174,7 @@
         </div>
         <div class="modal-body py-3">
           <div class="p-2.5 rounded-3 bg-light border mb-3">
-            <small class="text-muted d-block" style="font-size: 0.72rem;">Subjek Perawatan:</small>
+            <small class="text-muted d-block text-2xs">Subjek Perawatan:</small>
             <div class="fw-bold text-dark" id="modalDashboardSubject">-</div>
           </div>
 
@@ -213,8 +212,8 @@
         </div>
 
         <div class="modal-footer border-top border-slate-200 py-2.5">
-          <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
-          <button type="submit" class="btn btn-dark btn-sm px-4" style="min-height: 44px;">Simpan & Perbarui Siklus</button>
+          <button type="button" class="btn btn-glass btn-sm px-4" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-dark btn-sm px-4">Simpan & Perbarui Siklus</button>
         </div>
       </form>
     </div>

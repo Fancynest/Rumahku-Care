@@ -3,7 +3,7 @@
 @section('title', ($selectedVehicle ? $selectedVehicle->name : 'Kendaraan') . ' - Garasi Rumahku Care')
 
 @section('header-action')
-<button class="btn btn-dark btn-sm d-flex align-items-center gap-1.5" data-bs-toggle="modal" data-bs-target="#modalTambahKendaraan" style="min-height: 40px; padding: 0.4rem 1rem;">
+<button class="btn btn-dark btn-sm d-flex align-items-center gap-1.5 px-3" data-bs-toggle="modal" data-bs-target="#modalTambahKendaraan">
   <i class="bi bi-plus-lg"></i>
   <span>Tambah Kendaraan</span>
 </button>
@@ -12,10 +12,10 @@
 @section('content')
 @if (!$selectedVehicle)
   <div class="glass-panel p-5 text-center my-4">
-    <i class="bi bi-car-front text-muted" style="font-size: 3rem;"></i>
+    <i class="bi bi-car-front text-muted fs-1"></i>
     <h5 class="fw-bold mt-3 mb-1 text-dark">Garasi Anda Masih Kosong</h5>
     <p class="text-muted small mb-4">Daftarkan kendaraan pertama Anda untuk mulai memantau servis berkala dan dokumen STNK.</p>
-    <button class="btn btn-dark px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalTambahKendaraan" style="min-height: 44px;">
+    <button class="btn btn-dark px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalTambahKendaraan">
       <i class="bi bi-plus-lg me-1"></i> Tambah Kendaraan Sekarang
     </button>
   </div>
@@ -25,7 +25,7 @@
 <div class="mb-4">
   <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
     <div>
-      <h5 class="fw-bold text-dark mb-0" style="letter-spacing: -0.02em;">
+      <h5 class="fw-bold text-dark mb-0">
         {{ $showArchived ? 'Kendaraan Terarsip' : 'Kendaraan Saya & Garasi' }}
       </h5>
       <span class="text-muted small">
@@ -34,12 +34,12 @@
     </div>
     <div>
       @if ($showArchived)
-        <a href="{{ route('vehicles.index') }}" class="btn btn-outline-dark btn-sm d-inline-flex align-items-center gap-1.5" style="min-height: 38px;">
+        <a href="{{ route('vehicles.index') }}" class="btn btn-outline-dark btn-sm d-inline-flex align-items-center gap-1.5">
           <i class="bi bi-arrow-left"></i>
           <span>Kembali ke Garasi Aktif ({{ $activeCount }})</span>
         </a>
       @elseif ($archivedCount > 0)
-        <a href="{{ route('vehicles.index', ['archived' => 1]) }}" class="btn btn-glass btn-sm text-muted d-inline-flex align-items-center gap-1.5" style="min-height: 38px;">
+        <a href="{{ route('vehicles.index', ['archived' => 1]) }}" class="btn btn-glass btn-sm text-muted d-inline-flex align-items-center gap-1.5">
           <i class="bi bi-archive"></i>
           <span>Tampilkan arsip ({{ $archivedCount }})</span>
         </a>
@@ -47,20 +47,19 @@
     </div>
   </div>
 
-  <div class="d-flex gap-2.5 overflow-x-auto pb-2" style="scrollbar-width: thin;">
+  <div class="d-flex gap-2.5 overflow-x-auto pb-2">
     @foreach ($vehicles as $v)
       @php
         $isActive = $v->id === $selectedVehicle->id;
       @endphp
       <a href="{{ route('vehicles.index', ['v' => $v->id, 'archived' => $showArchived ? 1 : null]) }}" 
-         class="text-decoration-none d-flex align-items-center gap-3 px-3.5 py-2.5 rounded-3 border transition-all text-nowrap {{ $isActive ? 'bg-white border-dark shadow-sm' : 'bg-white-50 border-slate-200 text-secondary' }}"
-         style="min-height: 48px; transition: all 0.2s ease;">
+         class="text-decoration-none d-flex align-items-center gap-3 px-3.5 py-2.5 rounded-3 border text-nowrap {{ $isActive ? 'bg-white border-dark shadow-sm' : 'bg-white-50 border-slate-200 text-secondary' }}">
         <i class="bi {{ str_starts_with($v->body_type ?? '', 'motor') ? 'bi-bicycle' : 'bi-car-front' }} {{ $isActive ? 'text-dark' : 'text-muted' }}"></i>
         <div>
           <div class="fw-bold small {{ $isActive ? 'text-dark' : 'text-slate-700' }}">{{ $v->name }}</div>
-          <div class="text-muted font-monospace" style="font-size: 0.72rem;">{{ $v->plate }}</div>
+          <div class="text-muted font-monospace text-2xs">{{ $v->plate }}</div>
         </div>
-        <span class="chip {{ $v->status_chip_class }} py-0.5 px-2 ms-1" style="font-size: 0.65rem;">
+        <span class="chip {{ $v->status_chip_class }} py-0.5 px-2 ms-1 text-2xs">
           {{ $v->status_label }}
         </span>
       </a>
@@ -68,62 +67,62 @@
   </div>
 </div>
 
-<!-- Nav Tabs Bootstrap (5 Tab: Ringkasan, Jadwal, Inspeksi, Kerusakan, Dokumen) -->
-<ul class="nav nav-tabs border-bottom border-slate-200 mb-4 gap-2" id="vehicleTabs" role="tablist">
+<!-- Nav Tabs Bootstrap (5 Tab: Ringkasan, Jadwal, Inspeksi, Kerusakan, Dokumen, BBM) -->
+<ul class="nav nav-tabs nav-tabs-scroll mb-4" id="vehicleTabs" role="tablist">
   <li class="nav-item" role="presentation">
-    <button class="nav-link active fw-medium text-dark d-flex align-items-center gap-1.5 px-3 py-2.5" id="tab-v-ringkasan-btn" data-bs-toggle="tab" data-bs-target="#ringkasan" type="button" role="tab" aria-controls="ringkasan" aria-selected="true" style="min-height: 44px;">
+    <button class="nav-link active fw-medium text-dark d-flex align-items-center gap-1.5 px-3 py-2.5" id="tab-v-ringkasan-btn" data-bs-toggle="tab" data-bs-target="#ringkasan" type="button" role="tab" aria-controls="ringkasan" aria-selected="true">
       <i class="bi bi-speedometer2"></i>
       <span>Ringkasan</span>
     </button>
   </li>
   <li class="nav-item" role="presentation">
-    <button class="nav-link fw-medium text-secondary d-flex align-items-center gap-1.5 px-3 py-2.5" id="tab-v-jadwal-btn" data-bs-toggle="tab" data-bs-target="#jadwal" type="button" role="tab" aria-controls="jadwal" aria-selected="false" style="min-height: 44px;">
+    <button class="nav-link fw-medium text-secondary d-flex align-items-center gap-1.5 px-3 py-2.5" id="tab-v-jadwal-btn" data-bs-toggle="tab" data-bs-target="#jadwal" type="button" role="tab" aria-controls="jadwal" aria-selected="false">
       <i class="bi bi-calendar-check"></i>
       <span>Jadwal</span>
       @if ($activeSchedules->isNotEmpty())
-        <span class="badge bg-light text-dark border ms-1" style="font-size: 0.65rem;">{{ $activeSchedules->count() }}</span>
+        <span class="badge bg-light text-dark border ms-1 text-2xs">{{ $activeSchedules->count() }}</span>
       @endif
     </button>
   </li>
   <li class="nav-item" role="presentation">
-    <button class="nav-link fw-medium text-secondary d-flex align-items-center gap-1.5 px-3 py-2.5" id="tab-v-inspeksi-btn" data-bs-toggle="tab" data-bs-target="#inspeksi" type="button" role="tab" aria-controls="inspeksi" aria-selected="false" style="min-height: 44px;">
+    <button class="nav-link fw-medium text-secondary d-flex align-items-center gap-1.5 px-3 py-2.5" id="tab-v-inspeksi-btn" data-bs-toggle="tab" data-bs-target="#inspeksi" type="button" role="tab" aria-controls="inspeksi" aria-selected="false">
       <i class="bi bi-clipboard-check"></i>
       <span>Inspeksi</span>
       @if ($selectedVehicle->inspectionRuns->isNotEmpty())
-        <span class="badge bg-light text-dark border ms-1" style="font-size: 0.65rem;">{{ $selectedVehicle->inspectionRuns->count() }}</span>
+        <span class="badge bg-light text-dark border ms-1 text-2xs">{{ $selectedVehicle->inspectionRuns->count() }}</span>
       @endif
     </button>
   </li>
   <li class="nav-item" role="presentation">
-    <button class="nav-link fw-medium text-secondary d-flex align-items-center gap-1.5 px-3 py-2.5" id="tab-v-kerusakan-btn" data-bs-toggle="tab" data-bs-target="#kerusakan" type="button" role="tab" aria-controls="kerusakan" aria-selected="false" style="min-height: 44px;">
+    <button class="nav-link fw-medium text-secondary d-flex align-items-center gap-1.5 px-3 py-2.5" id="tab-v-kerusakan-btn" data-bs-toggle="tab" data-bs-target="#kerusakan" type="button" role="tab" aria-controls="kerusakan" aria-selected="false">
       <i class="bi bi-tools"></i>
       <span>Kerusakan</span>
       @php
         $openVehicleDamages = $selectedVehicle->damageReports->whereIn('status', ['dilaporkan', 'dalam_perbaikan']);
       @endphp
       @if ($openVehicleDamages->isNotEmpty())
-        <span class="badge bg-danger text-white ms-1" style="font-size: 0.65rem;">{{ $openVehicleDamages->count() }}</span>
+        <span class="badge bg-danger text-white ms-1 text-2xs">{{ $openVehicleDamages->count() }}</span>
       @endif
     </button>
   </li>
   <li class="nav-item" role="presentation">
-    <button class="nav-link fw-medium text-secondary d-flex align-items-center gap-1.5 px-3 py-2.5" id="tab-v-dokumen-btn" data-bs-toggle="tab" data-bs-target="#dokumen" type="button" role="tab" aria-controls="dokumen" aria-selected="false" style="min-height: 44px;">
+    <button class="nav-link fw-medium text-secondary d-flex align-items-center gap-1.5 px-3 py-2.5" id="tab-v-dokumen-btn" data-bs-toggle="tab" data-bs-target="#dokumen" type="button" role="tab" aria-controls="dokumen" aria-selected="false">
       <i class="bi bi-file-earmark-text"></i>
       <span>Dokumen</span>
       @php
         $activeVehicleDocs = $selectedVehicle->documents->whereNull('archived_at');
       @endphp
       @if ($activeVehicleDocs->isNotEmpty())
-        <span class="badge bg-light text-dark border ms-1" style="font-size: 0.65rem;">{{ $activeVehicleDocs->count() }}</span>
+        <span class="badge bg-light text-dark border ms-1 text-2xs">{{ $activeVehicleDocs->count() }}</span>
       @endif
     </button>
   </li>
   <li class="nav-item" role="presentation">
-    <button class="nav-link fw-medium text-secondary d-flex align-items-center gap-1.5 px-3 py-2.5" id="tab-v-bbm-btn" data-bs-toggle="tab" data-bs-target="#bbm" type="button" role="tab" aria-controls="bbm" aria-selected="false" style="min-height: 44px;">
+    <button class="nav-link fw-medium text-secondary d-flex align-items-center gap-1.5 px-3 py-2.5" id="tab-v-bbm-btn" data-bs-toggle="tab" data-bs-target="#bbm" type="button" role="tab" aria-controls="bbm" aria-selected="false">
       <i class="bi bi-fuel-pump"></i>
       <span>BBM</span>
       @if ($fuelMetrics['logs']->isNotEmpty())
-        <span class="badge bg-light text-dark border ms-1" style="font-size: 0.65rem;">{{ $fuelMetrics['logs']->count() }}</span>
+        <span class="badge bg-light text-dark border ms-1 text-2xs">{{ $fuelMetrics['logs']->count() }}</span>
       @endif
     </button>
   </li>

@@ -4,11 +4,11 @@
 
 @section('header-action')
 <div class="d-flex align-items-center gap-2">
-  <button class="btn btn-glass btn-sm d-flex align-items-center gap-1.5" data-bs-toggle="modal" data-bs-target="#modalTemplateJadwal" style="min-height: 40px; padding: 0.4rem 1rem;">
+  <button class="btn btn-glass btn-sm d-flex align-items-center gap-1.5 px-3" data-bs-toggle="modal" data-bs-target="#modalTemplateJadwal">
     <i class="bi bi-collection"></i>
     <span>Mulai dari Template</span>
   </button>
-  <button class="btn btn-dark btn-sm d-flex align-items-center gap-1.5" data-bs-toggle="modal" data-bs-target="#modalBuatJadwal" style="min-height: 40px; padding: 0.4rem 1rem;">
+  <button class="btn btn-dark btn-sm d-flex align-items-center gap-1.5 px-3" data-bs-toggle="modal" data-bs-target="#modalBuatJadwal">
     <i class="bi bi-plus-lg"></i>
     <span>+ Buat Jadwal</span>
   </button>
@@ -21,25 +21,22 @@
 <!-- Header & Filter -->
 <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
   <div>
-    <h5 class="fw-bold text-dark mb-0" style="letter-spacing: -0.02em;">Jadwal Perawatan & Pengingat</h5>
+    <h5 class="fw-bold text-dark mb-0">Jadwal Perawatan & Pengingat</h5>
     <span class="text-muted small">Kelola siklus pemeliharaan berkala untuk kendaraan dan peralatan rumah Anda.</span>
   </div>
 
   <!-- Filter Pills -->
   <div class="d-flex align-items-center gap-2 bg-white p-1.5 rounded-pill border shadow-xs">
     <a href="{{ route('schedules.index', ['filter' => 'all']) }}" 
-       class="btn btn-sm rounded-pill px-3.5 py-1.5 text-decoration-none {{ $filter === 'all' ? 'btn-dark' : 'text-muted' }}" 
-       style="font-size: 0.82rem; font-weight: 500;">
+       class="btn btn-sm rounded-pill px-3.5 py-1.5 text-decoration-none text-xs {{ $filter === 'all' ? 'btn-dark' : 'text-muted' }}">
       Semua
     </a>
     <a href="{{ route('schedules.index', ['filter' => 'home_asset']) }}" 
-       class="btn btn-sm rounded-pill px-3.5 py-1.5 text-decoration-none {{ $filter === 'home_asset' ? 'btn-dark' : 'text-muted' }}" 
-       style="font-size: 0.82rem; font-weight: 500;">
+       class="btn btn-sm rounded-pill px-3.5 py-1.5 text-decoration-none text-xs {{ $filter === 'home_asset' ? 'btn-dark' : 'text-muted' }}">
       <i class="bi bi-house-door me-1.5"></i>Rumah
     </a>
     <a href="{{ route('schedules.index', ['filter' => 'vehicle']) }}" 
-       class="btn btn-sm rounded-pill px-3.5 py-1.5 text-decoration-none {{ $filter === 'vehicle' ? 'btn-dark' : 'text-muted' }}" 
-       style="font-size: 0.82rem; font-weight: 500;">
+       class="btn btn-sm rounded-pill px-3.5 py-1.5 text-decoration-none text-xs {{ $filter === 'vehicle' ? 'btn-dark' : 'text-muted' }}">
       <i class="bi bi-car-front me-1.5"></i>Kendaraan
     </a>
   </div>
@@ -73,14 +70,14 @@
 
 @if ($totalSchedules === 0)
   <div class="glass-panel p-5 text-center my-4">
-    <i class="bi bi-calendar2-check text-muted" style="font-size: 3rem;"></i>
+    <i class="bi bi-calendar2-check text-muted fs-1"></i>
     <h5 class="fw-bold mt-3 mb-1 text-dark">Belum Ada Jadwal Perawatan</h5>
     <p class="text-muted small mb-4">Tambahkan jadwal berkala atau gunakan template siap pakai untuk menjaga kondisi aset Anda tetap prima.</p>
     <div class="d-flex justify-content-center gap-2">
-      <button class="btn btn-glass px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalTemplateJadwal" style="min-height: 44px;">
+      <button class="btn btn-glass px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalTemplateJadwal">
         <i class="bi bi-collection me-1.5"></i> Gunakan Template
       </button>
-      <button class="btn btn-dark px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalBuatJadwal" style="min-height: 44px;">
+      <button class="btn btn-dark px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalBuatJadwal">
         <i class="bi bi-plus-lg me-1.5"></i> Buat Jadwal Baru
       </button>
     </div>
@@ -98,7 +95,7 @@
         <div class="d-flex align-items-center gap-2 mb-2.5">
           <i class="bi {{ $meta['icon'] }} fs-5"></i>
           <h6 class="fw-bold text-dark mb-0">{{ $meta['label'] }}</h6>
-          <span class="badge bg-white border text-secondary rounded-pill px-2 py-0.5" style="font-size: 0.72rem;">{{ $items->count() }}</span>
+          <span class="badge bg-white border text-secondary rounded-pill px-2 py-0.5 text-2xs">{{ $items->count() }}</span>
         </div>
 
         <!-- Schedule Items Card -->
@@ -112,30 +109,30 @@
               <div class="list-group-item p-3 border-slate-200 bg-transparent">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                   <!-- Col 1: Subjek & Judul -->
-                  <div class="d-flex align-items-center gap-3" style="min-width: 260px;">
-                    <div class="rounded-3 bg-white p-2.5 border shadow-2xs text-center" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="avatar-lg rounded-3 bg-white border shadow-2xs text-center">
                       <i class="bi {{ $isVehicle ? 'bi-car-front' : 'bi-house-gear' }} fs-5 text-dark"></i>
                     </div>
                     <div>
                       <div class="d-flex align-items-center gap-2 mb-0.5">
-                        <span class="badge bg-light text-dark border px-2 py-0.5" style="font-size: 0.68rem;">
+                        <span class="badge bg-light text-dark border px-2 py-0.5 text-2xs">
                           {{ $isVehicle ? 'Kendaraan' : 'Aset Rumah' }}
                         </span>
                         <span class="fw-semibold text-secondary small">{{ $sch->subject_name }}</span>
                       </div>
                       <div class="fw-bold text-dark fs-6">{{ $sch->title }}</div>
                       @if ($sch->notes)
-                        <div class="text-muted small mt-0.5" style="font-size: 0.74rem;">{{ $sch->notes }}</div>
+                        <div class="text-muted small mt-0.5 text-2xs">{{ $sch->notes }}</div>
                       @endif
                     </div>
                   </div>
 
                   <!-- Col 2: Pemicu & Status Waktu/KM -->
                   <div class="text-start text-md-center">
-                    <span class="badge bg-white text-dark border px-2.5 py-1 mb-1 font-monospace" style="font-size: 0.72rem;">
+                    <span class="badge bg-white text-dark border px-2.5 py-1 mb-1 font-monospace text-2xs">
                       {{ $sch->trigger_label }}
                     </span>
-                    <div class="small text-muted" style="font-size: 0.78rem;">
+                    <div class="small text-muted">
                       @if ($sch->trigger_type === 'kilometer')
                         Target: <strong class="text-dark">{{ number_format($sch->next_due_km) }} KM</strong>
                         @php
@@ -163,7 +160,7 @@
                   <!-- Col 3: Status Chip & Tombol Aksi -->
                   <div class="d-flex align-items-center gap-1.5 ms-auto ms-md-0">
                     @if ($sch->priority && $sch->priority !== 'normal')
-                      <span class="badge {{ $sch->priority === 'darurat' ? 'bg-danger text-white' : ($sch->priority === 'mendesak' ? 'bg-warning-subtle text-warning-emphasis border border-warning' : 'bg-info-subtle text-info-emphasis border border-info') }} py-1 px-2 text-capitalize" style="font-size: 0.68rem;">
+                      <span class="badge {{ $sch->priority === 'darurat' ? 'bg-danger text-white' : ($sch->priority === 'mendesak' ? 'bg-warning-subtle text-warning-emphasis border border-warning' : 'bg-info-subtle text-info-emphasis border border-info') }} py-1 px-2 text-capitalize text-2xs">
                         <i class="bi bi-flag-fill me-0.5"></i>{{ ucfirst($sch->priority) }}
                       </span>
                     @endif
@@ -172,7 +169,6 @@
                     </span>
 
                     <button class="btn btn-dark btn-sm d-inline-flex align-items-center gap-1.5 px-3 btn-complete-modal" 
-                            style="min-height: 40px; font-weight: 500;"
                             data-bs-toggle="modal" 
                             data-bs-target="#modalTandaiSelesai"
                             data-id="{{ $sch->id }}"
@@ -187,7 +183,7 @@
 
                     <!-- Dropdown Hapus -->
                     <div class="dropdown">
-                      <button class="btn btn-glass btn-sm p-2 rounded-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="min-height: 40px; min-width: 40px;">
+                      <button class="btn btn-glass btn-touch btn-sm p-2 rounded-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-three-dots-vertical"></i>
                       </button>
                       <ul class="dropdown-menu dropdown-menu-end glass-panel border-0 p-1 shadow-sm">
@@ -287,7 +283,7 @@
               <option value="kilometer" id="optionTriggerKM">Jarak Tempuh (Kilometer / KM)</option>
               <option value="tanggal">Tanggal Pasti (Satu Kali)</option>
             </select>
-            <small class="text-muted" id="triggerKmHint" style="font-size: 0.72rem;">* Pemicu kilometer hanya tersedia untuk kendaraan bermotor.</small>
+            <small class="text-muted text-2xs" id="triggerKmHint">* Pemicu kilometer hanya tersedia untuk kendaraan bermotor.</small>
           </div>
 
           <!-- Input Dinamis Sesuai Pemicu -->
@@ -298,7 +294,7 @@
               <input type="number" name="interval_days" id="inputIntervalDays" class="form-control" placeholder="90" min="1" value="90">
               <span class="input-group-text bg-transparent text-muted">Hari</span>
             </div>
-            <small class="text-muted" style="font-size: 0.72rem;">Misal: 30 hari (1 bulan), 90 hari (3 bulan), 180 hari (6 bulan).</small>
+            <small class="text-muted text-2xs">Misal: 30 hari (1 bulan), 90 hari (3 bulan), 180 hari (6 bulan).</small>
           </div>
 
           <!-- Pemicu Kilometer -->
@@ -308,7 +304,7 @@
               <input type="number" name="interval_km" id="inputIntervalKM" class="form-control" placeholder="5000" min="100" step="100">
               <span class="input-group-text bg-transparent text-muted">KM</span>
             </div>
-            <small class="text-muted" style="font-size: 0.72rem;">Jatuh tempo berikutnya akan dihitung otomatis dari odometer kendaraan saat ini.</small>
+            <small class="text-muted text-2xs">Jatuh tempo berikutnya akan dihitung otomatis dari odometer kendaraan saat ini.</small>
           </div>
 
           <!-- Tanggal Jatuh Tempo Pertama -->
@@ -336,8 +332,8 @@
         </div>
 
         <div class="modal-footer border-top border-slate-200 py-2.5">
-          <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
-          <button type="submit" class="btn btn-dark btn-sm px-4" style="min-height: 44px;">Simpan Jadwal</button>
+          <button type="button" class="btn btn-glass btn-sm px-4" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-dark btn-sm px-4">Simpan Jadwal</button>
         </div>
       </form>
     </div>
@@ -351,7 +347,7 @@
       <div class="modal-header border-bottom border-slate-200 py-3">
         <div>
           <h6 class="modal-title fw-bold text-dark mb-0">Pilih Template Perawatan</h6>
-          <small class="text-muted" style="font-size: 0.75rem;">Semua template di bawah merupakan <strong class="text-dark">contoh awal, sesuaikan</strong> dengan kebutuhan dan spesifikasi aset Anda.</small>
+          <small class="text-muted text-xs">Semua template di bawah merupakan <strong class="text-dark">contoh awal, sesuaikan</strong> dengan kebutuhan dan spesifikasi aset Anda.</small>
         </div>
         <button type="button" class="btn-close small" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
@@ -362,20 +358,19 @@
               <div class="p-3 rounded-3 bg-white border border-slate-200 h-100 d-flex flex-column justify-content-between">
                 <div>
                   <div class="d-flex justify-content-between align-items-center mb-1">
-                    <span class="badge bg-light text-dark border px-2 py-0.5" style="font-size: 0.68rem;">
+                    <span class="badge bg-light text-dark border px-2 py-0.5 text-2xs">
                       {{ $t['target_type'] === 'vehicle' ? 'Kendaraan' : 'Aset Rumah' }}
                     </span>
-                    <span class="text-muted font-monospace" style="font-size: 0.72rem;">
+                    <span class="text-muted font-monospace text-2xs">
                       {{ $t['trigger_type'] === 'kilometer' ? 'Tiap ' . number_format($t['interval_km']) . ' KM' : 'Tiap ' . $t['interval_days'] . ' Hari' }}
                     </span>
                   </div>
                   <h6 class="fw-bold text-dark mb-1">{{ $t['title'] }}</h6>
-                  <p class="text-muted small mb-3" style="font-size: 0.75rem;">{{ $t['notes'] }}</p>
+                  <p class="text-muted small mb-3 text-xs">{{ $t['notes'] }}</p>
                 </div>
                 <div>
                   <button type="button" 
                           class="btn btn-dark btn-sm w-100 btn-apply-template" 
-                          style="min-height: 40px;"
                           data-title="{{ $t['title'] }}"
                           data-target-type="{{ $t['target_type'] }}"
                           data-trigger-type="{{ $t['trigger_type'] }}"
@@ -392,7 +387,7 @@
         </div>
       </div>
       <div class="modal-footer border-top border-slate-200 py-2.5">
-        <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Tutup</button>
+        <button type="button" class="btn btn-glass btn-sm px-4" data-bs-dismiss="modal">Tutup</button>
       </div>
     </div>
   </div>
@@ -482,8 +477,8 @@
         </div>
 
         <div class="modal-footer border-top border-slate-200 py-2.5">
-          <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
-          <button type="submit" class="btn btn-dark btn-sm px-4" style="min-height: 44px;">Simpan Perubahan</button>
+          <button type="button" class="btn btn-glass btn-sm px-4" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-dark btn-sm px-4">Simpan Perubahan</button>
         </div>
       </form>
     </div>
@@ -502,7 +497,7 @@
         </div>
         <div class="modal-body py-3">
           <div class="p-2.5 rounded-3 bg-light border mb-3">
-            <small class="text-muted d-block" style="font-size: 0.72rem;">Subjek Perawatan:</small>
+            <small class="text-muted d-block text-2xs">Subjek Perawatan:</small>
             <div class="fw-bold text-dark" id="modalTandaiSubject">-</div>
           </div>
 
@@ -540,8 +535,8 @@
         </div>
 
         <div class="modal-footer border-top border-slate-200 py-2.5">
-          <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
-          <button type="submit" class="btn btn-dark btn-sm px-4" style="min-height: 44px;">Simpan & Perbarui Siklus</button>
+          <button type="button" class="btn btn-glass btn-sm px-4" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-dark btn-sm px-4">Simpan & Perbarui Siklus</button>
         </div>
       </form>
     </div>

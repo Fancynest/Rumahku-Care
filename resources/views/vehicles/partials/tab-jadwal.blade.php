@@ -5,7 +5,7 @@
         <h6 class="fw-bold text-dark mb-0">Jadwal Perawatan Berkala</h6>
         <span class="text-muted small">Agenda pemeliharaan berkala untuk {{ $selectedVehicle->name }}.</span>
       </div>
-      <a href="{{ route('schedules.index', ['filter' => 'vehicle']) }}" class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center gap-1.5" style="min-height: 40px; font-weight: 500;">
+      <a href="{{ route('schedules.index', ['filter' => 'vehicle']) }}" class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center gap-1.5 fw-medium min-h-40">
         <i class="bi bi-calendar-plus"></i>
         <span>Kelola di Jadwal</span>
       </a>
@@ -15,8 +15,8 @@
       <div class="p-4 text-center text-muted bg-white-50 rounded-3 border border-dashed border-slate-200">
         <i class="bi bi-calendar2-x d-block fs-3 mb-1 text-secondary"></i>
         <div class="fw-medium text-dark small">Belum ada jadwal perawatan aktif</div>
-        <p class="text-muted mb-3" style="font-size: 0.78rem;">Buat pengingat ganti oli atau servis berkala berbasis kilometer dan waktu.</p>
-        <a href="{{ route('schedules.index', ['filter' => 'vehicle']) }}" class="btn btn-dark btn-sm px-3" style="min-height: 44px; display: inline-flex; align-items: center;">
+        <p class="text-muted mb-3 text-xs">Buat pengingat ganti oli atau servis berkala berbasis kilometer dan waktu.</p>
+        <a href="{{ route('schedules.index', ['filter' => 'vehicle']) }}" class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center min-h-44">
           <i class="bi bi-plus-lg me-1"></i> Buat Jadwal Baru
         </a>
       </div>
@@ -35,14 +35,14 @@
                 @endif
               </div>
               @if ($sch->notes)
-                <div class="text-muted small mt-1" style="font-size: 0.75rem;">{{ $sch->notes }}</div>
+                <div class="text-muted small mt-1 text-xs">{{ $sch->notes }}</div>
               @endif
             </div>
             <div class="d-flex align-items-center gap-2">
               <span class="chip {{ $sch->status_chip_class }} py-1 px-2">
                 <span class="chip-dot"></span> {{ ucfirst($sch->status) }}
               </span>
-              <button class="btn btn-glass btn-sm px-3" data-bs-toggle="modal" data-bs-target="#modalCatatServis" style="min-height: 40px;">
+              <button class="btn btn-glass btn-sm px-3 min-h-40" data-bs-toggle="modal" data-bs-target="#modalCatatServis">
                 <i class="bi bi-wrench me-1"></i> Catat Servis
               </button>
             </div>
