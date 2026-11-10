@@ -216,6 +216,32 @@ class AuthTest extends TestCase
         $response->assertSessionHasErrors(['email']);
     }
 
+    public function test_reset_password_is_throttled_after_five_attempts(): void
+    {
+        $user = User::firstOrFail();
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->post('/reset-password', [
+                'token' => 'some-token',
+                'email' => $user->email,
+                'password' => 'new-password123',
+                'password_confirmation' => 'new-password123',
+            ]);
+        }
+
+        $response6 = $this->post('/reset-password', [
+            'token' => 'some-token',
+            'email' => $user->email,
+            'password' => 'new-password123',
+            'password_confirmation' => 'new-password123',
+        ]);
+
+        $response6->assertRedirect();
+        $response6->assertSessionHasErrors(['email']);
+        $errorMsg = session('errors')->first('email');
+        $this->assertStringContainsString('Terlalu banyak percobaan. Coba lagi dalam', $errorMsg);
+    }
+
     public function test_register_rate_limiting_throttles_after_five_attempts(): void
     {
         for ($i = 0; $i < 5; $i++) {

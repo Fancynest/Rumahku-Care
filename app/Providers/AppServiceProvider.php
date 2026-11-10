@@ -77,6 +77,20 @@ class AppServiceProvider extends ServiceProvider
                 });
         });
 
+        RateLimiter::for('reset-password', function (Request $request) {
+            return Limit::perMinute(5)
+                ->by($request->ip())
+                ->response(function (Request $request, array $headers) {
+                    $seconds = $headers['Retry-After'] ?? 60;
+
+                    return back()
+                        ->withInput($request->only('email', 'token'))
+                        ->withErrors([
+                            'email' => "Terlalu banyak percobaan. Coba lagi dalam {$seconds} detik.",
+                        ]);
+                });
+        });
+
         View::composer('layouts.header', function ($view): void {
             $urgentSchedules = collect();
 
