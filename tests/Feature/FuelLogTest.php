@@ -473,5 +473,22 @@ class FuelLogTest extends TestCase
             'liters' => 10.00,
             'total_cost' => 52000,
         ]);
+
+        // 4. Format koma ribuan (koma diikuti 3 digit di akhir tanpa koma lain): "52,000" dan "11,200"
+        $response4 = $this->post("/vehicles/{$this->vehicle->id}/fuel-logs", [
+            'filled_at' => Carbon::today()->toDateString(),
+            'odometer' => '11,200',
+            'liters' => '15',
+            'total_cost' => '52,000',
+            'is_full_tank' => 1,
+        ]);
+        $response4->assertRedirect();
+
+        $this->assertDatabaseHas('fuel_logs', [
+            'vehicle_id' => $this->vehicle->id,
+            'odometer' => 11200,
+            'liters' => 15.00,
+            'total_cost' => 52000,
+        ]);
     }
 }

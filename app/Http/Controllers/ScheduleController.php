@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\NormalizesNumbers;
 use App\Models\HomeAsset;
 use App\Models\MaintenanceSchedule;
 use App\Models\Vehicle;
@@ -16,6 +17,8 @@ use Illuminate\View\View;
 
 class ScheduleController extends Controller
 {
+    use NormalizesNumbers;
+
     public function index(Request $request): View
     {
         $filter = $request->query('filter', 'all'); // all, vehicle, home_asset
@@ -204,13 +207,7 @@ class ScheduleController extends Controller
         $subject = $schedule->subject;
         $isVehicle = $subject instanceof Vehicle;
 
-        foreach (['odometer', 'labor_cost', 'parts_cost'] as $field) {
-            if ($request->has($field) && is_string($request->input($field))) {
-                $val = preg_replace('/,.*$/', '', trim($request->input($field)));
-                $val = preg_replace('/[^0-9]/', '', $val);
-                $request->merge([$field => $val]);
-            }
-        }
+        $this->normalizeRequestNumbers($request, integerFields: ['odometer', 'labor_cost', 'parts_cost']);
 
         $rules = [
             'done_at' => ['required', 'date', 'before_or_equal:today'],

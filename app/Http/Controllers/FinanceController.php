@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\NormalizesNumbers;
 use App\Models\Budget;
 use App\Services\ExpenseReport;
 use Carbon\Carbon;
@@ -12,6 +13,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class FinanceController extends Controller
 {
+    use NormalizesNumbers;
+
     public function index(Request $request, ExpenseReport $report): View
     {
         $month = $request->query('month', Carbon::today()->format('Y-m'));
@@ -70,11 +73,7 @@ class FinanceController extends Controller
 
         foreach ($categories as $inputKey => $categoryValue) {
             $val = $rawBudgets[$inputKey] ?? null;
-            if (is_string($val)) {
-                $val = preg_replace('/,.*$/', '', trim($val));
-                $val = preg_replace('/[^0-9]/', '', $val);
-            }
-            $amount = (int) $val;
+            $amount = $this->normalizeInteger($val) ?? 0;
 
             if ($amount > 0) {
                 Budget::updateOrCreate(

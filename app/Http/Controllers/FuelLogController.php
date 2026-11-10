@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\NormalizesNumbers;
 use App\Models\FuelLog;
 use App\Models\Vehicle;
 use App\Services\AttachmentStorer;
@@ -12,40 +13,18 @@ use Illuminate\Support\Facades\DB;
 
 class FuelLogController extends Controller
 {
+    use NormalizesNumbers;
+
     /**
      * Normalisasi input liter (koma desimal -> titik), total biaya (titik ribuan -> angka polos), dan odometer.
      */
     protected function normalizeInput(Request $request): void
     {
-        $liters = $request->input('liters');
-        if (is_string($liters)) {
-            $liters = trim($liters);
-            // Hilangkan akhiran ,- jika ada
-            $liters = preg_replace('/,\s*-\s*$/', '', $liters);
-            // Ganti koma dengan titik untuk desimal
-            $liters = str_replace(',', '.', $liters);
-            // Buang unit dan karakter selain angka dan titik desimal
-            $liters = preg_replace('/[^0-9.]/', '', $liters);
-            $request->merge(['liters' => $liters]);
-        }
-
-        $cost = $request->input('total_cost');
-        if (is_string($cost)) {
-            $cost = trim($cost);
-            // Hilangkan bagian desimal/akhiran sebelum membuang pemisah ribuan (mis. ",00", ",-", ",50")
-            $cost = preg_replace('/,.*$/', '', $cost);
-            $cost = preg_replace('/[^0-9]/', '', $cost);
-            $request->merge(['total_cost' => $cost]);
-        }
-
-        $odometer = $request->input('odometer');
-        if (is_string($odometer)) {
-            $odometer = trim($odometer);
-            // Hilangkan bagian desimal/akhiran sebelum membuang pemisah ribuan (mis. ",00", ",-", ",50")
-            $odometer = preg_replace('/,.*$/', '', $odometer);
-            $odometer = preg_replace('/[^0-9]/', '', $odometer);
-            $request->merge(['odometer' => $odometer]);
-        }
+        $this->normalizeRequestNumbers(
+            $request,
+            integerFields: ['total_cost', 'odometer'],
+            decimalFields: ['liters'],
+        );
 
         $request->merge([
             'is_full_tank' => $request->boolean('is_full_tank'),

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\NormalizesNumbers;
 use App\Models\Vehicle;
 use App\Models\VehicleModel;
 use App\Services\FuelCalculator;
@@ -12,6 +13,8 @@ use Illuminate\View\View;
 
 class VehicleController extends Controller
 {
+    use NormalizesNumbers;
+
     public function index(Request $request, FuelCalculator $fuelCalculator): View
     {
         $vehicles = $request->user()->vehicles()
@@ -137,11 +140,7 @@ class VehicleController extends Controller
     {
         abort_if($vehicle->user_id !== $request->user()->id, 404);
 
-        if ($request->has('odometer') && is_string($request->input('odometer'))) {
-            $odo = preg_replace('/,.*$/', '', trim($request->input('odometer')));
-            $odo = preg_replace('/[^0-9]/', '', $odo);
-            $request->merge(['odometer' => $odo]);
-        }
+        $this->normalizeRequestNumbers($request, integerFields: ['odometer']);
 
         $validated = $request->validate([
             'odometer' => ['required', 'integer', 'min:'.$vehicle->odometer],
@@ -165,13 +164,7 @@ class VehicleController extends Controller
             $request->merge(['done_at' => $request->input('serviced_at')]);
         }
 
-        foreach (['odometer', 'labor_cost', 'parts_cost'] as $field) {
-            if ($request->has($field) && is_string($request->input($field))) {
-                $val = preg_replace('/,.*$/', '', trim($request->input($field)));
-                $val = preg_replace('/[^0-9]/', '', $val);
-                $request->merge([$field => $val]);
-            }
-        }
+        $this->normalizeRequestNumbers($request, integerFields: ['odometer', 'labor_cost', 'parts_cost']);
 
         $validated = $request->validate([
             'done_at' => ['required', 'date', 'before_or_equal:today'],
