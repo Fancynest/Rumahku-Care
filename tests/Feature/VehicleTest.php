@@ -429,6 +429,7 @@ class VehicleTest extends TestCase
         $this->assertSame('Auto2000 Tebet', $fresh->workshop);
 
         // User lain tidak boleh mengedit kendaraan ini (404)
+        $this->flushSession();
         $userB = User::factory()->create();
         $this->actingAs($userB);
         $responseForbidden = $this->put("/vehicles/{$vehicle->id}", [

@@ -37,6 +37,7 @@
             <input class="form-check-input" type="checkbox" name="remember" id="remember">
             <label class="form-check-label small text-muted" for="remember">Ingat Saya</label>
           </div>
+          <a href="{{ route('password.request') }}" class="small text-muted text-decoration-none">Lupa kata sandi?</a>
         </div>
 
         <button type="submit" class="btn btn-dark w-100 fw-semibold mb-3" style="min-height: 44px;">

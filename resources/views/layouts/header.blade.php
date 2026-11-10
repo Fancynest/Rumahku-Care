@@ -70,5 +70,16 @@
         </div>
       </div>
     </div>
+
+    @auth
+      <a href="{{ route('profile.edit') }}" class="btn btn-glass rounded-3 p-1.5 d-inline-flex align-items-center gap-2 text-decoration-none" title="Profil Akun" style="min-height: 40px;">
+        <div class="rounded-circle bg-slate-200 text-slate-700 d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px; font-size: 0.75rem;">
+          {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
+        </div>
+        <span class="small fw-semibold text-dark d-none d-md-inline" style="max-width: 140px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+          {{ Auth::user()->name }}
+        </span>
+      </a>
+    @endauth
   </div>
 </header>

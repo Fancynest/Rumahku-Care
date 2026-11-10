@@ -9,6 +9,7 @@ use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\FuelLogController;
 use App\Http\Controllers\HomeAssetController;
 use App\Http\Controllers\InspectionController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\TechnicianController;
 use App\Http\Controllers\VehicleController;
@@ -20,6 +21,10 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:register');
+    Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->middleware('throttle:forgot-password')->name('password.email');
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
 // Authenticated Application Routes
@@ -95,5 +100,12 @@ Route::middleware('auth')->group(function () {
     Route::prefix('inspections')->name('inspections.')->group(function () {
         Route::post('/', [InspectionController::class, 'store'])->name('store');
         Route::post('/items/{item}/convert-to-damage', [InspectionController::class, 'convertIssueToDamageReport'])->name('convert-damage');
+    });
+
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [ProfileController::class, 'edit'])->name('edit');
+        Route::patch('/', [ProfileController::class, 'updateProfile'])->name('update');
+        Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password');
+        Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
     });
 });

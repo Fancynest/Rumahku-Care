@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Password;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
@@ -130,6 +131,89 @@ class AuthTest extends TestCase
         $errorMsg = session('errors')->first('email');
         $this->assertStringContainsString('Terlalu banyak percobaan. Coba lagi dalam', $errorMsg);
         $this->assertStringContainsString('detik.', $errorMsg);
+    }
+
+    public function test_forgot_password_page_is_accessible_and_hides_sidebar(): void
+    {
+        $response = $this->get('/forgot-password');
+        $response->assertOk();
+        $response->assertSee('Lupa Kata Sandi');
+        $response->assertDontSee('id="sidebar"', false);
+        $response->assertDontSee('top-header', false);
+    }
+
+    public function test_forgot_password_sends_generic_message_without_user_enumeration(): void
+    {
+        $user = User::firstOrFail();
+
+        // 1. Existing user email
+        $resExisting = $this->post('/forgot-password', [
+            'email' => $user->email,
+        ]);
+        $resExisting->assertRedirect();
+        $resExisting->assertSessionHas('status', 'Jika alamat email terdaftar di sistem kami, tautan pemulihan kata sandi telah dikirim.');
+
+        // 2. Non-existent user email returns exact same message (anti user-enumeration)
+        $resNonExisting = $this->post('/forgot-password', [
+            'email' => 'nobody_registered@example.com',
+        ]);
+        $resNonExisting->assertRedirect();
+        $resNonExisting->assertSessionHas('status', 'Jika alamat email terdaftar di sistem kami, tautan pemulihan kata sandi telah dikirim.');
+    }
+
+    public function test_forgot_password_is_throttled_after_five_requests(): void
+    {
+        for ($i = 0; $i < 5; $i++) {
+            $this->post('/forgot-password', ['email' => "throttle{$i}@example.com"]);
+        }
+
+        $response6 = $this->post('/forgot-password', ['email' => 'throttle6@example.com']);
+        $response6->assertRedirect();
+        $response6->assertSessionHasErrors(['email']);
+        $errorMsg = session('errors')->first('email');
+        $this->assertStringContainsString('Terlalu banyak percobaan. Coba lagi dalam', $errorMsg);
+    }
+
+    public function test_user_can_reset_password_with_valid_token(): void
+    {
+        $user = User::firstOrFail();
+        $token = Password::broker()->createToken($user);
+
+        $resetPage = $this->get("/reset-password/{$token}?email=".urlencode($user->email));
+        $resetPage->assertOk();
+        $resetPage->assertSee('Atur Ulang Kata Sandi');
+
+        $response = $this->post('/reset-password', [
+            'token' => $token,
+            'email' => $user->email,
+            'password' => 'new-password123',
+            'password_confirmation' => 'new-password123',
+        ]);
+
+        $response->assertRedirect('/login');
+        $response->assertSessionHas('success');
+
+        // Can login with new password
+        $loginRes = $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'new-password123',
+        ]);
+        $loginRes->assertRedirect('/');
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_user_cannot_reset_password_with_invalid_token(): void
+    {
+        $user = User::firstOrFail();
+
+        $response = $this->post('/reset-password', [
+            'token' => 'invalid-token-12345',
+            'email' => $user->email,
+            'password' => 'new-password123',
+            'password_confirmation' => 'new-password123',
+        ]);
+
+        $response->assertSessionHasErrors(['email']);
     }
 
     public function test_register_rate_limiting_throttles_after_five_attempts(): void
