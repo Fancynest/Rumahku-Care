@@ -21,8 +21,9 @@
 <body>
 
   @auth
-    <!-- Sidebar -->
+    <!-- Sidebar & Backdrop -->
     @include('layouts.sidebar')
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
     <!-- Main Content Wrapper -->
     <div class="main-wrapper">
@@ -41,7 +42,7 @@
     </div>
   @else
     <!-- Guest Layout (Login, Register) -->
-    <div class="min-vh-100 d-flex flex-column justify-content-center align-items-center p-3">
+    <div class="d-flex flex-column justify-content-center align-items-center p-3" style="min-height: 100dvh;">
       @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert" style="max-width: 480px; width: 100%;">
           <i class="bi bi-check-circle me-1.5"></i> {{ session('success') }}
@@ -65,18 +66,43 @@
   @auth
   <script>
     const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarClose = document.getElementById('sidebarClose');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
     const sidebarEl = document.getElementById('sidebar');
+
+    function openSidebar() {
+      sidebarEl?.classList.add('show');
+      sidebarBackdrop?.classList.add('show');
+      document.body.classList.add('sidebar-open');
+    }
+
+    function closeSidebar() {
+      sidebarEl?.classList.remove('show');
+      sidebarBackdrop?.classList.remove('show');
+      document.body.classList.remove('sidebar-open');
+    }
 
     sidebarToggle?.addEventListener('click', function(e) {
       e.stopPropagation();
-      sidebarEl?.classList.toggle('show');
+      if (sidebarEl?.classList.contains('show')) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
     });
 
-    document.addEventListener('click', function(e) {
-      if (sidebarEl && sidebarEl.classList.contains('show')) {
-        if (!sidebarEl.contains(e.target) && !sidebarToggle?.contains(e.target)) {
-          sidebarEl.classList.remove('show');
-        }
+    sidebarClose?.addEventListener('click', function(e) {
+      e.stopPropagation();
+      closeSidebar();
+    });
+
+    sidebarBackdrop?.addEventListener('click', function() {
+      closeSidebar();
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && sidebarEl?.classList.contains('show')) {
+        closeSidebar();
       }
     });
   </script>

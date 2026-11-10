@@ -1,6 +1,6 @@
 <header class="top-header">
   <div class="d-flex align-items-center gap-3">
-    <button class="btn btn-glass d-lg-none p-1.5" id="sidebarToggle" aria-label="Toggle Navigation">
+    <button class="btn btn-glass d-lg-none p-1.5" id="sidebarToggle" aria-label="Toggle Navigation" style="min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center;">
       <i class="bi bi-list fs-5"></i>
     </button>
   </div>
@@ -10,7 +10,7 @@
 
     <!-- Notification Bell -->
     <div class="dropdown">
-      <button class="btn btn-glass rounded-3 position-relative p-2" type="button" data-bs-toggle="dropdown" aria-label="Notifikasi" style="min-height: 40px; min-width: 40px; display: inline-flex; align-items: center; justify-content: center;">
+      <button class="btn btn-glass rounded-3 position-relative p-2" type="button" data-bs-toggle="dropdown" aria-label="Notifikasi" style="min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center;">
         <i class="bi bi-bell text-secondary" style="font-size: 0.95rem;"></i>
         @if (isset($urgentSchedules) && $urgentSchedules->isNotEmpty())
           <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
@@ -72,7 +72,7 @@
     </div>
 
     @auth
-      <a href="{{ route('profile.edit') }}" class="btn btn-glass rounded-3 p-1.5 d-inline-flex align-items-center gap-2 text-decoration-none" title="Profil Akun" style="min-height: 40px;">
+      <a href="{{ route('profile.edit') }}" class="btn btn-glass rounded-3 p-1.5 d-inline-flex align-items-center gap-2 text-decoration-none" title="Profil Akun" style="min-height: 44px;">
         <div class="rounded-circle bg-slate-200 text-slate-700 d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px; font-size: 0.75rem;">
           {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
         </div>

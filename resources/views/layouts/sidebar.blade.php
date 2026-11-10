@@ -1,12 +1,17 @@
 <aside class="sidebar" id="sidebar">
-  <div class="sidebar-brand">
-    <div class="brand-symbol">
-      <i class="bi bi-shield-check"></i>
+  <div class="sidebar-brand justify-content-between">
+    <div class="d-flex align-items-center gap-2.5 overflow-hidden">
+      <div class="brand-symbol">
+        <i class="bi bi-shield-check"></i>
+      </div>
+      <div class="overflow-hidden">
+        <h6 class="brand-text-title text-truncate">Rumahku Care</h6>
+        <span class="brand-text-sub text-truncate">Personal Asset Manager</span>
+      </div>
     </div>
-    <div>
-      <h6 class="brand-text-title">Rumahku Care</h6>
-      <span class="brand-text-sub">Personal Asset Manager</span>
-    </div>
+    <button type="button" class="btn btn-sm text-secondary d-lg-none p-1 ms-auto" id="sidebarClose" aria-label="Tutup Menu" style="min-height: 44px; min-width: 44px;">
+      <i class="bi bi-x-lg fs-5"></i>
+    </button>
   </div>
 
   <nav class="sidebar-menu pt-3">
@@ -45,8 +50,8 @@
     </div>
     @auth
       <div class="d-flex align-items-center gap-2 pt-1">
-        <a href="{{ route('profile.edit') }}" class="d-flex align-items-center gap-2 text-decoration-none text-dark flex-grow-1 overflow-hidden" title="Pengaturan Profil">
-          <div class="rounded-circle bg-slate-200 text-slate-700 d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width: 34px; height: 34px; font-size: 0.8rem;">
+        <a href="{{ route('profile.edit') }}" class="d-flex align-items-center gap-2 text-decoration-none text-dark flex-grow-1 overflow-hidden" title="Pengaturan Profil" style="min-height: 44px;">
+          <div class="rounded-circle bg-slate-200 text-slate-700 d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width: 36px; height: 36px; font-size: 0.8rem;">
             {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
           </div>
           <div class="overflow-hidden me-auto">
@@ -56,7 +61,7 @@
         </a>
         <form action="{{ route('logout') }}" method="POST" class="m-0">
           @csrf
-          <button type="submit" class="btn btn-glass btn-sm p-1.5 text-danger" title="Keluar" aria-label="Keluar" style="min-height: 34px; min-width: 34px;">
+          <button type="submit" class="btn btn-glass btn-sm p-1.5 text-danger" title="Keluar" aria-label="Keluar" style="min-height: 44px; min-width: 44px;">
             <i class="bi bi-box-arrow-right"></i>
           </button>
         </form>
