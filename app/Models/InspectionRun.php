@@ -66,11 +66,6 @@ class InspectionRun extends Model
         return $this->items->contains(fn (InspectionRunItem $i) => $i->status === 'bermasalah');
     }
 
-    public function getHasProblemAttribute(): bool
-    {
-        return $this->items->contains(fn (InspectionRunItem $i) => $i->status === 'bermasalah');
-    }
-
     public function getStatusLabelAttribute(): string
     {
         if ($this->has_danger) {

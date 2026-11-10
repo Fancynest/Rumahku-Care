@@ -171,47 +171,45 @@ class AttentionFeed
             ]));
         }
 
-        // 3. Dari Kerusakan (DamageReport) - jika tabel sudah ada di DB
-        if (class_exists(DamageReport::class)) {
-            $damageReports = $user->damageReports()
-                ->with('reportable')
-                ->whereIn('status', ['dilaporkan', 'dalam_perbaikan'])
-                ->whereIn('severity', ['berat', 'sedang'])
-                ->get()
-                ->reject(function ($dr) {
-                    return $dr->reportable instanceof Vehicle && $dr->reportable->archived_at !== null;
-                });
+        // 3. Dari Kerusakan (DamageReport)
+        $damageReports = $user->damageReports()
+            ->with('reportable')
+            ->whereIn('status', ['dilaporkan', 'dalam_perbaikan'])
+            ->whereIn('severity', ['berat', 'sedang'])
+            ->get()
+            ->reject(function ($dr) {
+                return $dr->reportable instanceof Vehicle && $dr->reportable->archived_at !== null;
+            });
 
-            foreach ($damageReports as $dr) {
-                $isVehicle = $dr->reportable instanceof Vehicle;
-                $status = $dr->severity === 'berat' ? 'mendesak' : 'perhatian';
-                $priority = $dr->severity === 'berat' ? 'darurat' : 'perhatian';
+        foreach ($damageReports as $dr) {
+            $isVehicle = $dr->reportable instanceof Vehicle;
+            $status = $dr->severity === 'berat' ? 'mendesak' : 'perhatian';
+            $priority = $dr->severity === 'berat' ? 'darurat' : 'perhatian';
 
-                $url = $isVehicle
-                    ? route('vehicles.index', ['v' => $dr->reportable_id]).'#kerusakan'
-                    : route('home-assets.show', $dr->reportable_id).'#kerusakan';
+            $url = $isVehicle
+                ? route('vehicles.index', ['v' => $dr->reportable_id]).'#kerusakan'
+                : route('home-assets.show', $dr->reportable_id).'#kerusakan';
 
-                $items->push(new Fluent([
-                    'type' => 'kerusakan',
-                    'type_badge' => 'Kerusakan ('.ucfirst($dr->severity).')',
-                    'id' => $dr->id,
-                    'title' => $dr->title,
-                    'subject_name' => $dr->subject_name,
-                    'subject_type' => $dr->reportable_type,
-                    'subject_id' => $dr->reportable_id,
-                    'is_vehicle' => $isVehicle,
-                    'subject_odometer' => 0,
-                    'status' => $status,
-                    'status_label' => ucfirst($dr->status_label),
-                    'status_chip_class' => $status === 'mendesak' ? 'chip-urgent' : 'chip-warning',
-                    'priority' => $priority,
-                    'due_label' => 'Perlu Perbaikan',
-                    'due_detail' => 'Dilaporkan: '.$dr->reported_at?->format('d M Y'),
-                    'url' => $url,
-                    'trigger_label' => ucfirst($dr->severity),
-                    'source' => $dr,
-                ]));
-            }
+            $items->push(new Fluent([
+                'type' => 'kerusakan',
+                'type_badge' => 'Kerusakan ('.ucfirst($dr->severity).')',
+                'id' => $dr->id,
+                'title' => $dr->title,
+                'subject_name' => $dr->subject_name,
+                'subject_type' => $dr->reportable_type,
+                'subject_id' => $dr->reportable_id,
+                'is_vehicle' => $isVehicle,
+                'subject_odometer' => 0,
+                'status' => $status,
+                'status_label' => ucfirst($dr->status_label),
+                'status_chip_class' => $status === 'mendesak' ? 'chip-urgent' : 'chip-warning',
+                'priority' => $priority,
+                'due_label' => 'Perlu Perbaikan',
+                'due_detail' => 'Dilaporkan: '.$dr->reported_at?->format('d M Y'),
+                'url' => $url,
+                'trigger_label' => ucfirst($dr->severity),
+                'source' => $dr,
+            ]));
         }
 
         // Urutkan berdasarkan status (terlambat > mendesak > perhatian > normal) lalu tie-breaker prioritas

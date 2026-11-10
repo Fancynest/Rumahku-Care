@@ -205,7 +205,7 @@ class OdometerTimeline
         }
 
         // Tanggal sama: pilih pembacaan odometer terendah
-        if ((int) $mPrevOdo = (int) $mNext->odometer <= (int) $fNext->odometer) {
+        if ((int) $mNext->odometer <= (int) $fNext->odometer) {
             return [
                 'odometer' => (int) $mNext->odometer,
                 'date' => $mDate,
