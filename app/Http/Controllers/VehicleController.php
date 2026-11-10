@@ -95,6 +95,9 @@ class VehicleController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $this->normalizeRequestNumbers($request, ['odometer']);
+        $this->normalizePlate($request);
+
         $validated = $request->validate([
             'plate' => [
                 'required',
@@ -156,6 +159,8 @@ class VehicleController extends Controller
     public function update(Request $request, Vehicle $vehicle): RedirectResponse
     {
         abort_if($vehicle->user_id !== $request->user()->id, 404);
+
+        $this->normalizePlate($request);
 
         $validated = $request->validate([
             'plate' => [
@@ -339,5 +344,15 @@ class VehicleController extends Controller
 
         return redirect()->back()
             ->with('success', 'Catatan servis untuk '.$vehicle->name.' berhasil disimpan.');
+    }
+
+    protected function normalizePlate(Request $request): void
+    {
+        if ($request->has('plate')) {
+            $plate = trim((string) preg_replace('/\s+/', ' ', (string) $request->input('plate')));
+            $request->merge([
+                'plate' => strtoupper($plate),
+            ]);
+        }
     }
 }

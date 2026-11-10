@@ -461,6 +461,62 @@ class VehicleTest extends TestCase
         $response->assertSessionHasErrors(['plate']);
     }
 
+    public function test_plate_is_normalized_and_duplicate_with_case_or_whitespace_is_rejected(): void
+    {
+        $user = User::firstOrFail();
+        $this->actingAs($user);
+
+        // Buat kendaraan awal dengan plat "B 1234 XYZ"
+        Vehicle::create([
+            'user_id' => $user->id,
+            'plate' => 'B 1234 XYZ',
+            'odometer' => 1000,
+            'color_key' => 'hitam',
+            'fuel_type' => 'Bensin',
+        ]);
+
+        // Coba buat kendaraan baru dengan variasi huruf kecil dan spasi berlebih "  b   1234   xyz  "
+        $responseStoreDuplicate = $this->post('/vehicles', [
+            'plate' => '  b   1234   xyz  ',
+            'vehicle_model_id' => 'other',
+            'custom_model_name' => 'Custom Motor',
+            'custom_body_type' => 'motor_matic',
+            'odometer' => 500,
+            'color_key' => 'putih',
+            'fuel_type' => 'Bensin',
+        ]);
+        $responseStoreDuplicate->assertSessionHasErrors(['plate']);
+
+        // Buat kendaraan baru dengan plat unik tapi formatnya acak -> harus dinormalisasi
+        $responseStoreValid = $this->post('/vehicles', [
+            'plate' => '  d   7890   klm  ',
+            'vehicle_model_id' => 'other',
+            'custom_model_name' => 'Custom Motor 2',
+            'custom_body_type' => 'motor_matic',
+            'odometer' => 500,
+            'color_key' => 'putih',
+            'fuel_type' => 'Bensin',
+        ]);
+        $responseStoreValid->assertRedirect();
+        $this->assertDatabaseHas('vehicles', [
+            'user_id' => $user->id,
+            'plate' => 'D 7890 KLM',
+        ]);
+
+        $createdVehicle = Vehicle::where('plate', 'D 7890 KLM')->firstOrFail();
+
+        // Update plat ke variasi huruf kecil dari plat pertama "b 1234 xyz" -> harus ditolak
+        $responseUpdateDuplicate = $this->put("/vehicles/{$createdVehicle->id}", [
+            'plate' => 'b 1234 xyz',
+            'vehicle_model_id' => 'other',
+            'custom_model_name' => 'Custom Motor 2',
+            'custom_body_type' => 'motor_matic',
+            'color_key' => 'putih',
+            'fuel_type' => 'Bensin',
+        ]);
+        $responseUpdateDuplicate->assertSessionHasErrors(['plate']);
+    }
+
     public function test_can_archive_and_restore_vehicle_and_observes_feed_and_calendar_effects(): void
     {
         $user = User::firstOrFail();
