@@ -9,6 +9,8 @@ use App\Models\MaintenanceRecord;
 use App\Models\User;
 use App\Models\Vehicle;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
@@ -17,22 +19,23 @@ use Illuminate\Support\Fluent;
 class ExpenseReport
 {
     /**
-     * Ambil seluruh pengeluaran ternormalisasi untuk pengguna.
+     * Ambil seluruh pengeluaran ternormalisasi untuk pengguna, opsional dibatasi rentang tanggal.
      *
      * @return Collection<int, Fluent>
      */
-    public function getAllExpenses(User $user): Collection
+    public function getAllExpenses(User $user, ?Carbon $startDate = null, ?Carbon $endDate = null): Collection
     {
         $items = collect();
 
         // 1. Servis & Perawatan (maintenance_records)
-        $records = $user->maintenanceRecords()
+        $recordsQuery = $user->maintenanceRecords()
             ->with('subject')
             ->where(function ($q) {
                 $q->where('labor_cost', '>', 0)
                     ->orWhere('parts_cost', '>', 0);
-            })
-            ->get();
+            });
+        $this->applyDateRange($recordsQuery, 'done_at', $startDate, $endDate);
+        $records = $recordsQuery->get();
 
         foreach ($records as $r) {
             $total = (int) $r->labor_cost + (int) $r->parts_cost;
@@ -66,10 +69,11 @@ class ExpenseReport
         }
 
         // 2. BBM (fuel_logs)
-        $fuelLogs = $user->fuelLogs()
+        $fuelLogsQuery = $user->fuelLogs()
             ->with('vehicle')
-            ->where('total_cost', '>', 0)
-            ->get();
+            ->where('total_cost', '>', 0);
+        $this->applyDateRange($fuelLogsQuery, 'filled_at', $startDate, $endDate);
+        $fuelLogs = $fuelLogsQuery->get();
 
         foreach ($fuelLogs as $f) {
             if (! $f->filled_at || (int) $f->total_cost <= 0) {
@@ -102,12 +106,13 @@ class ExpenseReport
         }
 
         // 3. Perbaikan Kerusakan (damage_reports) - HANYA selesai dan biaya > 0 (resolved_at)
-        $damages = $user->damageReports()
+        $damagesQuery = $user->damageReports()
             ->with('reportable')
             ->where('status', 'selesai')
             ->where('repair_cost', '>', 0)
-            ->whereNotNull('resolved_at')
-            ->get();
+            ->whereNotNull('resolved_at');
+        $this->applyDateRange($damagesQuery, 'resolved_at', $startDate, $endDate);
+        $damages = $damagesQuery->get();
 
         foreach ($damages as $d) {
             $date = Carbon::parse($d->resolved_at)->startOfDay();
@@ -136,10 +141,32 @@ class ExpenseReport
         }
 
         // 4. Dokumen & Pajak (documents) - biaya > 0, termasuk yang diarsipkan
-        $documents = $user->documents()
+        $documentsQuery = $user->documents()
             ->with('subject')
-            ->where('cost', '>', 0)
-            ->get();
+            ->where('cost', '>', 0);
+
+        if ($startDate || $endDate) {
+            $documentsQuery->where(function ($q) use ($startDate, $endDate): void {
+                $q->where(function ($sub) use ($startDate, $endDate): void {
+                    $sub->whereNotNull('issued_at');
+                    $this->applyDateRange($sub, 'issued_at', $startDate, $endDate);
+                })->orWhere(function ($sub) use ($startDate, $endDate): void {
+                    $sub->whereNull('issued_at');
+                    if ($startDate && $endDate) {
+                        $sub->whereBetween('created_at', [
+                            $startDate->copy()->startOfDay()->toDateTimeString(),
+                            $endDate->copy()->endOfDay()->toDateTimeString(),
+                        ]);
+                    } elseif ($startDate) {
+                        $sub->where('created_at', '>=', $startDate->copy()->startOfDay()->toDateTimeString());
+                    } elseif ($endDate) {
+                        $sub->where('created_at', '<=', $endDate->copy()->endOfDay()->toDateTimeString());
+                    }
+                });
+            });
+        }
+
+        $documents = $documentsQuery->get();
 
         foreach ($documents as $doc) {
             $rawDate = $doc->issued_at ?? $doc->created_at;
@@ -176,14 +203,43 @@ class ExpenseReport
     }
 
     /**
+     * Terapkan rentang tanggal pada query Eloquent.
+     *
+     * @param  Builder|Relation  $query
+     */
+    private function applyDateRange(mixed $query, string $column, ?Carbon $startDate, ?Carbon $endDate): void
+    {
+        if ($startDate && $endDate) {
+            $query->whereBetween($column, [
+                $startDate->toDateString().' 00:00:00',
+                $endDate->toDateString().' 23:59:59',
+            ]);
+        } elseif ($startDate) {
+            $query->where($column, '>=', $startDate->toDateString().' 00:00:00');
+        } elseif ($endDate) {
+            $query->where($column, '<=', $endDate->toDateString().' 23:59:59');
+        }
+    }
+
+    /**
      * Filter daftar pengeluaran berdasarkan bulan, kategori, dan subjek.
      *
      * @param  array{month?: string|null, category?: string|null, subject?: string|null}  $filters
      * @return Collection<int, Fluent>
      */
-    public function getFilteredItems(User $user, array $filters = []): Collection
+    public function getFilteredItems(User $user, array $filters = [], ?Collection $sourceExpenses = null): Collection
     {
-        $all = $this->getAllExpenses($user);
+        if ($sourceExpenses !== null) {
+            $all = $sourceExpenses;
+        } else {
+            $startDate = null;
+            $endDate = null;
+            if (! empty($filters['month']) && preg_match('/^\d{4}-\d{2}$/', $filters['month'])) {
+                $startDate = Carbon::createFromFormat('Y-m', $filters['month'])->startOfMonth();
+                $endDate = $startDate->copy()->endOfMonth();
+            }
+            $all = $this->getAllExpenses($user, $startDate, $endDate);
+        }
 
         // Filter Bulan (YYYY-MM)
         if (! empty($filters['month'])) {
@@ -221,7 +277,11 @@ class ExpenseReport
         $selectedMonth = Carbon::createFromFormat('Y-m', $monthStr)->startOfMonth();
         $prevMonth = $selectedMonth->copy()->subMonth();
 
-        $allExpenses = $this->getAllExpenses($user);
+        // Rentang 6 bulan ke belakang sampai akhir bulan terpilih (5 bulan lalu + bulan terpilih)
+        $trendStartDate = $selectedMonth->copy()->subMonths(5)->startOfMonth();
+        $trendEndDate = $selectedMonth->copy()->endOfMonth();
+
+        $allExpenses = $this->getAllExpenses($user, $trendStartDate, $trendEndDate);
 
         // Subject filter for broader trend
         $subjectFiltered = $allExpenses;
@@ -306,7 +366,7 @@ class ExpenseReport
             'month' => $monthStr,
             'category' => $filters['category'] ?? null,
             'subject' => $filters['subject'] ?? null,
-        ]);
+        ], $subjectFiltered);
 
         // Paginasi 20 item per halaman
         $totalItems = $filteredItems->count();

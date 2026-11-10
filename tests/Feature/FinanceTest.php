@@ -371,4 +371,59 @@ class FinanceTest extends TestCase
         // Memastikan jumlah query tetap terikat dan tidak bertambah per baris data
         $this->assertLessThanOrEqual(20, count($queries));
     }
+
+    public function test_expense_report_scopes_queries_to_selected_window_and_six_month_trend(): void
+    {
+        $this->actingAs($this->user);
+
+        // 1. Catatan dalam rentang tren 6 bulan (2 bulan lalu dari 2026-11)
+        FuelLog::create([
+            'user_id' => $this->user->id,
+            'vehicle_id' => $this->vehicle->id,
+            'filled_at' => Carbon::parse('2026-09-15')->toDateString(),
+            'odometer' => 10200,
+            'liters' => 20,
+            'total_cost' => 200000,
+        ]);
+
+        // 2. Catatan di luar rentang tren 6 bulan (7 bulan lalu dari 2026-11, misal 2026-04-10)
+        FuelLog::create([
+            'user_id' => $this->user->id,
+            'vehicle_id' => $this->vehicle->id,
+            'filled_at' => Carbon::parse('2026-04-10')->toDateString(),
+            'odometer' => 9000,
+            'liters' => 30,
+            'total_cost' => 300000,
+        ]);
+
+        // 3. Maintenance record lama (8 bulan lalu)
+        MaintenanceRecord::create([
+            'user_id' => $this->user->id,
+            'subject_type' => $this->vehicle->getMorphClass(),
+            'subject_id' => $this->vehicle->id,
+            'done_at' => Carbon::parse('2026-03-01')->toDateString(),
+            'service_type' => 'Ganti Oli Lama',
+            'labor_cost' => 100000,
+            'parts_cost' => 200000,
+        ]);
+
+        $report = app(ExpenseReport::class);
+        $data = $report->getMonthlyReport($this->user, ['month' => '2026-11']);
+
+        // Data 7 & 8 bulan lalu tidak boleh masuk ke tren 6 bulan
+        $trendMonths = array_column($data['six_month_trend'], 'month');
+        $this->assertContains('2026-09', $trendMonths);
+        $this->assertNotContains('2026-04', $trendMonths);
+        $this->assertNotContains('2026-03', $trendMonths);
+
+        $totalTrend = array_sum(array_column($data['six_month_trend'], 'total'));
+        $this->assertSame(200000, $totalTrend);
+
+        // Query terisolasi langsung dengan startDate dan endDate
+        $start = Carbon::parse('2026-06-01');
+        $end = Carbon::parse('2026-11-30');
+        $scoped = $report->getAllExpenses($this->user, $start, $end);
+        $this->assertCount(1, $scoped);
+        $this->assertSame(200000, $scoped->first()->amount);
+    }
 }
