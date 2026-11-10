@@ -118,6 +118,31 @@ class VehicleTest extends TestCase
         ]);
     }
 
+    public function test_can_update_vehicle_odometer_with_formatted_strings(): void
+    {
+        $vehicle = Vehicle::firstOrFail();
+        $targetOdometer = $vehicle->odometer + 1000;
+
+        // Uji format "15.000,00"
+        $formatted = number_format($targetOdometer, 2, ',', '.');
+        $response = $this->patch("/vehicles/{$vehicle->id}/odometer", [
+            'odometer' => $formatted,
+        ]);
+
+        $response->assertRedirect();
+        $this->assertSame($targetOdometer, $vehicle->fresh()->odometer);
+
+        // Uji format "15.500,-"
+        $targetOdometer2 = $targetOdometer + 500;
+        $formatted2 = number_format($targetOdometer2, 0, ',', '.').',-';
+        $response2 = $this->patch("/vehicles/{$vehicle->id}/odometer", [
+            'odometer' => $formatted2,
+        ]);
+
+        $response2->assertRedirect();
+        $this->assertSame($targetOdometer2, $vehicle->fresh()->odometer);
+    }
+
     public function test_cannot_update_vehicle_odometer_lower_than_current(): void
     {
         $vehicle = Vehicle::firstOrFail();

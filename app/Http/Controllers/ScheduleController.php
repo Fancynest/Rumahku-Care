@@ -204,6 +204,14 @@ class ScheduleController extends Controller
         $subject = $schedule->subject;
         $isVehicle = $subject instanceof Vehicle;
 
+        foreach (['odometer', 'labor_cost', 'parts_cost'] as $field) {
+            if ($request->has($field) && is_string($request->input($field))) {
+                $val = preg_replace('/,.*$/', '', trim($request->input($field)));
+                $val = preg_replace('/[^0-9]/', '', $val);
+                $request->merge([$field => $val]);
+            }
+        }
+
         $rules = [
             'done_at' => ['required', 'date', 'before_or_equal:today'],
             'labor_cost' => ['nullable', 'integer', 'min:0'],

@@ -19,20 +19,30 @@ class FuelLogController extends Controller
     {
         $liters = $request->input('liters');
         if (is_string($liters)) {
-            $liters = str_replace(' ', '', $liters);
-            // Jika ada koma, ganti dengan titik
+            $liters = trim($liters);
+            // Hilangkan akhiran ,- jika ada
+            $liters = preg_replace('/,\s*-\s*$/', '', $liters);
+            // Ganti koma dengan titik untuk desimal
             $liters = str_replace(',', '.', $liters);
+            // Buang unit dan karakter selain angka dan titik desimal
+            $liters = preg_replace('/[^0-9.]/', '', $liters);
             $request->merge(['liters' => $liters]);
         }
 
         $cost = $request->input('total_cost');
         if (is_string($cost)) {
+            $cost = trim($cost);
+            // Hilangkan bagian desimal/akhiran sebelum membuang pemisah ribuan (mis. ",00", ",-", ",50")
+            $cost = preg_replace('/,.*$/', '', $cost);
             $cost = preg_replace('/[^0-9]/', '', $cost);
             $request->merge(['total_cost' => $cost]);
         }
 
         $odometer = $request->input('odometer');
         if (is_string($odometer)) {
+            $odometer = trim($odometer);
+            // Hilangkan bagian desimal/akhiran sebelum membuang pemisah ribuan (mis. ",00", ",-", ",50")
+            $odometer = preg_replace('/,.*$/', '', $odometer);
             $odometer = preg_replace('/[^0-9]/', '', $odometer);
             $request->merge(['odometer' => $odometer]);
         }

@@ -71,6 +71,7 @@ class FinanceController extends Controller
         foreach ($categories as $inputKey => $categoryValue) {
             $val = $rawBudgets[$inputKey] ?? null;
             if (is_string($val)) {
+                $val = preg_replace('/,.*$/', '', trim($val));
                 $val = preg_replace('/[^0-9]/', '', $val);
             }
             $amount = (int) $val;

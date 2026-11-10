@@ -418,4 +418,60 @@ class FuelLogTest extends TestCase
 
         $this->assertTrue($log3->fresh()->is_full_tank);
     }
+
+    public function test_normalize_input_handles_various_formats_for_cost_odometer_and_liters(): void
+    {
+        $this->actingAs($this->user);
+
+        // 1. Format: "Rp 52.000,-" untuk total_cost, "10.600,00" untuk odometer, "12,5" untuk liters
+        $response1 = $this->post("/vehicles/{$this->vehicle->id}/fuel-logs", [
+            'filled_at' => Carbon::today()->toDateString(),
+            'odometer' => '10.600,00',
+            'liters' => '12,5',
+            'total_cost' => 'Rp 52.000,-',
+            'is_full_tank' => 1,
+        ]);
+        $response1->assertRedirect();
+
+        $this->assertDatabaseHas('fuel_logs', [
+            'vehicle_id' => $this->vehicle->id,
+            'odometer' => 10600,
+            'liters' => 12.50,
+            'total_cost' => 52000,
+        ]);
+
+        // 2. Format: "52.000,00" untuk total_cost, "10.800,-" untuk odometer, "14.25 L" untuk liters
+        $response2 = $this->post("/vehicles/{$this->vehicle->id}/fuel-logs", [
+            'filled_at' => Carbon::today()->toDateString(),
+            'odometer' => '10.800,-',
+            'liters' => '14.25 L',
+            'total_cost' => '52.000,00',
+            'is_full_tank' => 1,
+        ]);
+        $response2->assertRedirect();
+
+        $this->assertDatabaseHas('fuel_logs', [
+            'vehicle_id' => $this->vehicle->id,
+            'odometer' => 10800,
+            'liters' => 14.25,
+            'total_cost' => 52000,
+        ]);
+
+        // 3. Format desimal lain pada total_cost: "52.000,50" -> 52000, "10,-" liter -> 10.00
+        $response3 = $this->post("/vehicles/{$this->vehicle->id}/fuel-logs", [
+            'filled_at' => Carbon::today()->toDateString(),
+            'odometer' => '11.000',
+            'liters' => '10,-',
+            'total_cost' => '52.000,50',
+            'is_full_tank' => 1,
+        ]);
+        $response3->assertRedirect();
+
+        $this->assertDatabaseHas('fuel_logs', [
+            'vehicle_id' => $this->vehicle->id,
+            'odometer' => 11000,
+            'liters' => 10.00,
+            'total_cost' => 52000,
+        ]);
+    }
 }
