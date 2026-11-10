@@ -34,7 +34,9 @@ class ScheduleController extends Controller
             $query->where('subject_type', HomeAsset::class);
         }
 
-        $allSchedules = $query->get();
+        $allSchedules = $query->get()->reject(function ($s) {
+            return $s->subject instanceof Vehicle && $s->subject->archived_at !== null;
+        })->values();
 
         $priorityRank = [
             'darurat' => 0,

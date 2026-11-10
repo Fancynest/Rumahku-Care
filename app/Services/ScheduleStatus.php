@@ -188,7 +188,11 @@ class ScheduleStatus
             $this->cachedActiveSchedules[$user->id] = $user->schedules()
                 ->with('subject')
                 ->where('is_active', true)
-                ->get();
+                ->get()
+                ->reject(function ($s) {
+                    return $s->subject instanceof Vehicle && $s->subject->archived_at !== null;
+                })
+                ->values();
         }
 
         return $this->cachedActiveSchedules[$user->id];

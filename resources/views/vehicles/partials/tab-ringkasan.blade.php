@@ -1,7 +1,21 @@
 <div class="tab-pane fade show active" id="ringkasan" role="tabpanel" aria-labelledby="tab-v-ringkasan-btn">
+  @if ($selectedVehicle->isArchived())
+    <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center justify-content-between mb-3" role="alert">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-archive-fill fs-5"></i>
+        <div>
+          <span class="fw-bold">Kendaraan ini berada dalam arsip</span>
+          <span class="small text-muted d-block">
+            Alasan arsip: <span class="fw-semibold text-dark">{{ ucfirst(str_replace('_', ' ', $selectedVehicle->archive_reason ?? 'Lainnya')) }}</span> • Diarsipkan pada {{ $selectedVehicle->archived_at?->format('d M Y') }}.
+          </span>
+        </div>
+      </div>
+    </div>
+  @endif
+
   <!-- Visual Kendaraan Besar di Tengah -->
   <div class="glass-panel p-4 mb-4 text-center position-relative">
-    <div class="d-flex justify-content-between align-items-start mb-2">
+    <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
       <div class="text-start">
         <span class="badge bg-light text-dark border px-2 py-1 mb-1 text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.05em;">
           {{ strtoupper(str_replace('_', ' ', $selectedVehicle->body_type ?? 'KENDARAAN')) }}
@@ -9,15 +23,42 @@
         <h3 class="fw-bold text-dark mb-0" style="letter-spacing: -0.02em;">{{ $selectedVehicle->name }}</h3>
       </div>
 
-      @if ($selectedVehicle->vehicleModel?->asset_glb)
-        <!-- Color Picker hanya tampil jika menggunakan model GLB 3D nyata -->
-        <div class="d-flex align-items-center gap-1.5 p-1 bg-white rounded-pill border shadow-xs" title="Sesuaikan warna cat 3D">
-          <button class="color-swatch-btn active" style="background-color: #0f172a;" onclick="setGLBColor([0.06, 0.09, 0.16, 1])"></button>
-          <button class="color-swatch-btn" style="background-color: #ffffff;" onclick="setGLBColor([0.95, 0.95, 0.95, 1])"></button>
-          <button class="color-swatch-btn" style="background-color: #dc2626;" onclick="setGLBColor([0.85, 0.15, 0.15, 1])"></button>
-          <button class="color-swatch-btn" style="background-color: #2563eb;" onclick="setGLBColor([0.15, 0.38, 0.92, 1])"></button>
-        </div>
-      @endif
+      <div class="d-flex align-items-center gap-2">
+        @if ($selectedVehicle->vehicleModel?->asset_glb)
+          <!-- Color Picker hanya tampil jika menggunakan model GLB 3D nyata -->
+          <div class="d-flex align-items-center gap-1.5 p-1 bg-white rounded-pill border shadow-xs" title="Sesuaikan warna cat 3D">
+            <button class="color-swatch-btn active" style="background-color: #0f172a;" onclick="setGLBColor([0.06, 0.09, 0.16, 1])"></button>
+            <button class="color-swatch-btn" style="background-color: #ffffff;" onclick="setGLBColor([0.95, 0.95, 0.95, 1])"></button>
+            <button class="color-swatch-btn" style="background-color: #dc2626;" onclick="setGLBColor([0.85, 0.15, 0.15, 1])"></button>
+            <button class="color-swatch-btn" style="background-color: #2563eb;" onclick="setGLBColor([0.15, 0.38, 0.92, 1])"></button>
+          </div>
+        @endif
+
+        <button type="button" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalEditKendaraan" style="min-height: 38px;">
+          <i class="bi bi-pencil"></i>
+          <span class="d-none d-sm-inline">Edit</span>
+        </button>
+
+        @if (! $selectedVehicle->isArchived())
+          <button type="button" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalArsipKendaraan" style="min-height: 38px;">
+            <i class="bi bi-archive"></i>
+            <span class="d-none d-sm-inline">Arsipkan</span>
+          </button>
+        @else
+          <form action="{{ route('vehicles.restore', $selectedVehicle->id) }}" method="POST" class="d-inline">
+            @csrf
+            <button type="submit" class="btn btn-outline-success btn-sm d-flex align-items-center gap-1" style="min-height: 38px;">
+              <i class="bi bi-arrow-counterclockwise"></i>
+              <span>Pulihkan</span>
+            </button>
+          </form>
+
+          <button type="button" class="btn btn-danger btn-sm d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalHapusPermanenKendaraan" style="min-height: 38px;">
+            <i class="bi bi-trash3"></i>
+            <span>Hapus Permanen</span>
+          </button>
+        @endif
+      </div>
     </div>
 
     <!-- Stage Visual Showcase -->

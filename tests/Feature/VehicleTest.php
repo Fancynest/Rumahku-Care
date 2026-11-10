@@ -2,11 +2,18 @@
 
 namespace Tests\Feature;
 
+use App\Models\HomeAsset;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleModel;
+use App\Services\AttentionFeed;
+use App\Services\ExpenseReport;
+use App\Services\ScheduleCalendar;
+use App\Services\ScheduleStatus;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class VehicleTest extends TestCase
@@ -394,5 +401,301 @@ class VehicleTest extends TestCase
         $response = $this->post("/vehicles/{$vehicle->id}/service-logs", []);
 
         $response->assertSessionHasErrors(['done_at', 'odometer']);
+    }
+
+    public function test_can_update_vehicle_details_and_model_from_catalog(): void
+    {
+        $user = User::firstOrFail();
+        $this->actingAs($user);
+        $vehicle = $user->vehicles()->firstOrFail();
+
+        $newModel = VehicleModel::where('brand', 'Toyota')->where('model', 'Avanza 1.5 G')->firstOrFail();
+
+        $response = $this->put("/vehicles/{$vehicle->id}", [
+            'plate' => 'B 8888 EDIT',
+            'vehicle_model_id' => (string) $newModel->id,
+            'year' => 2023,
+            'color_key' => 'putih',
+            'fuel_type' => 'Bensin',
+            'workshop' => 'Auto2000 Tebet',
+        ]);
+
+        $response->assertRedirect();
+        $fresh = $vehicle->fresh();
+        $this->assertSame('B 8888 EDIT', $fresh->plate);
+        $this->assertSame($newModel->id, $fresh->vehicle_model_id);
+        $this->assertSame(2023, $fresh->year);
+        $this->assertSame('putih', $fresh->color_key);
+        $this->assertSame('Auto2000 Tebet', $fresh->workshop);
+
+        // User lain tidak boleh mengedit kendaraan ini (404)
+        $userB = User::factory()->create();
+        $this->actingAs($userB);
+        $responseForbidden = $this->put("/vehicles/{$vehicle->id}", [
+            'plate' => 'B 9999 HACK',
+            'vehicle_model_id' => (string) $newModel->id,
+            'color_key' => 'hitam',
+            'fuel_type' => 'Bensin',
+        ]);
+        $responseForbidden->assertStatus(404);
+    }
+
+    public function test_cannot_update_vehicle_with_duplicate_plate_for_same_user(): void
+    {
+        $user = User::firstOrFail();
+        $this->actingAs($user);
+        $vehicles = $user->vehicles()->take(2)->get();
+        $this->assertCount(2, $vehicles);
+
+        $v1 = $vehicles[0];
+        $v2 = $vehicles[1];
+
+        $response = $this->put("/vehicles/{$v2->id}", [
+            'plate' => $v1->plate,
+            'vehicle_model_id' => (string) ($v2->vehicle_model_id ?? 'other'),
+            'color_key' => 'hitam',
+            'fuel_type' => 'Bensin',
+        ]);
+
+        $response->assertSessionHasErrors(['plate']);
+    }
+
+    public function test_can_archive_and_restore_vehicle_and_observes_feed_and_calendar_effects(): void
+    {
+        $user = User::firstOrFail();
+        $this->actingAs($user);
+        $vehicle = $user->vehicles()->firstOrFail();
+
+        // Buat jadwal mendesak dan dokumen jatuh tempo pada kendaraan ini
+        $schedule = $vehicle->schedules()->create([
+            'user_id' => $user->id,
+            'title' => 'Uji Emisi Kendaraan',
+            'trigger_type' => 'tanggal',
+            'interval_months' => 6,
+            'next_due_date' => Carbon::today()->addDays(2)->toDateString(),
+            'priority' => 'mendesak',
+            'is_active' => true,
+        ]);
+
+        $document = $vehicle->documents()->create([
+            'user_id' => $user->id,
+            'type' => 'pajak_tahunan',
+            'title' => 'Pajak STNK Tahunan',
+            'cost' => 500000,
+            'expires_at' => Carbon::today()->addDays(5)->toDateString(),
+        ]);
+
+        // Verifikasi sebelum arsip: muncul di AttentionFeed
+        $feed = app(AttentionFeed::class);
+        $urgentBefore = $feed->urgent($user);
+        $this->assertTrue($urgentBefore->contains(fn ($i) => $i->id === $schedule->id));
+
+        // 1. Arsipkan kendaraan
+        $archiveResponse = $this->post("/vehicles/{$vehicle->id}/archive", [
+            'archive_reason' => 'dijual',
+        ]);
+        $archiveResponse->assertRedirect();
+
+        $freshVehicle = $vehicle->fresh();
+        $this->assertTrue($freshVehicle->isArchived());
+        $this->assertSame('dijual', $freshVehicle->archive_reason);
+        $this->assertStringContainsString('(arsip)', $freshVehicle->name);
+
+        // 2. Efek ke Pemilih Garasi:
+        // Default /vehicles hanya memuat kendaraan aktif
+        $viewActiveResponse = $this->get('/vehicles');
+        $viewActiveResponse->assertStatus(200);
+        $viewActiveResponse->assertDontSee($freshVehicle->plate);
+
+        // /vehicles?archived=1 memuat kendaraan terarsip
+        $viewArchivedResponse = $this->get('/vehicles?archived=1');
+        $viewArchivedResponse->assertStatus(200);
+        $viewArchivedResponse->assertSee($freshVehicle->plate);
+        $viewArchivedResponse->assertSee('(arsip)');
+
+        // 3. Efek ke Bell / AttentionFeed & Dashboard:
+        // Item jadwal/dokumen kendaraan terarsip tidak boleh muncul
+        app()->forgetInstance(AttentionFeed::class);
+        app()->forgetInstance(ScheduleStatus::class);
+        $urgentAfter = app(AttentionFeed::class)->urgent($user);
+        $this->assertFalse($urgentAfter->contains(fn ($i) => $i->id === $schedule->id));
+        $this->assertFalse($urgentAfter->contains(fn ($i) => $i->id === $document->id));
+
+        // 4. Efek ke Kalender:
+        $calendar = app(ScheduleCalendar::class);
+        $calData = $calendar->build($user, Carbon::today()->format('Y-m'));
+        $agendaItems = collect($calData['agenda_list']);
+        $this->assertFalse($agendaItems->contains(fn ($item) => $item->id === $schedule->id));
+
+        // 5. Efek ke Keuangan: Laporan keuangan TETAP memuat biaya dokumen/BBM dengan label (arsip)
+        $expenseReport = app(ExpenseReport::class);
+        $expenses = $expenseReport->getAllExpenses($user);
+        $docExpense = $expenses->firstWhere('origin_id', $document->id);
+        $this->assertNotNull($docExpense);
+        $this->assertStringContainsString('(arsip)', $docExpense->subject_label);
+
+        // 6. Pulihkan kendaraan
+        $restoreResponse = $this->post("/vehicles/{$vehicle->id}/restore");
+        $restoreResponse->assertRedirect();
+
+        $restoredVehicle = $vehicle->fresh();
+        $this->assertFalse($restoredVehicle->isArchived());
+        $this->assertNull($restoredVehicle->archive_reason);
+        $this->assertStringNotContainsString('(arsip)', $restoredVehicle->name);
+    }
+
+    public function test_permanent_delete_cascades_all_relations_and_physical_attachment_files(): void
+    {
+        Storage::fake('local');
+
+        $user = User::firstOrFail();
+        $this->actingAs($user);
+        $vehicle = $user->vehicles()->create([
+            'plate' => 'B 7777 DEL',
+            'odometer' => 1000,
+            'color_key' => 'hitam',
+            'fuel_type' => 'Bensin',
+        ]);
+
+        // Upload lampiran fisik pada kendaraan
+        $fileVehicle = UploadedFile::fake()->image('mobil.jpg', 600, 600);
+        $pathVehicle = $fileVehicle->store('attachments/'.$user->id, 'local');
+        $attVehicle = $vehicle->attachments()->create([
+            'user_id' => $user->id,
+            'path' => $pathVehicle,
+            'original_name' => 'mobil.jpg',
+            'mime' => 'image/jpeg',
+            'size' => 1024,
+        ]);
+
+        // Buat relasi anak: maintenance record dengan lampiran fisik nota
+        $record = $vehicle->maintenanceRecords()->create([
+            'user_id' => $user->id,
+            'done_at' => Carbon::today()->toDateString(),
+            'odometer' => 1200,
+            'service_type' => 'Ganti Oli',
+            'labor_cost' => 50000,
+        ]);
+        $fileNota = UploadedFile::fake()->create('nota.pdf', 500, 'application/pdf');
+        $pathNota = $fileNota->store('attachments/'.$user->id, 'local');
+        $attRecord = $record->attachments()->create([
+            'user_id' => $user->id,
+            'path' => $pathNota,
+            'original_name' => 'nota.pdf',
+            'mime' => 'application/pdf',
+            'size' => 500,
+        ]);
+
+        // Buat log BBM
+        $fuelLog = $vehicle->fuelLogs()->create([
+            'user_id' => $user->id,
+            'filled_at' => Carbon::today()->toDateString(),
+            'odometer' => 1300,
+            'liters' => 20,
+            'total_cost' => 200000,
+        ]);
+
+        // Buat jadwal
+        $schedule = $vehicle->schedules()->create([
+            'user_id' => $user->id,
+            'title' => 'Servis Berkala',
+            'trigger_type' => 'kilometer',
+            'interval_km' => 5000,
+            'next_due_km' => 6000,
+        ]);
+
+        // Pastikan file fisik ada sebelum penghapusan
+        Storage::disk('local')->assertExists($pathVehicle);
+        Storage::disk('local')->assertExists($pathNota);
+
+        // 1. Tolak penghapusan jika kendaraan BELUM diarsipkan
+        $responseNotArchived = $this->delete("/vehicles/{$vehicle->id}", [
+            'confirm_plate' => 'B 7777 DEL',
+        ]);
+        $responseNotArchived->assertSessionHasErrors(['confirm_plate']);
+
+        // Arsipkan dulu
+        $vehicle->update(['archived_at' => now(), 'archive_reason' => 'rusak_berat']);
+
+        // 2. Tolak jika konfirmasi nomor plat salah
+        $responseWrongPlate = $this->delete("/vehicles/{$vehicle->id}", [
+            'confirm_plate' => 'B 1234 SALAH',
+        ]);
+        $responseWrongPlate->assertSessionHasErrors(['confirm_plate']);
+
+        // 3. Hapus permanen dengan plat yang benar
+        $responseDelete = $this->delete("/vehicles/{$vehicle->id}", [
+            'confirm_plate' => 'B 7777 DEL',
+        ]);
+        $responseDelete->assertRedirect();
+
+        // Seluruh baris di DB harus hilang
+        $this->assertDatabaseMissing('vehicles', ['id' => $vehicle->id]);
+        $this->assertDatabaseMissing('maintenance_records', ['id' => $record->id]);
+        $this->assertDatabaseMissing('fuel_logs', ['id' => $fuelLog->id]);
+        $this->assertDatabaseMissing('maintenance_schedules', ['id' => $schedule->id]);
+        $this->assertDatabaseMissing('attachments', ['id' => $attVehicle->id]);
+        $this->assertDatabaseMissing('attachments', ['id' => $attRecord->id]);
+
+        // Seluruh file fisik harus terhapus dari storage
+        Storage::disk('local')->assertMissing($pathVehicle);
+        Storage::disk('local')->assertMissing($pathNota);
+    }
+
+    public function test_home_asset_delete_cascades_all_relations_and_physical_attachment_files(): void
+    {
+        Storage::fake('local');
+
+        $user = User::firstOrFail();
+        $this->actingAs($user);
+        $homeAsset = HomeAsset::create([
+            'user_id' => $user->id,
+            'name' => 'Pompa Air Sumur',
+            'category' => 'air',
+            'room' => 'Belakang',
+            'condition' => 'normal',
+        ]);
+
+        $fileAsset = UploadedFile::fake()->image('pompa.jpg', 600, 600);
+        $pathAsset = $fileAsset->store('attachments/'.$user->id, 'local');
+        $attAsset = $homeAsset->attachments()->create([
+            'user_id' => $user->id,
+            'path' => $pathAsset,
+            'original_name' => 'pompa.jpg',
+            'mime' => 'image/jpeg',
+            'size' => 1024,
+        ]);
+
+        $record = $homeAsset->maintenanceRecords()->create([
+            'user_id' => $user->id,
+            'done_at' => Carbon::today()->toDateString(),
+            'service_type' => 'Ganti Kapasitor',
+            'labor_cost' => 75000,
+        ]);
+
+        $fileNota = UploadedFile::fake()->create('nota_pompa.pdf', 400, 'application/pdf');
+        $pathNota = $fileNota->store('attachments/'.$user->id, 'local');
+        $attRecord = $record->attachments()->create([
+            'user_id' => $user->id,
+            'path' => $pathNota,
+            'original_name' => 'nota_pompa.pdf',
+            'mime' => 'application/pdf',
+            'size' => 400,
+        ]);
+
+        Storage::disk('local')->assertExists($pathAsset);
+        Storage::disk('local')->assertExists($pathNota);
+
+        // Hapus aset rumah via controller
+        $response = $this->delete("/home-assets/{$homeAsset->id}");
+        $response->assertRedirect();
+
+        $this->assertDatabaseMissing('home_assets', ['id' => $homeAsset->id]);
+        $this->assertDatabaseMissing('maintenance_records', ['id' => $record->id]);
+        $this->assertDatabaseMissing('attachments', ['id' => $attAsset->id]);
+        $this->assertDatabaseMissing('attachments', ['id' => $attRecord->id]);
+
+        Storage::disk('local')->assertMissing($pathAsset);
+        Storage::disk('local')->assertMissing($pathNota);
     }
 }

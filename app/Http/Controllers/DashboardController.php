@@ -34,7 +34,7 @@ class DashboardController extends Controller
 
         // Jumlah aset untuk empty-state check dan kompatibilitas
         $vehicleSchedules = $allSchedules->where('subject_type', Vehicle::class)->groupBy('subject_id');
-        $vehicles = $user->vehicles()->get()->each(function ($v) use ($vehicleSchedules) {
+        $vehicles = $user->vehicles()->active()->get()->each(function ($v) use ($vehicleSchedules) {
             $v->setRelation('schedules', $vehicleSchedules->get($v->id, collect()));
         });
         $primeVehiclesCount = $vehicles->filter(fn ($v) => $v->status_label === 'Kondisi Prima')->count();

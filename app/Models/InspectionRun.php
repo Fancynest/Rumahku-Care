@@ -29,6 +29,13 @@ class InspectionRun extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::deleting(function (InspectionRun $run): void {
+            $run->items()->delete();
+        });
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

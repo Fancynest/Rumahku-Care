@@ -57,6 +57,25 @@ class HomeAsset extends Model
         return $this->morphMany(MaintenanceRecord::class, 'subject')->orderByDesc('done_at')->orderByDesc('id');
     }
 
+    protected static function booted(): void
+    {
+        static::deleting(function (HomeAsset $asset): void {
+            $asset->allSchedules()->each(fn ($s) => $s->delete());
+            $asset->maintenanceRecords()->each(fn ($m) => $m->delete());
+            $asset->damageReports()->each(fn ($d) => $d->delete());
+            $asset->inspectionRuns()->each(fn ($i) => $i->delete());
+            $asset->documents()->each(fn ($doc) => $doc->delete());
+        });
+    }
+
+    /**
+     * @return MorphMany<MaintenanceSchedule, $this>
+     */
+    public function allSchedules(): MorphMany
+    {
+        return $this->morphMany(MaintenanceSchedule::class, 'subject');
+    }
+
     /**
      * @return MorphMany<MaintenanceSchedule, $this>
      */

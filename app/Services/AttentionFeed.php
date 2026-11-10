@@ -125,7 +125,10 @@ class AttentionFeed
             ->with('subject')
             ->active()
             ->whereNotNull('expires_at')
-            ->get();
+            ->get()
+            ->reject(function ($doc) {
+                return $doc->subject instanceof Vehicle && $doc->subject->archived_at !== null;
+            });
 
         foreach ($documents as $doc) {
             $isVehicle = $doc->subject instanceof Vehicle;
@@ -174,7 +177,10 @@ class AttentionFeed
                 ->with('reportable')
                 ->whereIn('status', ['dilaporkan', 'dalam_perbaikan'])
                 ->whereIn('severity', ['berat', 'sedang'])
-                ->get();
+                ->get()
+                ->reject(function ($dr) {
+                    return $dr->reportable instanceof Vehicle && $dr->reportable->archived_at !== null;
+                });
 
             foreach ($damageReports as $dr) {
                 $isVehicle = $dr->reportable instanceof Vehicle;

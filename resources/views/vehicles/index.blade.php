@@ -23,10 +23,27 @@
 
 <!-- 1. Header Sederhana: Pemilih Kendaraan (Garasi Strip di Atas) -->
 <div class="mb-4">
-  <div class="d-flex align-items-center justify-content-between mb-2">
+  <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
     <div>
-      <h5 class="fw-bold text-dark mb-0" style="letter-spacing: -0.02em;">Kendaraan Saya & Garasi</h5>
-      <span class="text-muted small">Pilih kendaraan untuk melihat kondisi fisik, odometer, dan servis.</span>
+      <h5 class="fw-bold text-dark mb-0" style="letter-spacing: -0.02em;">
+        {{ $showArchived ? 'Kendaraan Terarsip' : 'Kendaraan Saya & Garasi' }}
+      </h5>
+      <span class="text-muted small">
+        {{ $showArchived ? 'Daftar kendaraan yang telah diarsipkan (dijual/rusak berat).' : 'Pilih kendaraan untuk melihat kondisi fisik, odometer, dan servis.' }}
+      </span>
+    </div>
+    <div>
+      @if ($showArchived)
+        <a href="{{ route('vehicles.index') }}" class="btn btn-outline-dark btn-sm d-inline-flex align-items-center gap-1.5" style="min-height: 38px;">
+          <i class="bi bi-arrow-left"></i>
+          <span>Kembali ke Garasi Aktif ({{ $activeCount }})</span>
+        </a>
+      @elseif ($archivedCount > 0)
+        <a href="{{ route('vehicles.index', ['archived' => 1]) }}" class="btn btn-glass btn-sm text-muted d-inline-flex align-items-center gap-1.5" style="min-height: 38px;">
+          <i class="bi bi-archive"></i>
+          <span>Tampilkan arsip ({{ $archivedCount }})</span>
+        </a>
+      @endif
     </div>
   </div>
 
@@ -35,7 +52,7 @@
       @php
         $isActive = $v->id === $selectedVehicle->id;
       @endphp
-      <a href="{{ route('vehicles.index', ['v' => $v->id]) }}" 
+      <a href="{{ route('vehicles.index', ['v' => $v->id, 'archived' => $showArchived ? 1 : null]) }}" 
          class="text-decoration-none d-flex align-items-center gap-3 px-3.5 py-2.5 rounded-3 border transition-all text-nowrap {{ $isActive ? 'bg-white border-dark shadow-sm' : 'bg-white-50 border-slate-200 text-secondary' }}"
          style="min-height: 48px; transition: all 0.2s ease;">
         <i class="bi {{ str_starts_with($v->body_type ?? '', 'motor') ? 'bi-bicycle' : 'bi-car-front' }} {{ $isActive ? 'text-dark' : 'text-muted' }}"></i>
@@ -203,6 +220,59 @@
         otherWrapper.classList.remove('d-none');
       } else {
         otherWrapper.classList.add('d-none');
+      }
+    });
+  }
+
+  // Cascading Brand & Model for Edit Vehicle
+  const brandSelectEdit = document.getElementById('selectBrandEdit');
+  const modelSelectEdit = document.getElementById('selectModelEdit');
+  const otherWrapperEdit = document.getElementById('wrapperOtherModelEdit');
+
+  if (brandSelectEdit && modelSelectEdit && otherWrapperEdit) {
+    brandSelectEdit.addEventListener('change', function() {
+      const brand = this.value;
+      modelSelectEdit.innerHTML = '';
+
+      if (brand === 'other') {
+        const opt = document.createElement('option');
+        opt.value = 'other';
+        opt.textContent = 'Model Kustom / Lainnya';
+        opt.selected = true;
+        modelSelectEdit.appendChild(opt);
+        otherWrapperEdit.classList.remove('d-none');
+        return;
+      }
+
+      const defaultOpt = document.createElement('option');
+      defaultOpt.value = '';
+      defaultOpt.textContent = 'Pilih Model ' + brand + '...';
+      defaultOpt.disabled = true;
+      defaultOpt.selected = true;
+      modelSelectEdit.appendChild(defaultOpt);
+
+      if (catalog[brand]) {
+        catalog[brand].forEach(function(item) {
+          const opt = document.createElement('option');
+          opt.value = item.id;
+          opt.textContent = item.model + ' (' + item.body_type.replace('_', ' ').toUpperCase() + ')';
+          modelSelectEdit.appendChild(opt);
+        });
+      }
+
+      const otherOpt = document.createElement('option');
+      otherOpt.value = 'other';
+      otherOpt.textContent = '+ Model Lainnya...';
+      modelSelectEdit.appendChild(otherOpt);
+
+      otherWrapperEdit.classList.add('d-none');
+    });
+
+    modelSelectEdit.addEventListener('change', function() {
+      if (this.value === 'other') {
+        otherWrapperEdit.classList.remove('d-none');
+      } else {
+        otherWrapperEdit.classList.add('d-none');
       }
     });
   }

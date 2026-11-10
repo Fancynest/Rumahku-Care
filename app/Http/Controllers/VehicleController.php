@@ -9,6 +9,7 @@ use App\Services\FuelCalculator;
 use App\Services\MaintenanceRecorder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class VehicleController extends Controller
@@ -17,10 +18,18 @@ class VehicleController extends Controller
 
     public function index(Request $request, FuelCalculator $fuelCalculator): View
     {
-        $vehicles = $request->user()->vehicles()
+        $showArchived = $request->boolean('archived');
+        $vehiclesQuery = $showArchived
+            ? $request->user()->vehicles()->archived()
+            : $request->user()->vehicles()->active();
+
+        $vehicles = $vehiclesQuery
             ->with(['vehicleModel', 'schedules' => fn ($q) => $q->where('is_active', true)])
             ->latest()
             ->get();
+
+        $archivedCount = $request->user()->vehicles()->archived()->count();
+        $activeCount = $request->user()->vehicles()->active()->count();
 
         $selectedId = $request->query('v');
         $selectedVehicle = $vehicles->firstWhere('id', $selectedId) ?? $vehicles->first();
@@ -77,14 +86,22 @@ class VehicleController extends Controller
             'fuelMetrics',
             'modelsGrouped',
             'inspectionTemplates',
-            'documentTypes'
+            'documentTypes',
+            'showArchived',
+            'archivedCount',
+            'activeCount'
         ));
     }
 
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'plate' => ['required', 'string', 'max:20'],
+            'plate' => [
+                'required',
+                'string',
+                'max:20',
+                Rule::unique('vehicles', 'plate')->where('user_id', $request->user()->id),
+            ],
             'vehicle_model_id' => [
                 'required',
                 function (string $attribute, mixed $value, \Closure $fail): void {
@@ -134,6 +151,116 @@ class VehicleController extends Controller
 
         return redirect()->route('vehicles.index', ['v' => $vehicle->id])
             ->with('success', 'Kendaraan '.$vehicle->name.' berhasil didaftarkan ke garasi.');
+    }
+
+    public function update(Request $request, Vehicle $vehicle): RedirectResponse
+    {
+        abort_if($vehicle->user_id !== $request->user()->id, 404);
+
+        $validated = $request->validate([
+            'plate' => [
+                'required',
+                'string',
+                'max:20',
+                Rule::unique('vehicles', 'plate')
+                    ->where('user_id', $request->user()->id)
+                    ->ignore($vehicle->id),
+            ],
+            'vehicle_model_id' => [
+                'required',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if ($value === 'other') {
+                        return;
+                    }
+
+                    if (! is_numeric($value) || ! VehicleModel::where('id', $value)->exists()) {
+                        $fail('Model kendaraan yang dipilih tidak valid.');
+                    }
+                },
+            ],
+            'custom_model_name' => ['required_if:vehicle_model_id,other', 'nullable', 'string', 'max:100'],
+            'custom_body_type' => ['required_if:vehicle_model_id,other', 'nullable', 'string', 'in:motor_matic,motor_sport,hatchback,sedan,mpv,suv,pickup,van,bus,truk'],
+            'year' => ['nullable', 'integer', 'min:1970', 'max:'.(date('Y') + 1)],
+            'color_key' => ['required', 'string', 'max:30'],
+            'fuel_type' => ['required', 'string', 'max:50'],
+            'workshop' => ['nullable', 'string', 'max:150'],
+        ]);
+
+        $modelId = $validated['vehicle_model_id'] === 'other' ? null : (int) $validated['vehicle_model_id'];
+
+        $vehicle->update([
+            'vehicle_model_id' => $modelId,
+            'custom_model_name' => $modelId ? null : $validated['custom_model_name'],
+            'custom_body_type' => $modelId ? null : $validated['custom_body_type'],
+            'plate' => strtoupper($validated['plate']),
+            'year' => $validated['year'] ?? null,
+            'color_key' => $validated['color_key'],
+            'fuel_type' => $validated['fuel_type'],
+            'workshop' => $validated['workshop'] ?? null,
+        ]);
+
+        return redirect()->route('vehicles.index', [
+            'v' => $vehicle->id,
+            'archived' => $vehicle->isArchived() ? 1 : null,
+        ])->with('success', 'Data kendaraan '.$vehicle->raw_name.' berhasil diperbarui.');
+    }
+
+    public function archive(Request $request, Vehicle $vehicle): RedirectResponse
+    {
+        abort_if($vehicle->user_id !== $request->user()->id, 404);
+
+        $validated = $request->validate([
+            'archive_reason' => ['required', 'string', 'in:dijual,rusak_berat,lainnya'],
+        ]);
+
+        $vehicle->update([
+            'archived_at' => now(),
+            'archive_reason' => $validated['archive_reason'],
+        ]);
+
+        return redirect()->route('vehicles.index')
+            ->with('success', 'Kendaraan '.$vehicle->raw_name.' berhasil diarsipkan.');
+    }
+
+    public function restore(Request $request, Vehicle $vehicle): RedirectResponse
+    {
+        abort_if($vehicle->user_id !== $request->user()->id, 404);
+
+        $vehicle->update([
+            'archived_at' => null,
+            'archive_reason' => null,
+        ]);
+
+        return redirect()->route('vehicles.index', ['v' => $vehicle->id])
+            ->with('success', 'Kendaraan '.$vehicle->raw_name.' berhasil dipulihkan ke garasi aktif.');
+    }
+
+    public function destroy(Request $request, Vehicle $vehicle): RedirectResponse
+    {
+        abort_if($vehicle->user_id !== $request->user()->id, 404);
+
+        if (! $vehicle->isArchived()) {
+            return redirect()->back()
+                ->withErrors(['confirm_plate' => 'Kendaraan harus diarsipkan terlebih dahulu sebelum dapat dihapus permanen.']);
+        }
+
+        $request->validate([
+            'confirm_plate' => ['required', 'string'],
+        ]);
+
+        $expected = strtoupper(preg_replace('/\s+/', '', $vehicle->plate));
+        $actual = strtoupper(preg_replace('/\s+/', '', (string) $request->input('confirm_plate')));
+
+        if ($expected !== $actual) {
+            return redirect()->back()
+                ->withErrors(['confirm_plate' => 'Nomor plat yang dimasukkan tidak cocok dengan plat kendaraan.']);
+        }
+
+        $name = $vehicle->raw_name;
+        $vehicle->delete();
+
+        return redirect()->route('vehicles.index', ['archived' => 1])
+            ->with('success', 'Kendaraan '.$name.' berhasil dihapus permanen beserta seluruh riwayatnya.');
     }
 
     public function updateOdometer(Request $request, Vehicle $vehicle): RedirectResponse

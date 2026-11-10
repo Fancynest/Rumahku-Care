@@ -53,7 +53,11 @@ class ScheduleCalendar
             ->where('is_active', true)
             ->whereNotNull('next_due_date')
             ->whereBetween('next_due_date', [$startDateStr, $endDateStr])
-            ->get();
+            ->get()
+            ->reject(function ($s) {
+                return $s->subject instanceof Vehicle && $s->subject->archived_at !== null;
+            })
+            ->values();
 
         // 2. Ambil dokumen aktif yang jatuh tempo
         /** @var Collection<int, Document> $documents */
@@ -62,7 +66,11 @@ class ScheduleCalendar
             ->whereNull('archived_at')
             ->whereNotNull('expires_at')
             ->whereBetween('expires_at', [$startDateStr, $endDateStr])
-            ->get();
+            ->get()
+            ->reject(function ($doc) {
+                return $doc->subject instanceof Vehicle && $doc->subject->archived_at !== null;
+            })
+            ->values();
 
         // 3. Ambil catatan servis selesai jika toggle aktif
         /** @var Collection<int, MaintenanceRecord> $records */

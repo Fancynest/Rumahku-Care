@@ -30,6 +30,8 @@ class Vehicle extends Model
         'odometer',
         'fuel_type',
         'workshop',
+        'archived_at',
+        'archive_reason',
     ];
 
     /**
@@ -41,7 +43,43 @@ class Vehicle extends Model
             'user_id' => 'integer',
             'year' => 'integer',
             'odometer' => 'integer',
+            'archived_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Vehicle $vehicle): void {
+            $vehicle->allSchedules()->each(fn ($s) => $s->delete());
+            $vehicle->maintenanceRecords()->each(fn ($m) => $m->delete());
+            $vehicle->fuelLogs()->each(fn ($f) => $f->delete());
+            $vehicle->damageReports()->each(fn ($d) => $d->delete());
+            $vehicle->inspectionRuns()->each(fn ($i) => $i->delete());
+            $vehicle->documents()->each(fn ($doc) => $doc->delete());
+        });
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->whereNull('archived_at');
+    }
+
+    public function scopeArchived($query)
+    {
+        return $query->whereNotNull('archived_at');
+    }
+
+    public function isArchived(): bool
+    {
+        return $this->archived_at !== null;
+    }
+
+    /**
+     * @return MorphMany<MaintenanceSchedule, $this>
+     */
+    public function allSchedules(): MorphMany
+    {
+        return $this->morphMany(MaintenanceSchedule::class, 'subject');
     }
 
     /**
@@ -118,11 +156,18 @@ class Vehicle extends Model
 
     public function getNameAttribute(): string
     {
-        if ($this->vehicleModel) {
-            return $this->vehicleModel->display_name;
-        }
+        $base = $this->vehicleModel
+            ? $this->vehicleModel->display_name
+            : ($this->custom_model_name ?? 'Kendaraan');
 
-        return $this->custom_model_name ?? 'Kendaraan';
+        return $this->archived_at ? "{$base} (arsip)" : $base;
+    }
+
+    public function getRawNameAttribute(): string
+    {
+        return $this->vehicleModel
+            ? $this->vehicleModel->display_name
+            : ($this->custom_model_name ?? 'Kendaraan');
     }
 
     public function getBodyTypeAttribute(): string

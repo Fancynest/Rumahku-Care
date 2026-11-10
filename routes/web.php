@@ -39,6 +39,10 @@ Route::middleware('auth')->group(function () {
     Route::prefix('vehicles')->name('vehicles.')->group(function () {
         Route::get('/', [VehicleController::class, 'index'])->name('index');
         Route::post('/', [VehicleController::class, 'store'])->name('store');
+        Route::put('/{vehicle}', [VehicleController::class, 'update'])->name('update');
+        Route::post('/{vehicle}/archive', [VehicleController::class, 'archive'])->name('archive');
+        Route::post('/{vehicle}/restore', [VehicleController::class, 'restore'])->name('restore');
+        Route::delete('/{vehicle}', [VehicleController::class, 'destroy'])->name('destroy');
         Route::patch('/{vehicle}/odometer', [VehicleController::class, 'updateOdometer'])->name('update-odometer');
         Route::post('/{vehicle}/service-logs', [VehicleController::class, 'storeServiceLog'])->name('service-logs.store');
         Route::post('/{vehicle}/fuel-logs', [FuelLogController::class, 'store'])->name('fuel-logs.store');

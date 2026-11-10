@@ -812,3 +812,182 @@
     </div>
   </div>
 </div>
+
+@if ($selectedVehicle)
+<!-- Modal Edit Kendaraan -->
+<div class="modal fade" id="modalEditKendaraan" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content glass-panel border-0 shadow-lg">
+      <form action="{{ route('vehicles.update', $selectedVehicle->id) }}" method="POST">
+        @csrf
+        @method('PUT')
+        <div class="modal-header border-bottom border-slate-200 py-3">
+          <h6 class="modal-title fw-bold text-dark">Edit Informasi Kendaraan</h6>
+          <button type="button" class="btn-close small" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        
+        <div class="modal-body py-3">
+          <!-- Pilih Merek -->
+          <div class="mb-3">
+            <label class="form-label text-muted small mb-1">Merek Kendaraan <span class="text-danger">*</span></label>
+            <select class="form-select" id="selectBrandEdit" required style="min-height: 44px;">
+              <option value="" disabled>Pilih Merek...</option>
+              @foreach ($modelsGrouped as $brand => $brandModels)
+                <option value="{{ $brand }}" {{ $selectedVehicle->vehicleModel?->brand === $brand ? 'selected' : '' }}>{{ $brand }}</option>
+              @endforeach
+              <option value="other" {{ (! $selectedVehicle->vehicle_model_id && $selectedVehicle->custom_model_name) ? 'selected' : '' }}>Merek Lainnya...</option>
+            </select>
+          </div>
+
+          <!-- Pilih Model (Cascading) -->
+          <div class="mb-3" id="wrapperModelEdit">
+            <label class="form-label text-muted small mb-1">Model Kendaraan <span class="text-danger">*</span></label>
+            <select class="form-select" id="selectModelEdit" name="vehicle_model_id" required style="min-height: 44px;">
+              @if ($selectedVehicle->vehicleModel)
+                @foreach ($modelsGrouped[$selectedVehicle->vehicleModel->brand] ?? [] as $m)
+                  <option value="{{ $m->id }}" {{ $selectedVehicle->vehicle_model_id === $m->id ? 'selected' : '' }}>
+                    {{ $m->model }} ({{ strtoupper(str_replace('_', ' ', $m->body_type)) }})
+                  </option>
+                @endforeach
+                <option value="other">+ Model Lainnya...</option>
+              @else
+                <option value="other" selected>Model Kustom / Lainnya</option>
+              @endif
+            </select>
+          </div>
+
+          <!-- Form Tambahan Khusus "Lainnya" -->
+          <div id="wrapperOtherModelEdit" class="p-3 rounded-3 bg-light border mb-3 {{ $selectedVehicle->vehicle_model_id ? 'd-none' : '' }}">
+            <div class="mb-2">
+              <label class="form-label text-muted small mb-1">Nama Model Lengkap <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" name="custom_model_name" value="{{ $selectedVehicle->custom_model_name }}" placeholder="Misal: Vespa Primavera 150" style="min-height: 44px;">
+            </div>
+            <div>
+              <label class="form-label text-muted small mb-1">Jenis Bodi <span class="text-danger">*</span></label>
+              <select class="form-select" name="custom_body_type" style="min-height: 44px;">
+                @foreach (['motor_matic' => 'Motor Matic (Skuter)', 'motor_sport' => 'Motor Sport / Manual', 'hatchback' => 'Hatchback (City Car)', 'sedan' => 'Sedan', 'mpv' => 'MPV (Mobil Keluarga)', 'suv' => 'SUV', 'pickup' => 'Pickup', 'van' => 'Van', 'bus' => 'Bus', 'truk' => 'Truk'] as $bKey => $bLabel)
+                  <option value="{{ $bKey }}" {{ $selectedVehicle->custom_body_type === $bKey ? 'selected' : '' }}>{{ $bLabel }}</option>
+                @endforeach
+              </select>
+            </div>
+          </div>
+
+          <!-- Plat & Tahun -->
+          <div class="row g-2 mb-3">
+            <div class="col-7">
+              <label class="form-label text-muted small mb-1">Nomor Plat Polisi <span class="text-danger">*</span></label>
+              <input type="text" class="form-control font-monospace text-uppercase" name="plate" value="{{ $selectedVehicle->plate }}" required style="min-height: 44px;">
+            </div>
+            <div class="col-5">
+              <label class="form-label text-muted small mb-1">Tahun Perakitan</label>
+              <input type="number" class="form-control" name="year" value="{{ $selectedVehicle->year }}" placeholder="{{ date('Y') }}" min="1970" max="{{ date('Y') + 1 }}" style="min-height: 44px;">
+            </div>
+          </div>
+
+          <!-- Bahan Bakar & Warna -->
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label text-muted small mb-1">Bahan Bakar <span class="text-danger">*</span></label>
+              <select class="form-select" name="fuel_type" required style="min-height: 44px;">
+                @foreach (['Bensin', 'Diesel', 'Listrik (EV)', 'Hybrid'] as $ft)
+                  <option value="{{ $ft }}" {{ $selectedVehicle->fuel_type === $ft ? 'selected' : '' }}>{{ $ft }}</option>
+                @endforeach
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label text-muted small mb-1">Warna Bodi <span class="text-danger">*</span></label>
+              <select class="form-select text-capitalize" name="color_key" required style="min-height: 44px;">
+                @foreach (['hitam', 'putih', 'silver', 'merah', 'biru', 'lainnya'] as $ck)
+                  <option value="{{ $ck }}" {{ strtolower($selectedVehicle->color_key) === $ck ? 'selected' : '' }}>{{ ucfirst($ck) }}</option>
+                @endforeach
+              </select>
+            </div>
+          </div>
+
+          <!-- Bengkel Langganan -->
+          <div class="mb-2">
+            <label class="form-label text-muted small mb-1">Bengkel Langganan</label>
+            <input type="text" class="form-control" name="workshop" value="{{ $selectedVehicle->workshop }}" placeholder="Opsional (misal: AHASS)" style="min-height: 44px;">
+          </div>
+        </div>
+
+        <div class="modal-footer border-top border-slate-200 py-2.5">
+          <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
+          <button type="submit" class="btn btn-dark btn-sm px-4" style="min-height: 44px;">Simpan Perubahan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Arsip Kendaraan -->
+<div class="modal fade" id="modalArsipKendaraan" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content glass-panel border-0 shadow-lg">
+      <form action="{{ route('vehicles.archive', $selectedVehicle->id) }}" method="POST">
+        @csrf
+        <div class="modal-header border-bottom border-slate-200 py-3">
+          <h6 class="modal-title fw-bold text-dark">Arsipkan Kendaraan</h6>
+          <button type="button" class="btn-close small" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        
+        <div class="modal-body py-3">
+          <p class="text-muted small mb-3">
+            Kendaraan yang diarsipkan tidak akan muncul di pemilih garasi aktif, kalender, dan pengingat beranda. Seluruh riwayat servis, pengeluaran BBM, dan laporan keuangan <strong>tetap tersimpan</strong> dan dapat dipulihkan sewaktu-waktu.
+          </p>
+
+          <div class="mb-3">
+            <label class="form-label text-muted small mb-1">Alasan Pengarsipan <span class="text-danger">*</span></label>
+            <select class="form-select" name="archive_reason" required style="min-height: 44px;">
+              <option value="dijual" selected>Kendaraan Telah Dijual</option>
+              <option value="rusak_berat">Rusak Berat / Tidak Digunakan</option>
+              <option value="lainnya">Alasan Lainnya</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer border-top border-slate-200 py-2.5">
+          <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
+          <button type="submit" class="btn btn-danger btn-sm px-4" style="min-height: 44px;">Arsipkan Sekarang</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Hapus Permanen Kendaraan -->
+<div class="modal fade" id="modalHapusPermanenKendaraan" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content glass-panel border-0 shadow-lg">
+      <form action="{{ route('vehicles.destroy', $selectedVehicle->id) }}" method="POST">
+        @csrf
+        @method('DELETE')
+        <div class="modal-header border-bottom border-slate-200 py-3">
+          <h6 class="modal-title fw-bold text-danger">Hapus Permanen Kendaraan</h6>
+          <button type="button" class="btn-close small" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        
+        <div class="modal-body py-3">
+          <div class="alert alert-danger border-0 small mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+            <strong>Peringatan!</strong> Tindakan ini tidak dapat dibatalkan. Seluruh riwayat servis, jadwal, log BBM, laporan kerusakan, berkas dokumen, dan semua lampiran foto fisik akan <strong>dihapus permanen</strong>.
+          </div>
+
+          <p class="text-muted small mb-2">
+            Untuk mengonfirmasi, ketik nomor plat kendaraan ini: <strong class="text-dark font-monospace">{{ $selectedVehicle->plate }}</strong>
+          </p>
+
+          <div class="mb-2">
+            <input type="text" name="confirm_plate" class="form-control font-monospace text-uppercase" placeholder="Ketik {{ $selectedVehicle->plate }}" required style="min-height: 44px;">
+          </div>
+        </div>
+
+        <div class="modal-footer border-top border-slate-200 py-2.5">
+          <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal" style="min-height: 44px; padding: 0.4rem 1.2rem;">Batal</button>
+          <button type="submit" class="btn btn-danger btn-sm px-4" style="min-height: 44px;">Hapus Permanen</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+@endif
