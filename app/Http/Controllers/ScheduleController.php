@@ -56,7 +56,7 @@ class ScheduleController extends Controller
                 ->sortBy(fn ($s) => $priorityRank[$s->priority] ?? 99)->values(),
         ];
 
-        $vehicles = $request->user()->vehicles()->get();
+        $vehicles = $request->user()->vehicles()->active()->get();
         $homeAssets = $request->user()->homeAssets()->get();
         $templates = config('maintenance.templates', []);
 
@@ -104,7 +104,7 @@ class ScheduleController extends Controller
 
         // Validate subject ownership
         if ($validated['subject_type'] === Vehicle::class) {
-            $subject = $request->user()->vehicles()->findOrFail($validated['subject_id']);
+            $subject = $request->user()->vehicles()->active()->findOrFail($validated['subject_id']);
         } else {
             $subject = $request->user()->homeAssets()->findOrFail($validated['subject_id']);
             if ($validated['trigger_type'] === 'kilometer') {

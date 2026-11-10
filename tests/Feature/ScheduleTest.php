@@ -441,4 +441,41 @@ class ScheduleTest extends TestCase
         $this->assertNotFalse($posNormal);
         $this->assertTrue($posDarurat < $posNormal, 'Darurat schedule should appear before normal within same group');
     }
+
+    public function test_archived_vehicle_cannot_be_subject_for_new_schedule_and_not_in_form_options(): void
+    {
+        $user = User::firstOrFail();
+        $this->actingAs($user);
+
+        $vehicle = Vehicle::create([
+            'user_id' => $user->id,
+            'plate' => 'B 7777 ARS',
+            'odometer' => 5000,
+            'color_key' => 'hitam',
+            'fuel_type' => 'Bensin',
+            'archived_at' => now(),
+            'archive_reason' => 'dijual',
+        ]);
+
+        // Form jadwal tidak menyertakan kendaraan arsip sebagai pilihan subjek
+        $responseIndex = $this->get('/schedules');
+        $responseIndex->assertOk();
+        $vehiclesInView = $responseIndex->viewData('vehicles');
+        $this->assertFalse($vehiclesInView->contains('id', $vehicle->id));
+
+        // Mencoba membuat jadwal untuk kendaraan arsip harus gagal 404
+        $responseStore = $this->post('/schedules', [
+            'subject_type' => Vehicle::class,
+            'subject_id' => $vehicle->id,
+            'title' => 'Ganti Oli Kendaraan Arsip',
+            'trigger_type' => 'kilometer',
+            'interval_km' => 5000,
+            'priority' => 'normal',
+        ]);
+
+        $responseStore->assertStatus(404);
+        $this->assertDatabaseMissing('maintenance_schedules', [
+            'title' => 'Ganti Oli Kendaraan Arsip',
+        ]);
+    }
 }
