@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -224,6 +225,22 @@ class ProfileTest extends TestCase
             'size' => 1024,
         ]);
 
+        // Tambahkan baris sesi dan password_reset_tokens milik pengguna
+        DB::table('sessions')->insert([
+            'id' => 'dummy_session_user_to_delete',
+            'user_id' => $user->id,
+            'ip_address' => '127.0.0.1',
+            'user_agent' => 'PHPUnit',
+            'payload' => 'dummy',
+            'last_activity' => time(),
+        ]);
+
+        DB::table('password_reset_tokens')->insert([
+            'email' => $user->email,
+            'token' => 'dummy_reset_token',
+            'created_at' => now(),
+        ]);
+
         Storage::disk('local')->assertExists($path);
 
         $this->actingAs($user);
@@ -240,9 +257,46 @@ class ProfileTest extends TestCase
         $this->assertDatabaseMissing('home_assets', ['id' => $asset->id]);
         $this->assertDatabaseMissing('vehicles', ['id' => $vehicle->id]);
         $this->assertDatabaseMissing('attachments', ['id' => $attachment->id]);
+        $this->assertDatabaseMissing('sessions', ['user_id' => $user->id]);
+        $this->assertDatabaseMissing('password_reset_tokens', ['email' => $user->email]);
 
         // Storage directory & files must be deleted
         Storage::disk('local')->assertMissing($path);
         $this->assertEmpty(Storage::disk('local')->allFiles("attachments/{$user->id}"));
+    }
+
+    public function test_physical_files_are_preserved_if_deletion_fails(): void
+    {
+        Storage::fake('local');
+
+        $user = User::factory()->create([
+            'email' => 'user_rollback@example.com',
+            'password' => 'secret123',
+        ]);
+
+        $fakeFile = UploadedFile::fake()->create('nota_safe.pdf', 100, 'application/pdf');
+        $path = $fakeFile->store("attachments/{$user->id}", 'local');
+
+        $attachment = Attachment::create([
+            'user_id' => $user->id,
+            'attachable_type' => 'user',
+            'attachable_id' => $user->id,
+            'path' => $path,
+            'original_name' => 'nota_safe.pdf',
+            'mime' => 'application/pdf',
+            'size' => 1024,
+        ]);
+
+        Storage::disk('local')->assertExists($path);
+
+        $this->actingAs($user);
+
+        $response = $this->delete('/profile', [
+            'password' => 'wrong-pass',
+        ]);
+
+        $response->assertSessionHasErrors(['password']);
+        Storage::disk('local')->assertExists($path);
+        $this->assertDatabaseHas('attachments', ['id' => $attachment->id]);
     }
 }

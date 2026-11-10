@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -85,14 +86,33 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+        $userId = $user->id;
+        $userEmail = $user->email;
+        $userDirectory = "attachments/{$userId}";
+
+        // Kumpulkan path berkas fisik lampiran milik pengguna sebelum baris DB dihapus
+        $attachmentPaths = $user->attachments()->pluck('path')->filter()->values()->all();
 
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        DB::transaction(function () use ($user): void {
+        DB::transaction(function () use ($user, $userId, $userEmail): void {
+            DB::table('sessions')->where('user_id', $userId)->delete();
+            DB::table('password_reset_tokens')->where('email', $userEmail)->delete();
+
             $user->delete();
         });
+
+        // Hapus file fisik SETELAH transaction DB commit
+        foreach ($attachmentPaths as $path) {
+            if (Storage::disk('local')->exists($path)) {
+                Storage::disk('local')->delete($path);
+            }
+        }
+        if (Storage::disk('local')->exists($userDirectory)) {
+            Storage::disk('local')->deleteDirectory($userDirectory);
+        }
 
         return redirect()->route('login')
             ->with('success', 'Akun Anda beserta seluruh data dan berkas telah berhasil dihapus.');

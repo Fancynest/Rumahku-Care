@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class Attachment extends Model
@@ -39,8 +40,19 @@ class Attachment extends Model
     protected static function booted(): void
     {
         static::deleting(function (Attachment $attachment): void {
-            if ($attachment->path && Storage::disk('local')->exists($attachment->path)) {
-                Storage::disk('local')->delete($attachment->path);
+            $path = $attachment->path;
+            if ($path) {
+                if (DB::transactionLevel() > 0) {
+                    DB::afterCommit(function () use ($path): void {
+                        if (Storage::disk('local')->exists($path)) {
+                            Storage::disk('local')->delete($path);
+                        }
+                    });
+                } else {
+                    if (Storage::disk('local')->exists($path)) {
+                        Storage::disk('local')->delete($path);
+                    }
+                }
             }
         });
     }
