@@ -131,7 +131,13 @@ class FinanceController extends Controller
             // Helper untuk mencegah CSV Injection
             $sanitize = function (mixed $value): string {
                 $str = (string) $value;
-                if ($str !== '' && in_array($str[0], ['=', '+', '-', '@'], true)) {
+                if ($str === '') {
+                    return $str;
+                }
+
+                $dangerous = ['=', '+', '-', '@', "\t", "\r"];
+
+                if (in_array($str[0], $dangerous, true) || in_array(ltrim($str)[0] ?? '', $dangerous, true)) {
                     return "'".$str;
                 }
 

@@ -275,18 +275,29 @@ class FinanceTest extends TestCase
     {
         $this->actingAs($this->user);
 
-        // Fuel log with potential CSV injection formula in notes / title
-        DamageReport::create([
-            'user_id' => $this->user->id,
-            'reportable_type' => HomeAsset::class,
-            'reportable_id' => $this->homeAsset->id,
-            'title' => '=cmd|"/C calc"!A0',
-            'severity' => 'sedang',
-            'status' => 'selesai',
-            'reported_at' => Carbon::today()->toDateString(),
-            'resolved_at' => Carbon::today()->toDateString(),
-            'repair_cost' => 100000,
-        ]);
+        // Uji sanitasi sel yang diawali '=', '+', '-', '@', tab, atau carriage return
+        $injectionTitles = [
+            '=cmd|"/C calc"!A0',
+            '+cmd|"/C calc"!A0',
+            '-cmd|"/C calc"!A0',
+            '@SUM(A1:A10)',
+            "\tTAB_INJECTION",
+            "\rCR_INJECTION",
+        ];
+
+        foreach ($injectionTitles as $idx => $injTitle) {
+            DamageReport::create([
+                'user_id' => $this->user->id,
+                'reportable_type' => HomeAsset::class,
+                'reportable_id' => $this->homeAsset->id,
+                'title' => $injTitle,
+                'severity' => 'sedang',
+                'status' => 'selesai',
+                'reported_at' => Carbon::today()->toDateString(),
+                'resolved_at' => Carbon::today()->toDateString(),
+                'repair_cost' => 10000 + $idx,
+            ]);
+        }
 
         $response = $this->get('/finance/export');
         $response->assertStatus(200);
@@ -298,8 +309,13 @@ class FinanceTest extends TestCase
         // Must begin with UTF-8 BOM
         $this->assertStringStartsWith("\xEF\xBB\xBF", $content);
 
-        // Formula must be escaped with a leading single quote: '=cmd
+        // Tiap karakter bahaya harus disanitasi dengan awalan petik tunggal (')
         $this->assertStringContainsString("'=cmd", $content);
+        $this->assertStringContainsString("'+cmd", $content);
+        $this->assertStringContainsString("'-cmd", $content);
+        $this->assertStringContainsString("'@SUM", $content);
+        $this->assertStringContainsString("'\tTAB_INJECTION", $content);
+        $this->assertStringContainsString("'\rCR_INJECTION", $content);
     }
 
     public function test_user_a_cannot_see_user_b_expenses(): void
