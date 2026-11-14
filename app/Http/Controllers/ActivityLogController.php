@@ -16,10 +16,10 @@ class ActivityLogController extends Controller
 
         // ── Filters ──────────────────────────────────────────────────────────
         $filters = [
-            'event'   => $request->query('event', 'all'),
+            'event' => $request->query('event', 'all'),
             'subject' => $request->query('subject', 'all'),
-            'from'    => $request->query('from', ''),
-            'to'      => $request->query('to', ''),
+            'from' => $request->query('from', ''),
+            'to' => $request->query('to', ''),
         ];
 
         // ── Base query ───────────────────────────────────────────────────────
@@ -36,9 +36,9 @@ class ActivityLogController extends Controller
         if ($filters['subject'] !== 'all') {
             [$type, $id] = explode(':', $filters['subject'].':');
             $modelClass = match ($type) {
-                'vehicle'    => Vehicle::class,
+                'vehicle' => Vehicle::class,
                 'home_asset' => HomeAsset::class,
-                default      => null,
+                default => null,
             };
             if ($modelClass && $id) {
                 $query->where('subject_type', $modelClass)->where('subject_id', (int) $id);
@@ -64,7 +64,7 @@ class ActivityLogController extends Controller
         });
 
         // ── Sidebar options ──────────────────────────────────────────────────
-        $vehicles   = $user->vehicles()->orderBy('id')->get();
+        $vehicles = $user->vehicles()->orderBy('id')->get();
         $homeAssets = $user->homeAssets()->orderBy('name')->get();
 
         return view('activity-log.index', compact(

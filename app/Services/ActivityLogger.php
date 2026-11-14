@@ -22,38 +22,38 @@ class ActivityLogger
      */
     private const FIELD_LABELS = [
         // Vehicle
-        'plate'             => 'Nomor Plat',
-        'year'              => 'Tahun',
-        'color_key'         => 'Warna',
-        'fuel_type'         => 'Jenis BBM',
-        'workshop'          => 'Bengkel Langganan',
-        'odometer'          => 'Odometer (KM)',
+        'plate' => 'Nomor Plat',
+        'year' => 'Tahun',
+        'color_key' => 'Warna',
+        'fuel_type' => 'Jenis BBM',
+        'workshop' => 'Bengkel Langganan',
+        'odometer' => 'Odometer (KM)',
         'custom_model_name' => 'Nama Model',
-        'custom_body_type'  => 'Tipe Bodi',
+        'custom_body_type' => 'Tipe Bodi',
         // HomeAsset
-        'name'              => 'Nama Aset',
-        'category'          => 'Kategori',
-        'room'              => 'Lokasi/Ruangan',
-        'brand'             => 'Merek',
-        'model'             => 'Model',
-        'condition'         => 'Kondisi',
-        'notes'             => 'Catatan',
-        'purchased_at'      => 'Tanggal Beli',
+        'name' => 'Nama Aset',
+        'category' => 'Kategori',
+        'room' => 'Lokasi/Ruangan',
+        'brand' => 'Merek',
+        'model' => 'Model',
+        'condition' => 'Kondisi',
+        'notes' => 'Catatan',
+        'purchased_at' => 'Tanggal Beli',
         'last_inspected_at' => 'Terakhir Inspeksi',
         // Schedule
-        'title'             => 'Judul',
-        'trigger_type'      => 'Pemicu',
-        'interval_days'     => 'Interval (hari)',
-        'interval_km'       => 'Interval (km)',
-        'next_due_date'     => 'Jatuh Tempo',
-        'next_due_km'       => 'Target KM',
-        'priority'          => 'Prioritas',
-        'is_active'         => 'Status Aktif',
+        'title' => 'Judul',
+        'trigger_type' => 'Pemicu',
+        'interval_days' => 'Interval (hari)',
+        'interval_km' => 'Interval (km)',
+        'next_due_date' => 'Jatuh Tempo',
+        'next_due_km' => 'Target KM',
+        'priority' => 'Prioritas',
+        'is_active' => 'Status Aktif',
         // DamageReport
-        'status'            => 'Status',
-        'technician_name'   => 'Teknisi',
-        'repair_cost'       => 'Biaya Perbaikan',
-        'resolved_at'       => 'Tanggal Selesai',
+        'status' => 'Status',
+        'technician_name' => 'Teknisi',
+        'repair_cost' => 'Biaya Perbaikan',
+        'resolved_at' => 'Tanggal Selesai',
     ];
 
     // ─── Core ────────────────────────────────────────────────────────────────
@@ -76,21 +76,21 @@ class ActivityLogger
         }
 
         return ActivityLog::create([
-            'user_id'      => $user->id,
+            'user_id' => $user->id,
             'subject_type' => $subject ? get_class($subject) : null,
-            'subject_id'   => $subject?->getKey(),
-            'event'        => $event,
-            'description'  => $description,
-            'properties'   => $properties ?: null,
+            'subject_id' => $subject?->getKey(),
+            'event' => $event,
+            'description' => $description,
+            'properties' => $properties ?: null,
         ]);
     }
 
     /**
      * Catat perubahan data (update) dengan diff old vs new.
      *
-     * @param  array<string, mixed>  $old       Data sebelum update
-     * @param  array<string, mixed>  $new       Data sesudah update
-     * @param  array<string, string> $extraLabels  Override label tambahan
+     * @param  array<string, mixed>  $old  Data sebelum update
+     * @param  array<string, mixed>  $new  Data sesudah update
+     * @param  array<string, string>  $extraLabels  Override label tambahan
      */
     public function logUpdated(
         User $user,
@@ -113,8 +113,8 @@ class ActivityLogger
             if ((string) $oldNorm !== (string) $newNorm) {
                 $changed[$key] = [
                     'label' => $labels[$key] ?? ucfirst(str_replace('_', ' ', $key)),
-                    'old'   => $oldVal,
-                    'new'   => $newVal,
+                    'old' => $oldVal,
+                    'new' => $newVal,
                 ];
             }
         }

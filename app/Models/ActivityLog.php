@@ -29,6 +29,7 @@ class ActivityLog extends Model
     {
         return [
             'properties' => 'array',
+            'created_at' => 'datetime',
         ];
     }
 
@@ -58,14 +59,14 @@ class ActivityLog extends Model
     public function getIconAttribute(): string
     {
         return match (true) {
-            str_starts_with($this->event, 'vehicle.')       => 'bi-car-front',
-            str_starts_with($this->event, 'home_asset.')    => 'bi-grid',
-            str_starts_with($this->event, 'schedule.')      => 'bi-calendar-check',
+            str_starts_with($this->event, 'vehicle.') => 'bi-car-front',
+            str_starts_with($this->event, 'home_asset.') => 'bi-grid',
+            str_starts_with($this->event, 'schedule.') => 'bi-calendar-check',
             str_starts_with($this->event, 'damage_report.') => 'bi-exclamation-triangle',
-            str_starts_with($this->event, 'inspection.')    => 'bi-clipboard2-check',
-            str_starts_with($this->event, 'fuel_log.')      => 'bi-fuel-pump',
-            str_starts_with($this->event, 'document.')      => 'bi-file-earmark-text',
-            default                                         => 'bi-activity',
+            str_starts_with($this->event, 'inspection.') => 'bi-clipboard2-check',
+            str_starts_with($this->event, 'fuel_log.') => 'bi-fuel-pump',
+            str_starts_with($this->event, 'document.') => 'bi-file-earmark-text',
+            default => 'bi-activity',
         };
     }
 
@@ -77,16 +78,16 @@ class ActivityLog extends Model
         $suffix = last(explode('.', $this->event));
 
         return match ($suffix) {
-            'created'         => 'chip-success',
+            'created' => 'chip-success',
             'updated',
             'odometer_updated' => 'chip-info',
-            'deleted'         => 'chip-urgent',
-            'archived'        => 'chip-neutral',
-            'restored'        => 'chip-success',
+            'deleted' => 'chip-urgent',
+            'archived' => 'chip-neutral',
+            'restored' => 'chip-success',
             'completed',
-            'service_logged'  => 'chip-success',
-            'status_updated'  => 'chip-warning',
-            default           => 'chip-neutral',
+            'service_logged' => 'chip-success',
+            'status_updated' => 'chip-warning',
+            default => 'chip-neutral',
         };
     }
 
@@ -96,30 +97,30 @@ class ActivityLog extends Model
     public function getEventLabelAttribute(): string
     {
         return match ($this->event) {
-            'vehicle.created'          => 'Kendaraan Baru',
-            'vehicle.updated'          => 'Data Diperbarui',
+            'vehicle.created' => 'Kendaraan Baru',
+            'vehicle.updated' => 'Data Diperbarui',
             'vehicle.odometer_updated' => 'Odometer Update',
-            'vehicle.archived'         => 'Diarsipkan',
-            'vehicle.restored'         => 'Dipulihkan',
-            'vehicle.deleted'          => 'Dihapus',
-            'vehicle.service_logged'   => 'Servis Dicatat',
-            'home_asset.created'       => 'Aset Baru',
-            'home_asset.updated'       => 'Data Diperbarui',
-            'home_asset.deleted'       => 'Dihapus',
-            'schedule.created'         => 'Jadwal Baru',
-            'schedule.updated'         => 'Jadwal Diperbarui',
-            'schedule.completed'       => 'Jadwal Selesai',
-            'schedule.deleted'         => 'Jadwal Dihapus',
-            'damage_report.created'    => 'Kerusakan Dilaporkan',
+            'vehicle.archived' => 'Diarsipkan',
+            'vehicle.restored' => 'Dipulihkan',
+            'vehicle.deleted' => 'Dihapus',
+            'vehicle.service_logged' => 'Servis Dicatat',
+            'home_asset.created' => 'Aset Baru',
+            'home_asset.updated' => 'Data Diperbarui',
+            'home_asset.deleted' => 'Dihapus',
+            'schedule.created' => 'Jadwal Baru',
+            'schedule.updated' => 'Jadwal Diperbarui',
+            'schedule.completed' => 'Jadwal Selesai',
+            'schedule.deleted' => 'Jadwal Dihapus',
+            'damage_report.created' => 'Kerusakan Dilaporkan',
             'damage_report.status_updated' => 'Status Kerusakan',
-            'damage_report.deleted'    => 'Laporan Dihapus',
-            'inspection.created'       => 'Inspeksi Dicatat',
-            'fuel_log.created'         => 'BBM Dicatat',
-            'fuel_log.updated'         => 'BBM Diperbarui',
-            'fuel_log.deleted'         => 'BBM Dihapus',
-            'document.created'         => 'Dokumen Baru',
-            'document.deleted'         => 'Dokumen Dihapus',
-            default                    => ucfirst(str_replace(['.', '_'], ' ', $this->event)),
+            'damage_report.deleted' => 'Laporan Dihapus',
+            'inspection.created' => 'Inspeksi Dicatat',
+            'fuel_log.created' => 'BBM Dicatat',
+            'fuel_log.updated' => 'BBM Diperbarui',
+            'fuel_log.deleted' => 'BBM Dihapus',
+            'document.created' => 'Dokumen Baru',
+            'document.deleted' => 'Dokumen Dihapus',
+            default => ucfirst(str_replace(['.', '_'], ' ', $this->event)),
         };
     }
 

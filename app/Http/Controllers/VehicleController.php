@@ -405,12 +405,12 @@ class VehicleController extends Controller
             $vehicle,
             'Catatan servis untuk '.$vehicle->name.' disimpan'.($schedule ? ' (Jadwal: '.$schedule->title.')' : '').'. Tanggal: '.$validated['done_at'].'.',
             array_filter([
-                'done_at'       => $validated['done_at'],
-                'odometer'      => $validated['odometer'],
-                'service_type'  => $validated['service_type'] ?? null,
+                'done_at' => $validated['done_at'],
+                'odometer' => $validated['odometer'],
+                'service_type' => $validated['service_type'] ?? null,
                 'workshop_name' => $validated['workshop_name'] ?? null,
-                'labor_cost'    => $validated['labor_cost'] ?? null,
-                'parts_cost'    => $validated['parts_cost'] ?? null,
+                'labor_cost' => $validated['labor_cost'] ?? null,
+                'parts_cost' => $validated['parts_cost'] ?? null,
             ]),
         );
 

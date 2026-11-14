@@ -92,12 +92,12 @@ class FuelLogController extends Controller
                 $vehicle,
                 'Pengisian BBM '.$vehicle->name.' '.number_format($validated['liters'], 1).' L (Rp '.number_format($validated['total_cost']).') pada '.$validated['filled_at'].'.',
                 array_filter([
-                    'filled_at'  => $validated['filled_at'],
-                    'odometer'   => $validated['odometer'],
-                    'liters'     => $validated['liters'],
+                    'filled_at' => $validated['filled_at'],
+                    'odometer' => $validated['odometer'],
+                    'liters' => $validated['liters'],
                     'total_cost' => $validated['total_cost'],
                     'fuel_grade' => $validated['fuel_grade'] ?? null,
-                    'station'    => $validated['station'] ?? null,
+                    'station' => $validated['station'] ?? null,
                 ]),
             );
         });
@@ -160,9 +160,9 @@ class FuelLogController extends Controller
                 $vehicle,
                 'Catatan BBM '.$vehicle->name.' ('.$validated['filled_at'].') diperbarui.',
                 array_filter([
-                    'filled_at'  => $validated['filled_at'],
-                    'odometer'   => $validated['odometer'],
-                    'liters'     => $validated['liters'],
+                    'filled_at' => $validated['filled_at'],
+                    'odometer' => $validated['odometer'],
+                    'liters' => $validated['liters'],
                     'total_cost' => $validated['total_cost'],
                 ]),
             );

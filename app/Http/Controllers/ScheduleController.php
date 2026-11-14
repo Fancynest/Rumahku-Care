@@ -270,11 +270,11 @@ class ScheduleController extends Controller
             'Jadwal "'.$schedule->title.'" ditandai selesai. Tanggal: '.$validated['done_at'].'.',
             array_filter([
                 'schedule_title' => $schedule->title,
-                'done_at'        => $validated['done_at'],
-                'odometer'       => $validated['odometer'] ?? null,
-                'workshop_name'  => $validated['workshop_name'] ?? null,
-                'labor_cost'     => $validated['labor_cost'] ?? null,
-                'parts_cost'     => $validated['parts_cost'] ?? null,
+                'done_at' => $validated['done_at'],
+                'odometer' => $validated['odometer'] ?? null,
+                'workshop_name' => $validated['workshop_name'] ?? null,
+                'labor_cost' => $validated['labor_cost'] ?? null,
+                'parts_cost' => $validated['parts_cost'] ?? null,
             ]),
         );
 
