@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DamageReport;
 use App\Models\HomeAsset;
 use App\Models\Vehicle;
+use App\Services\ActivityLogger;
 use App\Services\AttachmentStorer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -70,6 +71,14 @@ class DamageReportController extends Controller
             if ($parent instanceof HomeAsset) {
                 $parent->recalculateCondition();
             }
+
+            app(ActivityLogger::class)->log(
+                $request->user(),
+                'damage_report.created',
+                $parent,
+                'Kerusakan "'.$validated['title'].'" dilaporkan. Tingkat: '.$validated['severity'].'.',
+                ['title' => $validated['title'], 'severity' => $validated['severity'], 'reported_at' => $validated['reported_at']],
+            );
         });
 
         return redirect()->back()
@@ -96,6 +105,8 @@ class DamageReportController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $damageReport, $validated, $storer): void {
+            $oldStatus = $damageReport->status;
+
             $dataToUpdate = [
                 'status' => $validated['status'],
                 'resolved_at' => $validated['status'] === 'selesai' ? ($validated['resolved_at'] ?? now()->toDateString()) : null,
@@ -116,6 +127,20 @@ class DamageReportController extends Controller
             if ($parent instanceof HomeAsset) {
                 $parent->recalculateCondition();
             }
+
+            app(ActivityLogger::class)->log(
+                $request->user(),
+                'damage_report.status_updated',
+                $parent,
+                'Status kerusakan "'.$damageReport->title.'" berubah dari '.$oldStatus.' → '.$validated['status'].'.',
+                [
+                    'report_title' => $damageReport->title,
+                    'old_status'   => $oldStatus,
+                    'new_status'   => $validated['status'],
+                    'repair_cost'  => $dataToUpdate['repair_cost'],
+                    'technician'   => $dataToUpdate['technician_name'],
+                ],
+            );
         });
 
         return redirect()->back()
@@ -127,12 +152,21 @@ class DamageReportController extends Controller
         abort_if((int) $damageReport->user_id !== (int) $request->user()->id, 404);
 
         $parent = $damageReport->reportable;
+        $title = $damageReport->title;
 
         $damageReport->delete();
 
         if ($parent instanceof HomeAsset) {
             $parent->recalculateCondition();
         }
+
+        app(ActivityLogger::class)->log(
+            $request->user(),
+            'damage_report.deleted',
+            $parent,
+            'Laporan kerusakan "'.$title.'" dihapus.',
+            ['report_title' => $title],
+        );
 
         return redirect()->back()
             ->with('success', 'Laporan kerusakan "'.$damageReport->title.'" berhasil dihapus.');

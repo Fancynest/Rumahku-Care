@@ -6,6 +6,7 @@ use App\Http\Controllers\Concerns\NormalizesNumbers;
 use App\Models\HomeAsset;
 use App\Models\MaintenanceSchedule;
 use App\Models\Vehicle;
+use App\Services\ActivityLogger;
 use App\Services\ActivityTimeline;
 use App\Services\MaintenanceRecorder;
 use App\Services\ScheduleCalendar;
@@ -140,6 +141,14 @@ class ScheduleController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
+        app(ActivityLogger::class)->log(
+            $request->user(),
+            'schedule.created',
+            $subject,
+            'Jadwal "'.$schedule->title.'" ditambahkan untuk '.(method_exists($subject, 'raw_name') ? $subject->raw_name : $subject->name).'.',
+            ['title' => $schedule->title, 'trigger_type' => $schedule->trigger_type, 'priority' => $schedule->priority],
+        );
+
         return redirect()->back()
             ->with('success', 'Jadwal perawatan "'.$schedule->title.'" berhasil ditambahkan.');
     }
@@ -186,6 +195,9 @@ class ScheduleController extends Controller
             $nextDueKm = null;
         }
 
+        $trackFields = ['title', 'trigger_type', 'interval_days', 'interval_km', 'next_due_date', 'next_due_km', 'priority', 'is_active', 'notes'];
+        $oldData = $schedule->only($trackFields);
+
         $schedule->update([
             'title' => $validated['title'],
             'trigger_type' => $validated['trigger_type'],
@@ -197,6 +209,15 @@ class ScheduleController extends Controller
             'is_active' => (bool) $validated['is_active'],
             'notes' => $validated['notes'] ?? null,
         ]);
+
+        app(ActivityLogger::class)->logUpdated(
+            $request->user(),
+            'schedule.updated',
+            $subject,
+            'Jadwal "'.$schedule->title.'" diperbarui.',
+            $oldData,
+            $schedule->fresh()->only($trackFields),
+        );
 
         return redirect()->back()
             ->with('success', 'Jadwal "'.$schedule->title.'" berhasil diperbarui.');
@@ -242,6 +263,21 @@ class ScheduleController extends Controller
             schedule: $schedule
         );
 
+        app(ActivityLogger::class)->log(
+            $request->user(),
+            'schedule.completed',
+            $subject,
+            'Jadwal "'.$schedule->title.'" ditandai selesai. Tanggal: '.$validated['done_at'].'.',
+            array_filter([
+                'schedule_title' => $schedule->title,
+                'done_at'        => $validated['done_at'],
+                'odometer'       => $validated['odometer'] ?? null,
+                'workshop_name'  => $validated['workshop_name'] ?? null,
+                'labor_cost'     => $validated['labor_cost'] ?? null,
+                'parts_cost'     => $validated['parts_cost'] ?? null,
+            ]),
+        );
+
         return redirect()->back()
             ->with('success', 'Jadwal "'.$schedule->title.'" berhasil ditandai selesai.');
     }
@@ -251,7 +287,16 @@ class ScheduleController extends Controller
         abort_if($schedule->user_id !== $request->user()->id, 404);
 
         $title = $schedule->title;
+        $subject = $schedule->subject;
         $schedule->delete();
+
+        app(ActivityLogger::class)->log(
+            $request->user(),
+            'schedule.deleted',
+            $subject,
+            'Jadwal "'.$title.'" dihapus.',
+            ['schedule_title' => $title],
+        );
 
         return redirect()->back()
             ->with('success', 'Jadwal "'.$title.'" berhasil dihapus.');

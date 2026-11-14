@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Document;
 use App\Models\HomeAsset;
 use App\Models\Vehicle;
+use App\Services\ActivityLogger;
 use App\Services\AttachmentStorer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -77,6 +78,19 @@ class DocumentController extends Controller
             if ($request->hasFile('file')) {
                 $storer->store($document, $request->file('file'), $request->user(), 'file');
             }
+
+            app(ActivityLogger::class)->log(
+                $request->user(),
+                'document.created',
+                $subject,
+                'Dokumen "'.$validated['title'].'" ditambahkan.',
+                array_filter([
+                    'title'      => $validated['title'],
+                    'type'       => $validated['type'],
+                    'expires_at' => $validated['expires_at'] ?? null,
+                    'cost'       => $validated['cost'] ?? null,
+                ]),
+            );
         });
 
         return redirect()->back()
@@ -157,6 +171,18 @@ class DocumentController extends Controller
             if ($request->hasFile('file')) {
                 $storer->store($newDocument, $request->file('file'), $request->user(), 'file');
             }
+
+            app(ActivityLogger::class)->log(
+                $request->user(),
+                'document.created',
+                $document->subject,
+                'Dokumen "'.$document->title.'" diperpanjang hingga '.($validated['expires_at'] ?? '-').'.',
+                array_filter([
+                    'title'      => $document->title,
+                    'expires_at' => $validated['expires_at'],
+                    'cost'       => $validated['cost'] ?? null,
+                ]),
+            );
         });
 
         return redirect()->back()
@@ -167,9 +193,19 @@ class DocumentController extends Controller
     {
         abort_if((int) $document->user_id !== (int) $request->user()->id, 404);
 
+        $title = $document->title;
+        $subject = $document->subject;
         $document->delete();
 
+        app(ActivityLogger::class)->log(
+            $request->user(),
+            'document.deleted',
+            $subject,
+            'Dokumen "'.$title.'" dihapus.',
+            ['title' => $title],
+        );
+
         return redirect()->back()
-            ->with('success', 'Dokumen "'.$document->title.'" berhasil dihapus.');
+            ->with('success', 'Dokumen "'.$title.'" berhasil dihapus.');
     }
 }

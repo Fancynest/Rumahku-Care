@@ -39,6 +39,11 @@
       <i class="bi bi-wallet2"></i>
       <span>Keuangan</span>
     </a>
+
+    <a href="{{ route('activity-log.index') }}" class="nav-item-link {{ request()->routeIs('activity-log.*') ? 'active' : '' }}">
+      <i class="bi bi-clock-history"></i>
+      <span>Log Aktivitas</span>
+    </a>
   </nav>
 
   <div class="p-3 border-top border-slate-200 d-flex flex-column gap-2 mt-auto">

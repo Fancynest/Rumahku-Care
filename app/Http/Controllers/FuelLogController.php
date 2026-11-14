@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\NormalizesNumbers;
 use App\Models\FuelLog;
 use App\Models\Vehicle;
+use App\Services\ActivityLogger;
 use App\Services\AttachmentStorer;
 use App\Services\OdometerTimeline;
 use Illuminate\Http\RedirectResponse;
@@ -84,6 +85,21 @@ class FuelLogController extends Controller
             if ($request->hasFile('file')) {
                 $storer->store($fuelLog, $request->file('file'), $request->user());
             }
+
+            app(ActivityLogger::class)->log(
+                $request->user(),
+                'fuel_log.created',
+                $vehicle,
+                'Pengisian BBM '.$vehicle->name.' '.number_format($validated['liters'], 1).' L (Rp '.number_format($validated['total_cost']).') pada '.$validated['filled_at'].'.',
+                array_filter([
+                    'filled_at'  => $validated['filled_at'],
+                    'odometer'   => $validated['odometer'],
+                    'liters'     => $validated['liters'],
+                    'total_cost' => $validated['total_cost'],
+                    'fuel_grade' => $validated['fuel_grade'] ?? null,
+                    'station'    => $validated['station'] ?? null,
+                ]),
+            );
         });
 
         return redirect()->to(route('vehicles.index', ['v' => $vehicle->id]).'#bbm')
@@ -137,6 +153,19 @@ class FuelLogController extends Controller
 
             // Naikkan odometer kendaraan jika pembacaan ini lebih tinggi (hanya naik)
             $timeline->updateVehicleOdometerIfHigher($vehicle, (int) $validated['odometer']);
+
+            app(ActivityLogger::class)->log(
+                $request->user(),
+                'fuel_log.updated',
+                $vehicle,
+                'Catatan BBM '.$vehicle->name.' ('.$validated['filled_at'].') diperbarui.',
+                array_filter([
+                    'filled_at'  => $validated['filled_at'],
+                    'odometer'   => $validated['odometer'],
+                    'liters'     => $validated['liters'],
+                    'total_cost' => $validated['total_cost'],
+                ]),
+            );
         });
 
         return redirect()->to(route('vehicles.index', ['v' => $vehicle->id]).'#bbm')
@@ -148,7 +177,17 @@ class FuelLogController extends Controller
         abort_if($fuelLog->user_id !== $request->user()->id, 404);
 
         $vehicleId = $fuelLog->vehicle_id;
+        $vehicle = $fuelLog->vehicle;
+        $filledAt = $fuelLog->filled_at;
         $fuelLog->delete();
+
+        app(ActivityLogger::class)->log(
+            $request->user(),
+            'fuel_log.deleted',
+            $vehicle,
+            'Catatan BBM '.($vehicle?->name ?? 'kendaraan').' ('.($filledAt?->format('d/m/Y') ?? '-').') dihapus.',
+            ['vehicle_name' => $vehicle?->name, 'filled_at' => $filledAt?->toDateString()],
+        );
 
         return redirect()->to(route('vehicles.index', ['v' => $vehicleId]).'#bbm')
             ->with('success', 'Catatan pengisian BBM berhasil dihapus.');

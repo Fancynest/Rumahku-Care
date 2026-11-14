@@ -6,6 +6,7 @@ use App\Models\HomeAsset;
 use App\Models\InspectionRun;
 use App\Models\InspectionRunItem;
 use App\Models\Vehicle;
+use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -106,6 +107,21 @@ class InspectionController extends Controller
             if ($parent instanceof HomeAsset) {
                 $parent->update(['last_inspected_at' => $validated['inspected_at']]);
             }
+
+            $issueCount = collect($validated['items'])->where('status', '!=', 'ok')->where('status', '!=', 'na')->count();
+
+            app(ActivityLogger::class)->log(
+                $request->user(),
+                'inspection.created',
+                $parent,
+                'Inspeksi "'.$validated['title'].'" dicatat. '.count($validated['items']).' item diperiksa'.($issueCount > 0 ? ', '.$issueCount.' ditemukan masalah' : '').'.',
+                [
+                    'title'       => $validated['title'],
+                    'inspected_at' => $validated['inspected_at'],
+                    'item_count'  => count($validated['items']),
+                    'issue_count' => $issueCount,
+                ],
+            );
         });
 
         return redirect()->back()

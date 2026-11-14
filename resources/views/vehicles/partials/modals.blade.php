@@ -85,7 +85,7 @@
             <div class="mb-3">
               <label class="form-label text-muted small mb-1">Tandai Jadwal Selesai (Opsional)</label>
               <select name="schedule_id" class="form-select">
-                <option value="">-- Tidak Ada / Servis Mandiri Tanpa Jadwal --</option>
+                <option value="">Tidak Ada / Servis Mandiri Tanpa Jadwal</option>
                 @foreach ($activeSchedules as $sch)
                   <option value="{{ $sch->id }}">
                     {{ $sch->title }} ({{ $sch->trigger_label }}) — Status: {{ ucfirst($sch->status) }}

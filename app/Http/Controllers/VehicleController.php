@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\NormalizesNumbers;
 use App\Models\Vehicle;
 use App\Models\VehicleModel;
+use App\Services\ActivityLogger;
 use App\Services\FuelCalculator;
 use App\Services\MaintenanceRecorder;
 use Illuminate\Http\RedirectResponse;
@@ -152,6 +153,14 @@ class VehicleController extends Controller
             'notes' => 'Servis oli mesin berkala sesuai jarak tempuh.',
         ]);
 
+        app(ActivityLogger::class)->log(
+            $request->user(),
+            'vehicle.created',
+            $vehicle,
+            'Kendaraan '.$vehicle->name.' ('.$vehicle->plate.') didaftarkan ke garasi.',
+            ['odometer' => $vehicle->odometer, 'fuel_type' => $vehicle->fuel_type],
+        );
+
         return redirect()->route('vehicles.index', ['v' => $vehicle->id])
             ->with('success', 'Kendaraan '.$vehicle->name.' berhasil didaftarkan ke garasi.');
     }
@@ -193,7 +202,7 @@ class VehicleController extends Controller
 
         $modelId = $validated['vehicle_model_id'] === 'other' ? null : (int) $validated['vehicle_model_id'];
 
-        $vehicle->update([
+        $newData = [
             'vehicle_model_id' => $modelId,
             'custom_model_name' => $modelId ? null : $validated['custom_model_name'],
             'custom_body_type' => $modelId ? null : $validated['custom_body_type'],
@@ -202,7 +211,21 @@ class VehicleController extends Controller
             'color_key' => $validated['color_key'],
             'fuel_type' => $validated['fuel_type'],
             'workshop' => $validated['workshop'] ?? null,
-        ]);
+        ];
+
+        $trackFields = ['plate', 'year', 'color_key', 'fuel_type', 'workshop', 'custom_model_name', 'custom_body_type'];
+        $oldData = $vehicle->only($trackFields);
+
+        $vehicle->update($newData);
+
+        app(ActivityLogger::class)->logUpdated(
+            $request->user(),
+            'vehicle.updated',
+            $vehicle,
+            'Data kendaraan '.$vehicle->raw_name.' diperbarui.',
+            $oldData,
+            $vehicle->fresh()->only($trackFields),
+        );
 
         return redirect()->route('vehicles.index', [
             'v' => $vehicle->id,
@@ -223,6 +246,14 @@ class VehicleController extends Controller
             'archive_reason' => $validated['archive_reason'],
         ]);
 
+        app(ActivityLogger::class)->log(
+            $request->user(),
+            'vehicle.archived',
+            $vehicle,
+            'Kendaraan '.$vehicle->raw_name.' diarsipkan. Alasan: '.$validated['archive_reason'].'.',
+            ['archive_reason' => $validated['archive_reason']],
+        );
+
         return redirect()->route('vehicles.index')
             ->with('success', 'Kendaraan '.$vehicle->raw_name.' berhasil diarsipkan.');
     }
@@ -235,6 +266,13 @@ class VehicleController extends Controller
             'archived_at' => null,
             'archive_reason' => null,
         ]);
+
+        app(ActivityLogger::class)->log(
+            $request->user(),
+            'vehicle.restored',
+            $vehicle,
+            'Kendaraan '.$vehicle->raw_name.' dipulihkan ke garasi aktif.',
+        );
 
         return redirect()->route('vehicles.index', ['v' => $vehicle->id])
             ->with('success', 'Kendaraan '.$vehicle->raw_name.' berhasil dipulihkan ke garasi aktif.');
@@ -262,7 +300,16 @@ class VehicleController extends Controller
         }
 
         $name = $vehicle->raw_name;
+        $plate = $vehicle->plate;
         $vehicle->delete();
+
+        app(ActivityLogger::class)->log(
+            $request->user(),
+            'vehicle.deleted',
+            null,
+            'Kendaraan '.$name.' ('.$plate.') dihapus permanen.',
+            ['subject_name' => $name.' ('.$plate.')'],
+        );
 
         return redirect()->route('vehicles.index', ['archived' => 1])
             ->with('success', 'Kendaraan '.$name.' berhasil dihapus permanen beserta seluruh riwayatnya.');
@@ -280,9 +327,19 @@ class VehicleController extends Controller
             'odometer.min' => 'Odometer baru tidak boleh lebih kecil dari odometer kendaraan saat ini ('.number_format($vehicle->odometer).' KM).',
         ]);
 
+        $oldOdometer = $vehicle->odometer;
+
         $vehicle->update([
             'odometer' => $validated['odometer'],
         ]);
+
+        app(ActivityLogger::class)->log(
+            $request->user(),
+            'vehicle.odometer_updated',
+            $vehicle,
+            'Odometer '.$vehicle->name.' diperbarui menjadi '.number_format($validated['odometer']).' KM.',
+            ['old' => $oldOdometer, 'new' => $validated['odometer']],
+        );
 
         return redirect()->back()
             ->with('success', 'Odometer '.$vehicle->name.' berhasil diperbarui menjadi '.number_format($vehicle->odometer).' KM.');
@@ -340,6 +397,21 @@ class VehicleController extends Controller
             subject: $vehicle,
             data: $validated,
             schedule: $schedule
+        );
+
+        app(ActivityLogger::class)->log(
+            $request->user(),
+            'vehicle.service_logged',
+            $vehicle,
+            'Catatan servis untuk '.$vehicle->name.' disimpan'.($schedule ? ' (Jadwal: '.$schedule->title.')' : '').'. Tanggal: '.$validated['done_at'].'.',
+            array_filter([
+                'done_at'       => $validated['done_at'],
+                'odometer'      => $validated['odometer'],
+                'service_type'  => $validated['service_type'] ?? null,
+                'workshop_name' => $validated['workshop_name'] ?? null,
+                'labor_cost'    => $validated['labor_cost'] ?? null,
+                'parts_cost'    => $validated['parts_cost'] ?? null,
+            ]),
         );
 
         return redirect()->back()

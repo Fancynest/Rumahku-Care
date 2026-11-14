@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DamageReportController;
@@ -62,6 +63,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [FinanceController::class, 'index'])->name('index');
         Route::get('/export', [FinanceController::class, 'export'])->name('export');
         Route::post('/budgets', [FinanceController::class, 'updateBudgets'])->name('budgets.update');
+    });
+
+    Route::prefix('activity-log')->name('activity-log.')->group(function () {
+        Route::get('/', [ActivityLogController::class, 'index'])->name('index');
     });
 
     Route::prefix('schedules')->name('schedules.')->group(function () {

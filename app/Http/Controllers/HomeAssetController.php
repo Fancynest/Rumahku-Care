@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\HomeAsset;
+use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -41,6 +42,14 @@ class HomeAssetController extends Controller
 
         $validated['condition_source'] = 'manual';
         $asset = $request->user()->homeAssets()->create($validated);
+
+        app(ActivityLogger::class)->log(
+            $request->user(),
+            'home_asset.created',
+            $asset,
+            'Aset '.$asset->name.' ('.$asset->category_label.') didaftarkan.',
+            ['category' => $asset->category, 'room' => $asset->room, 'condition' => $asset->condition],
+        );
 
         return redirect()->route('home-assets.show', $asset->id)
             ->with('success', 'Aset rumah '.$asset->name.' berhasil didaftarkan.');
@@ -83,8 +92,20 @@ class HomeAssetController extends Controller
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
+        $trackFields = ['name', 'category', 'room', 'brand', 'model', 'condition', 'notes', 'purchased_at', 'last_inspected_at'];
+        $oldData = $homeAsset->only($trackFields);
+
         $validated['condition_source'] = 'manual';
         $homeAsset->update($validated);
+
+        app(ActivityLogger::class)->logUpdated(
+            $request->user(),
+            'home_asset.updated',
+            $homeAsset,
+            'Data aset '.$homeAsset->name.' diperbarui.',
+            $oldData,
+            $homeAsset->fresh()->only($trackFields),
+        );
 
         return redirect()->back()
             ->with('success', 'Data aset '.$homeAsset->name.' berhasil diperbarui.');
@@ -96,6 +117,14 @@ class HomeAssetController extends Controller
 
         $name = $homeAsset->name;
         $homeAsset->delete();
+
+        app(ActivityLogger::class)->log(
+            $request->user(),
+            'home_asset.deleted',
+            null,
+            'Aset '.$name.' dihapus permanen.',
+            ['subject_name' => $name],
+        );
 
         return redirect()->route('home-assets.index')
             ->with('success', 'Aset '.$name.' berhasil dihapus.');
