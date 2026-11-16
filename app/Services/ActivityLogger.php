@@ -50,19 +50,12 @@ class ActivityLogger
         'priority' => 'Prioritas',
         'is_active' => 'Status Aktif',
         // DamageReport
-<<<<<<< HEAD
-        'status'            => 'Status',
-        'technician_name'   => 'Teknisi',
-        'repair_cost'       => 'Biaya Perbaikan',
-        'resolved_at'       => 'Tanggal Selesai',
-        // User / Profile
-        'email'             => 'Alamat Email',
-=======
         'status' => 'Status',
         'technician_name' => 'Teknisi',
         'repair_cost' => 'Biaya Perbaikan',
         'resolved_at' => 'Tanggal Selesai',
->>>>>>> upstream/main
+        // User / Profile
+        'email' => 'Alamat Email',
     ];
 
     // ─── Core ────────────────────────────────────────────────────────────────

@@ -38,12 +38,8 @@ class ActivityLogController extends Controller
             $modelClass = match ($type) {
                 'vehicle' => Vehicle::class,
                 'home_asset' => HomeAsset::class,
-<<<<<<< HEAD
-                'user'       => \App\Models\User::class,
-                default      => null,
-=======
+                'user' => \App\Models\User::class,
                 default => null,
->>>>>>> upstream/main
             };
             if ($modelClass && $id) {
                 $query->where('subject_type', $modelClass)->where('subject_id', (int) $id);
