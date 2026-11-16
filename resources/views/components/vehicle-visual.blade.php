@@ -6,10 +6,19 @@
     $image = $model?->asset_image ? asset($model->asset_image) : null;
     $bodyType = $vehicle->body_type ?? 'default';
 
+    // Smart detection untuk motor jika body_type belum diset spesifik
+    $vehicleNameLower = strtolower($vehicle->name ?? '');
+    $isMotorcycle = str_starts_with($bodyType, 'motor') || str_contains($vehicleNameLower, 'vario') || str_contains($vehicleNameLower, 'beat') || str_contains($vehicleNameLower, 'scoopy') || str_contains($vehicleNameLower, 'nmax') || str_contains($vehicleNameLower, 'aerox') || str_contains($vehicleNameLower, 'pcx') || str_contains($vehicleNameLower, 'vespa') || str_contains($vehicleNameLower, 'motor');
+
+    if ($isMotorcycle && !str_starts_with($bodyType, 'motor')) {
+        $bodyType = 'motor_matic';
+    }
+
     // Generic fallback path check
     $genericRelative = "images/vehicles/generic/{$bodyType}.svg";
     $hasGeneric = file_exists(public_path($genericRelative));
-    $genericAsset = $hasGeneric ? asset($genericRelative) : asset('images/vehicles/generic/default.svg');
+    $fallbackDefault = $isMotorcycle ? 'images/vehicles/generic/motor_matic.svg' : 'images/vehicles/generic/default.svg';
+    $genericAsset = $hasGeneric ? asset($genericRelative) : asset($fallbackDefault);
 
     // Initial color factor for 3D GLB based on color_key
     $colorKey = strtolower($vehicle->color_key ?? 'hitam');

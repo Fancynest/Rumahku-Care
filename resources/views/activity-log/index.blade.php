@@ -24,6 +24,7 @@
       <label class="form-label text-muted small fw-semibold mb-1" for="filterEvent">Kategori</label>
       <select name="event" id="filterEvent" class="form-select form-select-sm">
         <option value="all"         {{ $filters['event'] === 'all'          ? 'selected' : '' }}>Semua Kategori</option>
+        <option value="auth"        {{ $filters['event'] === 'auth'         ? 'selected' : '' }}>🔐 Akun & Keamanan</option>
         <option value="vehicle"     {{ $filters['event'] === 'vehicle'      ? 'selected' : '' }}>🚗 Kendaraan</option>
         <option value="home_asset"  {{ $filters['event'] === 'home_asset'   ? 'selected' : '' }}>🏠 Aset Rumah</option>
         <option value="schedule"    {{ $filters['event'] === 'schedule'     ? 'selected' : '' }}>📅 Jadwal</option>
@@ -39,6 +40,11 @@
       <label class="form-label text-muted small fw-semibold mb-1" for="filterSubject">Subjek</label>
       <select name="subject" id="filterSubject" class="form-select form-select-sm">
         <option value="all" {{ $filters['subject'] === 'all' ? 'selected' : '' }}>Semua Subjek</option>
+        @auth
+          <option value="user:{{ auth()->id() }}" {{ $filters['subject'] === 'user:'.auth()->id() ? 'selected' : '' }}>
+            👤 Akun Saya ({{ auth()->user()->name }})
+          </option>
+        @endauth
         @if ($vehicles->isNotEmpty())
           <optgroup label="Kendaraan">
             @foreach ($vehicles as $v)
@@ -144,6 +150,24 @@
 
                   <p class="fw-semibold text-dark small mb-0">{{ $log->description }}</p>
 
+                  {{-- Info Perangkat & Lokasi/IP --}}
+                  @if (!empty($log->properties['device']) || !empty($log->properties['ip_address']))
+                    <div class="d-flex flex-wrap align-items-center gap-3 text-muted text-2xs mt-1.5">
+                      @if (!empty($log->properties['device']))
+                        <span class="d-inline-flex align-items-center gap-1.5">
+                          <i class="bi bi-laptop text-secondary"></i>
+                          <span>{{ $log->properties['device'] }}</span>
+                        </span>
+                      @endif
+                      @if (!empty($log->properties['ip_address']))
+                        <span class="d-inline-flex align-items-center gap-1.5">
+                          <i class="bi bi-geo-alt text-secondary"></i>
+                          <span>IP: {{ $log->properties['ip_address'] === '127.0.0.1' || $log->properties['ip_address'] === '::1' ? '127.0.0.1 (Lokal)' : $log->properties['ip_address'] }}</span>
+                        </span>
+                      @endif
+                    </div>
+                  @endif
+
                   {{-- Detail diff perubahan --}}
                   @if ($log->hasFieldChanges())
                     <div class="mt-2 pt-2 border-top border-slate-100">
@@ -164,17 +188,22 @@
                     </div>
                   @elseif (!empty($log->properties) && !isset($log->properties['subject_name']))
                     {{-- Properties non-diff (servis, bbm, dll) --}}
-                    <div class="mt-2 pt-2 border-top border-slate-100">
-                      <div class="d-flex flex-wrap gap-2">
-                        @foreach ($log->properties as $key => $val)
-                          @if ($val !== null && $val !== '' && $key !== 'subject_name')
+                    @php
+                      $filteredProps = collect($log->properties)->filter(function ($val, $key) {
+                          return $val !== null && $val !== '' && !in_array($key, ['subject_name', 'device', 'ip_address', 'email', 'name']);
+                      });
+                    @endphp
+                    @if ($filteredProps->isNotEmpty())
+                      <div class="mt-2 pt-2 border-top border-slate-100">
+                        <div class="d-flex flex-wrap gap-2">
+                          @foreach ($filteredProps as $key => $val)
                             <span class="badge bg-light text-secondary border text-2xs fw-normal">
                               {{ ucfirst(str_replace('_', ' ', $key)) }}: <strong>{{ $val }}</strong>
                             </span>
-                          @endif
-                        @endforeach
+                          @endforeach
+                        </div>
                       </div>
-                    </div>
+                    @endif
                   @endif
                 </div>
 

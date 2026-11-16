@@ -38,6 +38,7 @@ class ActivityLogController extends Controller
             $modelClass = match ($type) {
                 'vehicle' => Vehicle::class,
                 'home_asset' => HomeAsset::class,
+                'user' => \App\Models\User::class,
                 default => null,
             };
             if ($modelClass && $id) {

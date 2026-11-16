@@ -59,6 +59,13 @@ class ActivityLog extends Model
     public function getIconAttribute(): string
     {
         return match (true) {
+            str_starts_with($this->event, 'auth.login') => 'bi-box-arrow-in-right',
+            str_starts_with($this->event, 'auth.logout') => 'bi-box-arrow-right',
+            str_starts_with($this->event, 'auth.failed') => 'bi-shield-x',
+            str_starts_with($this->event, 'auth.password') => 'bi-key',
+            str_starts_with($this->event, 'auth.profile') => 'bi-person-gear',
+            str_starts_with($this->event, 'auth.register') => 'bi-person-plus',
+            str_starts_with($this->event, 'auth.') => 'bi-shield-lock',
             str_starts_with($this->event, 'vehicle.') => 'bi-car-front',
             str_starts_with($this->event, 'home_asset.') => 'bi-grid',
             str_starts_with($this->event, 'schedule.') => 'bi-calendar-check',
@@ -75,19 +82,26 @@ class ActivityLog extends Model
      */
     public function getChipClassAttribute(): string
     {
-        $suffix = last(explode('.', $this->event));
-
-        return match ($suffix) {
-            'created' => 'chip-success',
-            'updated',
-            'odometer_updated' => 'chip-info',
-            'deleted' => 'chip-urgent',
-            'archived' => 'chip-neutral',
-            'restored' => 'chip-success',
-            'completed',
-            'service_logged' => 'chip-success',
-            'status_updated' => 'chip-warning',
-            default => 'chip-neutral',
+        return match ($this->event) {
+            'auth.login' => 'chip-success',
+            'auth.logout' => 'chip-neutral',
+            'auth.failed' => 'chip-urgent',
+            'auth.register' => 'chip-success',
+            'auth.password_updated',
+            'auth.password_reset' => 'chip-urgent',
+            'auth.profile_updated' => 'chip-info',
+            default => match (last(explode('.', $this->event))) {
+                'created' => 'chip-success',
+                'updated',
+                'odometer_updated' => 'chip-info',
+                'deleted' => 'chip-urgent',
+                'archived' => 'chip-neutral',
+                'restored' => 'chip-success',
+                'completed',
+                'service_logged' => 'chip-success',
+                'status_updated' => 'chip-warning',
+                default => 'chip-neutral',
+            },
         };
     }
 
@@ -97,6 +111,13 @@ class ActivityLog extends Model
     public function getEventLabelAttribute(): string
     {
         return match ($this->event) {
+            'auth.login' => 'Login Berhasil',
+            'auth.logout' => 'Logout',
+            'auth.failed' => 'Login Gagal',
+            'auth.register' => 'Registrasi Akun',
+            'auth.password_updated' => 'Ubah Password',
+            'auth.password_reset' => 'Reset Password',
+            'auth.profile_updated' => 'Ubah Profil',
             'vehicle.created' => 'Kendaraan Baru',
             'vehicle.updated' => 'Data Diperbarui',
             'vehicle.odometer_updated' => 'Odometer Update',
@@ -137,6 +158,10 @@ class ActivityLog extends Model
 
         if ($subject instanceof HomeAsset) {
             return $subject->name;
+        }
+
+        if ($subject instanceof User) {
+            return $subject->name.' (Akun)';
         }
 
         // Subject sudah dihapus — tampilkan nama yang tersimpan di properties

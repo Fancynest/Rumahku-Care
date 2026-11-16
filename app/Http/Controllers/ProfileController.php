@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -45,10 +46,31 @@ class ProfileController extends Controller
             'current_password.required' => 'Kata sandi saat ini wajib diisi untuk mengubah alamat email.',
         ]);
 
+        $oldData = [
+            'name'  => $user->name,
+            'email' => $user->email,
+        ];
+
         $user->update([
             'name' => $validated['name'],
             'email' => $validated['email'],
         ]);
+
+        app(ActivityLogger::class)->logUpdated(
+            $user,
+            'auth.profile_updated',
+            $user,
+            'Informasi profil akun diperbarui.',
+            $oldData,
+            [
+                'name'  => $validated['name'],
+                'email' => $validated['email'],
+            ],
+            [
+                'name'  => 'Nama Pengguna',
+                'email' => 'Alamat Email',
+            ]
+        );
 
         return redirect()->route('profile.edit')
             ->with('success', 'Profil Anda berhasil diperbarui.');
@@ -69,6 +91,16 @@ class ProfileController extends Controller
         $user->update([
             'password' => Hash::make($validated['password']),
         ]);
+
+        app(ActivityLogger::class)->log(
+            $user,
+            'auth.password_updated',
+            $user,
+            'Kata sandi berhasil diubah dan sesi di perangkat lain telah dinonaktifkan.',
+            [
+                'email' => $user->email,
+            ]
+        );
 
         // Invalidate sesi di perangkat lain
         Auth::logoutOtherDevices($validated['password']);

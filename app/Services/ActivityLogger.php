@@ -54,6 +54,8 @@ class ActivityLogger
         'technician_name' => 'Teknisi',
         'repair_cost' => 'Biaya Perbaikan',
         'resolved_at' => 'Tanggal Selesai',
+        // User / Profile
+        'email' => 'Alamat Email',
     ];
 
     // ─── Core ────────────────────────────────────────────────────────────────
@@ -73,6 +75,16 @@ class ActivityLogger
         // Simpan nama subjek agar tetap terbaca meski record dihapus nanti
         if ($subject !== null && empty($properties['subject_name'])) {
             $properties['subject_name'] = $this->resolveSubjectName($subject);
+        }
+
+        // Otomatis tambahkan data IP & perangkat jika ada request aktif
+        if (request()) {
+            if (!isset($properties['ip_address'])) {
+                $properties['ip_address'] = request()->ip() ?? '127.0.0.1';
+            }
+            if (!isset($properties['device'])) {
+                $properties['device'] = self::parseUserAgent(request()->userAgent());
+            }
         }
 
         return ActivityLog::create([
@@ -141,6 +153,54 @@ class ActivityLogger
             return $subject->name;
         }
 
+        if ($subject instanceof User) {
+            return $subject->name.' (Akun)';
+        }
+
         return class_basename($subject).' #'.$subject->getKey();
+    }
+
+    /**
+     * Parse User-Agent string menjadi format ringkas dan mudah dibaca (mis: Chrome (Windows 10/11)).
+     */
+    public static function parseUserAgent(?string $userAgent): string
+    {
+        if (!$userAgent) {
+            return 'Perangkat tidak dikenal';
+        }
+
+        // Deteksi Sistem Operasi
+        $os = 'OS Lainnya';
+        if (preg_match('/windows nt 10/i', $userAgent)) {
+            $os = 'Windows 10/11';
+        } elseif (preg_match('/windows/i', $userAgent)) {
+            $os = 'Windows';
+        } elseif (preg_match('/iphone/i', $userAgent)) {
+            $os = 'iPhone (iOS)';
+        } elseif (preg_match('/ipad/i', $userAgent)) {
+            $os = 'iPad (iPadOS)';
+        } elseif (preg_match('/android/i', $userAgent)) {
+            $os = 'Android';
+        } elseif (preg_match('/macintosh|mac os x/i', $userAgent)) {
+            $os = 'macOS';
+        } elseif (preg_match('/linux/i', $userAgent)) {
+            $os = 'Linux';
+        }
+
+        // Deteksi Browser
+        $browser = 'Browser';
+        if (preg_match('/edg/i', $userAgent)) {
+            $browser = 'Edge';
+        } elseif (preg_match('/chrome|crios/i', $userAgent) && !preg_match('/opr|opera/i', $userAgent)) {
+            $browser = 'Chrome';
+        } elseif (preg_match('/firefox|fxios/i', $userAgent)) {
+            $browser = 'Firefox';
+        } elseif (preg_match('/safari/i', $userAgent) && !preg_match('/chrome|crios/i', $userAgent)) {
+            $browser = 'Safari';
+        } elseif (preg_match('/opr|opera/i', $userAgent)) {
+            $browser = 'Opera';
+        }
+
+        return "{$browser} ({$os})";
     }
 }

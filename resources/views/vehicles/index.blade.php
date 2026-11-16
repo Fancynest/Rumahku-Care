@@ -54,7 +54,7 @@
       @endphp
       <a href="{{ route('vehicles.index', ['v' => $v->id, 'archived' => $showArchived ? 1 : null]) }}" 
          class="text-decoration-none d-flex align-items-center gap-3 px-3.5 py-2.5 rounded-3 border text-nowrap {{ $isActive ? 'bg-white border-dark shadow-sm' : 'bg-white-50 border-slate-200 text-secondary' }}">
-        <i class="bi {{ str_starts_with($v->body_type ?? '', 'motor') ? 'bi-bicycle' : 'bi-car-front' }} {{ $isActive ? 'text-dark' : 'text-muted' }}"></i>
+        <i class="bi {{ str_starts_with($v->body_type ?? '', 'motor') ? 'bi-scooter' : 'bi-car-front' }} {{ $isActive ? 'text-dark' : 'text-muted' }}"></i>
         <div>
           <div class="fw-bold small {{ $isActive ? 'text-dark' : 'text-slate-700' }}">{{ $v->name }}</div>
           <div class="text-muted font-monospace text-2xs">{{ $v->plate }}</div>
