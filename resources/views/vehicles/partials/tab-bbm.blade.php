@@ -77,16 +77,16 @@
     @else
       <div class="table-responsive rounded-3 border border-slate-200 bg-white">
         <table class="table table-hover align-middle mb-0 text-sm">
-          <thead class="table-light text-muted text-xs tracking-wider">
+          <thead class="table-light text-muted text-xs tracking-wider text-nowrap">
             <tr>
-              <th class="ps-3 py-2.5">TANGGAL</th>
-              <th class="py-2.5">ODOMETER</th>
-              <th class="py-2.5">VOLUME</th>
-              <th class="py-2.5">TOTAL BIAYA</th>
-              <th class="py-2.5">HARGA/LITER</th>
-              <th class="py-2.5">KONSUMSI</th>
-              <th class="py-2.5">JENIS & SPBU</th>
-              <th class="py-2.5">NOTA</th>
+              <th class="ps-3 pe-2 py-2.5">TANGGAL</th>
+              <th class="px-2 py-2.5">ODOMETER</th>
+              <th class="px-2 py-2.5">VOLUME</th>
+              <th class="px-2 py-2.5">TOTAL BIAYA</th>
+              <th class="px-2 py-2.5">HARGA/LITER</th>
+              <th class="px-2 py-2.5">KONSUMSI</th>
+              <th class="px-2 py-2.5">JENIS & SPBU</th>
+              <th class="px-2 py-2.5">NOTA</th>
               <th class="text-end pe-3 py-2.5">AKSI</th>
             </tr>
           </thead>

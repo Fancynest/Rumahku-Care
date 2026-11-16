@@ -33,6 +33,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::redirect('/dashboard', '/');
 
     Route::prefix('home-assets')->name('home-assets.')->group(function () {
         Route::get('/', [HomeAssetController::class, 'index'])->name('index');

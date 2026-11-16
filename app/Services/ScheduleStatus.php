@@ -60,7 +60,7 @@ class ScheduleStatus
             $thresholdMendesak = (int) config('maintenance.thresholds.date.mendesak', 7);
             $thresholdPerhatian = (int) config('maintenance.thresholds.date.perhatian', 30);
 
-            if ($diffDays < 0) {
+            if ($diffDays <= $thresholdTerlambat) {
                 $status = self::TERLAMBAT;
             } elseif ($diffDays <= $thresholdMendesak) {
                 $status = self::MENDESAK;
@@ -89,7 +89,7 @@ class ScheduleStatus
         $thresholdMendesak = (int) config('maintenance.thresholds.document.mendesak', 7);
         $thresholdPerhatian = (int) config('maintenance.thresholds.document.perhatian', 30);
 
-        if ($diffDays < 0) {
+        if ($diffDays <= $thresholdTerlambat) {
             return self::TERLAMBAT;
         } elseif ($diffDays <= $thresholdMendesak) {
             return self::MENDESAK;

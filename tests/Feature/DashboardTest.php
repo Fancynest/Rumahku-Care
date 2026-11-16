@@ -14,6 +14,15 @@ class DashboardTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_dashboard_url_path_redirects_to_root(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get('/dashboard');
+
+        $response->assertRedirect('/');
+    }
+
     public function test_dashboard_displays_greeting_and_summary_numbers_from_db(): void
     {
         $user = User::factory()->create(['name' => 'Gabriel Pratama', 'email' => 'gabriel@example.com']);
