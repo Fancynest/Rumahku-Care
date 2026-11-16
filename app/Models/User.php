@@ -29,6 +29,7 @@ class User extends Authenticatable
             $user->maintenanceRecords()->each(fn ($mr) => $mr->delete());
             $user->schedules()->each(fn ($s) => $s->delete());
             $user->budgets()->delete();
+            $user->activityLogs()->delete();
             $user->attachments()->each(fn ($att) => $att->delete());
         });
     }
@@ -124,5 +125,13 @@ class User extends Authenticatable
     public function attachments(): HasMany
     {
         return $this->hasMany(Attachment::class);
+    }
+
+    /**
+     * @return HasMany<ActivityLog, $this>
+     */
+    public function activityLogs(): HasMany
+    {
+        return $this->hasMany(ActivityLog::class);
     }
 }

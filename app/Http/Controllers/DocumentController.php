@@ -85,10 +85,10 @@ class DocumentController extends Controller
                 $subject,
                 'Dokumen "'.$validated['title'].'" ditambahkan.',
                 array_filter([
-                    'title'      => $validated['title'],
-                    'type'       => $validated['type'],
+                    'title' => $validated['title'],
+                    'type' => $validated['type'],
                     'expires_at' => $validated['expires_at'] ?? null,
-                    'cost'       => $validated['cost'] ?? null,
+                    'cost' => $validated['cost'] ?? null,
                 ]),
             );
         });
@@ -178,9 +178,9 @@ class DocumentController extends Controller
                 $document->subject,
                 'Dokumen "'.$document->title.'" diperpanjang hingga '.($validated['expires_at'] ?? '-').'.',
                 array_filter([
-                    'title'      => $document->title,
+                    'title' => $document->title,
                     'expires_at' => $validated['expires_at'],
-                    'cost'       => $validated['cost'] ?? null,
+                    'cost' => $validated['cost'] ?? null,
                 ]),
             );
         });

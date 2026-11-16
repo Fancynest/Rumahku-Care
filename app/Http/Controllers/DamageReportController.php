@@ -135,10 +135,10 @@ class DamageReportController extends Controller
                 'Status kerusakan "'.$damageReport->title.'" berubah dari '.$oldStatus.' → '.$validated['status'].'.',
                 [
                     'report_title' => $damageReport->title,
-                    'old_status'   => $oldStatus,
-                    'new_status'   => $validated['status'],
-                    'repair_cost'  => $dataToUpdate['repair_cost'],
-                    'technician'   => $dataToUpdate['technician_name'],
+                    'old_status' => $oldStatus,
+                    'new_status' => $validated['status'],
+                    'repair_cost' => $dataToUpdate['repair_cost'],
+                    'technician' => $dataToUpdate['technician_name'],
                 ],
             );
         });
