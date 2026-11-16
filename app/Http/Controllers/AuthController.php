@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\ActivityLogger;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,7 +31,32 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
+            $user = Auth::user();
+            app(ActivityLogger::class)->log(
+                $user,
+                'auth.login',
+                $user,
+                'Masuk ke sistem (Login berhasil).',
+                [
+                    'email' => $user->email,
+                ]
+            );
+
             return redirect()->intended(route('dashboard'));
+        }
+
+        // Catat jika ada percobaan login yang gagal untuk email terdaftar
+        $failedUser = User::where('email', $credentials['email'])->first();
+        if ($failedUser) {
+            app(ActivityLogger::class)->log(
+                $failedUser,
+                'auth.failed',
+                $failedUser,
+                'Percobaan masuk gagal (kata sandi salah).',
+                [
+                    'email' => $credentials['email'],
+                ]
+            );
         }
 
         throw ValidationException::withMessages([
@@ -60,12 +86,36 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
+        app(ActivityLogger::class)->log(
+            $user,
+            'auth.register',
+            $user,
+            'Pendaftaran akun baru berhasil.',
+            [
+                'name' => $user->name,
+                'email' => $user->email,
+            ]
+        );
+
         return redirect()->route('dashboard')
             ->with('success', 'Akun berhasil dibuat. Selamat datang di Rumahku Care!');
     }
 
     public function logout(Request $request): RedirectResponse
     {
+        $user = Auth::user();
+        if ($user) {
+            app(ActivityLogger::class)->log(
+                $user,
+                'auth.logout',
+                $user,
+                'Keluar dari sistem (Logout).',
+                [
+                    'email' => $user->email,
+                ]
+            );
+        }
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -120,6 +170,16 @@ class AuthController extends Controller
                 ])->save();
 
                 event(new PasswordReset($user));
+
+                app(ActivityLogger::class)->log(
+                    $user,
+                    'auth.password_reset',
+                    $user,
+                    'Kata sandi berhasil diatur ulang via tautan lupa sandi.',
+                    [
+                        'email' => $user->email,
+                    ]
+                );
             }
         );
 
