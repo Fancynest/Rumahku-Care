@@ -88,6 +88,8 @@ class AttentionFeed
                 $daysDiff = Carbon::today()->diffInDays(Carbon::parse($sch->next_due_date), false);
                 if ($daysDiff < 0) {
                     $dueLabel = 'Terlambat '.abs($daysDiff).' hari';
+                } elseif ($daysDiff === 0) {
+                    $dueLabel = 'Jatuh tempo hari ini';
                 } else {
                     $dueLabel = 'Sisa '.$daysDiff.' hari lagi';
                 }

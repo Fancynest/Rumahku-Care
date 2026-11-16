@@ -87,4 +87,19 @@ class MaintenanceSchedule extends Model
     {
         return ScheduleStatus::chipClass($this->status);
     }
+
+    public function getSubjectNameAttribute(): string
+    {
+        return $this->subject?->name ?? 'Aset/Kendaraan';
+    }
+
+    public function getTriggerLabelAttribute(): string
+    {
+        return match ($this->trigger_type) {
+            'kilometer' => $this->interval_km ? 'Tiap ' . number_format($this->interval_km) . ' KM' : 'Jarak Tempuh',
+            'interval_hari' => $this->interval_days ? 'Tiap ' . $this->interval_days . ' Hari' : 'Interval Hari',
+            'tanggal' => 'Tanggal Spesifik',
+            default => 'Jadwal Rutin',
+        };
+    }
 }

@@ -10,7 +10,7 @@
   </button>
   <button class="btn btn-dark btn-sm d-flex align-items-center gap-1.5 px-3" data-bs-toggle="modal" data-bs-target="#modalBuatJadwal">
     <i class="bi bi-plus-lg"></i>
-    <span>+ Buat Jadwal</span>
+    <span>Buat Jadwal</span>
   </button>
 </div>
 @endsection

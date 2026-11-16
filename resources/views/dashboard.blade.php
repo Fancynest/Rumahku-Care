@@ -124,9 +124,13 @@
 
               <!-- Tombol Cepat: Sesuai Tipe Item -->
               <div class="pt-2.5 border-top border-slate-200 d-flex justify-content-between align-items-center">
-                <span class="badge bg-white text-dark border px-2 py-1 font-monospace text-2xs">
-                  {{ $card->trigger_label }}
-                </span>
+                @if (!empty($card->trigger_label))
+                  <span class="badge bg-white text-dark border px-2 py-1 font-monospace text-2xs">
+                    {{ $card->trigger_label }}
+                  </span>
+                @else
+                  <span></span>
+                @endif
                 @if ($card->type === 'jadwal')
                   <button class="btn btn-dark btn-sm px-3 d-inline-flex align-items-center gap-1.5 btn-dashboard-complete" 
                           data-bs-toggle="modal" 

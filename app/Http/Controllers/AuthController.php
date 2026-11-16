@@ -23,10 +23,17 @@ class AuthController extends Controller
 
     public function login(Request $request): RedirectResponse
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'string', 'email'],
+        $input = $request->validate([
+            'email' => ['required', 'string'],
             'password' => ['required', 'string'],
         ]);
+
+        $loginValue = $input['email'];
+        $isEmail = filter_var($loginValue, FILTER_VALIDATE_EMAIL);
+        $credentials = [
+            $isEmail ? 'email' : 'name' => $loginValue,
+            'password' => $input['password'],
+        ];
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
@@ -45,8 +52,8 @@ class AuthController extends Controller
             return redirect()->intended(route('dashboard'));
         }
 
-        // Catat jika ada percobaan login yang gagal untuk email terdaftar
-        $failedUser = User::where('email', $credentials['email'])->first();
+        // Catat jika ada percobaan login yang gagal untuk email/username terdaftar
+        $failedUser = User::where('email', $loginValue)->orWhere('name', $loginValue)->first();
         if ($failedUser) {
             app(ActivityLogger::class)->log(
                 $failedUser,
@@ -54,13 +61,13 @@ class AuthController extends Controller
                 $failedUser,
                 'Percobaan masuk gagal (kata sandi salah).',
                 [
-                    'email' => $credentials['email'],
+                    'email' => $failedUser->email,
                 ]
             );
         }
 
         throw ValidationException::withMessages([
-            'email' => 'Email atau kata sandi yang Anda masukkan salah.',
+            'email' => 'Email/nama pengguna atau kata sandi yang Anda masukkan salah.',
         ]);
     }
 

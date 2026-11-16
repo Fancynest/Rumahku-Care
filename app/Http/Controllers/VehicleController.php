@@ -69,6 +69,10 @@ class VehicleController extends Controller
             $fuelMetrics = $fuelCalculator->calculate($selectedVehicle);
         }
 
+        if (VehicleModel::count() === 0) {
+            (new \Database\Seeders\VehicleModelSeeder)->run();
+        }
+
         $modelsGrouped = VehicleModel::orderBy('brand')
             ->orderBy('model')
             ->get()
@@ -129,9 +133,17 @@ class VehicleController extends Controller
 
         $modelId = $validated['vehicle_model_id'] === 'other' ? null : (int) $validated['vehicle_model_id'];
 
+        $customName = $validated['custom_model_name'] ?? null;
+        if ($modelId === null && $request->filled('custom_brand') && $customName) {
+            $brand = trim((string) $request->input('custom_brand'));
+            if (! str_starts_with(strtolower($customName), strtolower($brand))) {
+                $customName = $brand.' '.$customName;
+            }
+        }
+
         $vehicle = $request->user()->vehicles()->create([
             'vehicle_model_id' => $modelId,
-            'custom_model_name' => $modelId ? null : $validated['custom_model_name'],
+            'custom_model_name' => $modelId ? null : $customName,
             'custom_body_type' => $modelId ? null : $validated['custom_body_type'],
             'plate' => strtoupper($validated['plate']),
             'year' => $validated['year'] ?? null,
@@ -202,9 +214,17 @@ class VehicleController extends Controller
 
         $modelId = $validated['vehicle_model_id'] === 'other' ? null : (int) $validated['vehicle_model_id'];
 
+        $customName = $validated['custom_model_name'] ?? null;
+        if ($modelId === null && $request->filled('custom_brand') && $customName) {
+            $brand = trim((string) $request->input('custom_brand'));
+            if (! str_starts_with(strtolower($customName), strtolower($brand))) {
+                $customName = $brand.' '.$customName;
+            }
+        }
+
         $newData = [
             'vehicle_model_id' => $modelId,
-            'custom_model_name' => $modelId ? null : $validated['custom_model_name'],
+            'custom_model_name' => $modelId ? null : $customName,
             'custom_body_type' => $modelId ? null : $validated['custom_body_type'],
             'plate' => strtoupper($validated['plate']),
             'year' => $validated['year'] ?? null,

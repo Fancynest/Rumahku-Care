@@ -735,8 +735,12 @@
           <!-- Form Tambahan Khusus "Lainnya" -->
           <div id="wrapperOtherModel" class="p-3 rounded-3 bg-light border mb-3 d-none">
             <div class="mb-2">
-              <label class="form-label text-muted small mb-1">Nama Model Lengkap <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" name="custom_model_name" placeholder="Misal: Vespa Primavera 150" >
+              <label class="form-label text-muted small mb-1">Merek Kendaraan <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" name="custom_brand" placeholder="Misal: Honda, Yamaha, Vespa, Wuling" >
+            </div>
+            <div class="mb-2">
+              <label class="form-label text-muted small mb-1">Nama Model / Tipe <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" name="custom_model_name" placeholder="Misal: Vario 160, Primavera 150" >
             </div>
             <div>
               <label class="form-label text-muted small mb-1">Jenis Bodi <span class="text-danger">*</span></label>
@@ -859,8 +863,12 @@
           <!-- Form Tambahan Khusus "Lainnya" -->
           <div id="wrapperOtherModelEdit" class="p-3 rounded-3 bg-light border mb-3 {{ $selectedVehicle->vehicle_model_id ? 'd-none' : '' }}">
             <div class="mb-2">
-              <label class="form-label text-muted small mb-1">Nama Model Lengkap <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" name="custom_model_name" value="{{ $selectedVehicle->custom_model_name }}" placeholder="Misal: Vespa Primavera 150" >
+              <label class="form-label text-muted small mb-1">Merek Kendaraan <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" name="custom_brand" value="{{ $selectedVehicle->custom_brand ?? '' }}" placeholder="Misal: Honda, Yamaha, Vespa" >
+            </div>
+            <div class="mb-2">
+              <label class="form-label text-muted small mb-1">Nama Model / Tipe <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" name="custom_model_name" value="{{ $selectedVehicle->custom_model_name }}" placeholder="Misal: Vario 160, Primavera 150" >
             </div>
             <div>
               <label class="form-label text-muted small mb-1">Jenis Bodi <span class="text-danger">*</span></label>
