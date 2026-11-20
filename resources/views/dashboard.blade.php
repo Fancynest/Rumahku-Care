@@ -40,9 +40,9 @@
     <div class="col-sm-6">
       <div class="glass-panel p-4 h-100">
         <div class="text-muted small fw-medium mb-1">Jadwal Perlu Tindakan</div>
-        <div class="d-flex align-items-baseline gap-2">
+        <div class="d-flex flex-column flex-sm-row align-items-sm-baseline gap-1 gap-sm-2">
           <h2 class="fw-bold text-dark mb-0">{{ $urgentCount }}</h2>
-          <span class="text-muted small">agenda berstatus terlambat atau mendesak</span>
+          <span class="text-muted text-xs">agenda berstatus terlambat atau mendesak</span>
         </div>
       </div>
     </div>
@@ -54,9 +54,9 @@
             <span class="text-muted small fw-medium">Pengeluaran Bulan Ini</span>
             <i class="bi bi-arrow-up-right text-muted small"></i>
           </div>
-          <div class="d-flex align-items-baseline gap-2">
-            <h2 class="fw-bold text-dark mb-0">{{ $currentMonthExpenseFormatted }}</h2>
-            <span class="text-muted small">rekap biaya servis, BBM, dan dokumen</span>
+          <div class="d-flex flex-column flex-sm-row align-items-sm-baseline gap-1 gap-sm-2">
+            <h2 class="fw-bold text-dark mb-0 text-nowrap">{{ $currentMonthExpenseFormatted }}</h2>
+            <span class="text-muted text-xs">rekap biaya servis, BBM, dan dokumen</span>
           </div>
         </div>
       </a>

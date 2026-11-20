@@ -3,14 +3,14 @@
 @section('title', 'Jadwal & Pengingat - Rumahku Care')
 
 @section('header-action')
-<div class="d-flex align-items-center gap-2">
-  <button class="btn btn-glass btn-sm d-flex align-items-center gap-1.5 px-3" data-bs-toggle="modal" data-bs-target="#modalTemplateJadwal">
+<div class="d-flex align-items-center gap-1.5">
+  <button class="btn btn-glass btn-sm d-none d-sm-inline-flex align-items-center gap-1.5 px-2.5" data-bs-toggle="modal" data-bs-target="#modalTemplateJadwal">
     <i class="bi bi-collection"></i>
-    <span>Mulai dari Template</span>
+    <span class="d-none d-md-inline">Mulai dari Template</span>
   </button>
-  <button class="btn btn-dark btn-sm d-flex align-items-center gap-1.5 px-3" data-bs-toggle="modal" data-bs-target="#modalBuatJadwal">
+  <button class="btn btn-dark btn-sm d-inline-flex align-items-center gap-1.5 px-2.5 text-nowrap" data-bs-toggle="modal" data-bs-target="#modalBuatJadwal">
     <i class="bi bi-plus-lg"></i>
-    <span>Buat Jadwal</span>
+    <span class="d-none d-sm-inline">Buat Jadwal</span>
   </button>
 </div>
 @endsection
@@ -158,46 +158,49 @@
                   </div>
 
                   <!-- Col 3: Status Chip & Tombol Aksi -->
-                  <div class="d-flex align-items-center gap-1.5 ms-auto ms-md-0">
-                    @if ($sch->priority && $sch->priority !== 'normal')
-                      <span class="badge {{ $sch->priority === 'darurat' ? 'bg-danger text-white' : ($sch->priority === 'mendesak' ? 'bg-warning-subtle text-warning-emphasis border border-warning' : 'bg-info-subtle text-info-emphasis border border-info') }} py-1 px-2 text-capitalize text-2xs">
-                        <i class="bi bi-flag-fill me-0.5"></i>{{ ucfirst($sch->priority) }}
+                  <div class="d-flex flex-wrap align-items-center gap-1.5 w-100 w-md-auto justify-content-between justify-content-md-end mt-2 mt-md-0">
+                    <div class="d-flex align-items-center gap-1.5">
+                      @if ($sch->priority && $sch->priority !== 'normal')
+                        <span class="badge {{ $sch->priority === 'darurat' ? 'bg-danger text-white' : ($sch->priority === 'mendesak' ? 'bg-warning-subtle text-warning-emphasis border border-warning' : 'bg-info-subtle text-info-emphasis border border-info') }} py-1 px-2 text-capitalize text-2xs">
+                          <i class="bi bi-flag-fill me-0.5"></i>{{ ucfirst($sch->priority) }}
+                        </span>
+                      @endif
+                      <span class="chip {{ $sch->status_chip_class }} py-1 px-2.5">
+                        <span class="chip-dot"></span> {{ ucfirst($sch->status) }}
                       </span>
-                    @endif
-                    <span class="chip {{ $sch->status_chip_class }} py-1 px-2.5">
-                      <span class="chip-dot"></span> {{ ucfirst($sch->status) }}
-                    </span>
+                    </div>
 
-                    <button class="btn btn-dark btn-sm d-inline-flex align-items-center gap-1.5 px-3 btn-complete-modal" 
-                            data-bs-toggle="modal" 
-                            data-bs-target="#modalTandaiSelesai"
-                            data-id="{{ $sch->id }}"
-                            data-title="{{ $sch->title }}"
-                            data-trigger="{{ $sch->trigger_type }}"
-                            data-subject="{{ $sch->subject_name }}"
-                            data-odo="{{ $subjectOdo }}"
-                            data-workshop="{{ $isVehicle ? ($sch->subject->workshop ?? '') : '' }}">
-                      <i class="bi bi-check2"></i>
-                      <span>Tandai Selesai</span>
-                    </button>
-
-                    <!-- Dropdown Hapus -->
-                    <div class="dropdown">
-                      <button class="btn btn-glass btn-touch btn-sm p-2 rounded-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-three-dots-vertical"></i>
+                    <div class="d-flex align-items-center gap-1.5 ms-auto">
+                      <button class="btn btn-dark btn-sm d-inline-flex align-items-center gap-1.5 px-3 text-nowrap btn-complete-modal" 
+                              data-bs-toggle="modal" 
+                              data-bs-target="#modalTandaiSelesai"
+                              data-id="{{ $sch->id }}"
+                              data-title="{{ $sch->title }}"
+                              data-trigger="{{ $sch->trigger_type }}"
+                              data-subject="{{ $sch->subject_name }}"
+                              data-odo="{{ $subjectOdo }}"
+                              data-workshop="{{ $isVehicle ? ($sch->subject->workshop ?? '') : '' }}">
+                        <i class="bi bi-check2"></i>
+                        <span>Tandai Selesai</span>
                       </button>
-                      <ul class="dropdown-menu dropdown-menu-end glass-panel border-0 p-1 shadow-sm">
-                        <li>
-                          <button type="button" 
-                                  class="dropdown-item py-1.5 rounded-2 small d-flex align-items-center gap-2 btn-edit-schedule"
-                                  data-bs-toggle="modal" 
-                                  data-bs-target="#modalEditJadwal"
-                                  data-id="{{ $sch->id }}"
-                                  data-title="{{ $sch->title }}"
-                                  data-trigger="{{ $sch->trigger_type }}"
-                                  data-interval-days="{{ $sch->interval_days }}"
-                                  data-interval-km="{{ $sch->interval_km }}"
-                                  data-due-date="{{ $sch->next_due_date ? $sch->next_due_date->format('Y-m-d') : '' }}"
+
+                      <!-- Dropdown Hapus -->
+                      <div class="dropdown">
+                        <button class="btn btn-glass btn-touch btn-sm p-2 rounded-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                          <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end glass-panel border-0 p-1 shadow-sm">
+                          <li>
+                            <button type="button" 
+                                    class="dropdown-item py-1.5 rounded-2 small d-flex align-items-center gap-2 btn-edit-schedule"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#modalEditJadwal"
+                                    data-id="{{ $sch->id }}"
+                                    data-title="{{ $sch->title }}"
+                                    data-trigger="{{ $sch->trigger_type }}"
+                                    data-interval-days="{{ $sch->interval_days }}"
+                                    data-interval-km="{{ $sch->interval_km }}"
+                                    data-due-date="{{ $sch->next_due_date ? $sch->next_due_date->format('Y-m-d') : '' }}"
                                   data-due-km="{{ $sch->next_due_km }}"
                                   data-priority="{{ $sch->priority }}"
                                   data-notes="{{ $sch->notes }}"

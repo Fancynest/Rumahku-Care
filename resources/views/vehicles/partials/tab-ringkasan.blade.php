@@ -136,12 +136,12 @@
 
   <!-- Riwayat Servis Terakhir dengan Dukungan Nota / Bukti Bayar -->
   <div class="glass-panel p-4 mb-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
       <div>
         <h6 class="fw-bold text-dark mb-0">Riwayat Servis Terakhir</h6>
         <span class="text-muted small">Catatan perawatan berkala dan bukti nota bengkel untuk {{ $selectedVehicle->name }}.</span>
       </div>
-      <button class="btn btn-dark btn-sm d-flex align-items-center gap-1.5 px-3" data-bs-toggle="modal" data-bs-target="#modalCatatServis">
+      <button class="btn btn-dark btn-sm d-flex align-items-center gap-1.5 px-3 text-nowrap" data-bs-toggle="modal" data-bs-target="#modalCatatServis">
         <i class="bi bi-wrench"></i>
         <span>Catat Servis</span>
       </button>

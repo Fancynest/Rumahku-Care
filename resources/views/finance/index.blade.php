@@ -4,9 +4,9 @@
 
 @section('header-action')
 <div class="d-flex align-items-center gap-2">
-  <a href="{{ route('finance.export', request()->query()) }}" class="btn btn-glass btn-sm d-flex align-items-center gap-1.5 px-3">
+  <a href="{{ route('finance.export', request()->query()) }}" class="btn btn-glass btn-sm d-flex align-items-center gap-1.5 px-2.5" title="Ekspor CSV">
     <i class="bi bi-file-earmark-arrow-down"></i>
-    <span>Ekspor CSV</span>
+    <span class="d-none d-sm-inline">Ekspor CSV</span>
   </a>
 </div>
 @endsection
@@ -300,7 +300,7 @@
     </div>
   @else
     <div class="table-responsive rounded-3 border border-slate-200 bg-white mb-3">
-      <table class="table table-hover align-middle mb-0">
+      <table class="table table-hover align-middle mb-0 text-nowrap">
         <thead class="table-light text-muted text-xs">
           <tr>
             <th class="ps-3 py-2.5">TANGGAL</th>

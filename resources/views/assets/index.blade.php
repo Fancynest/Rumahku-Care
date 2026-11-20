@@ -3,9 +3,9 @@
 @section('title', 'Aset Rumah Saya - Rumahku Care')
 
 @section('header-action')
-<button class="btn btn-dark btn-sm d-flex align-items-center gap-1.5 min-h-40 px-3" data-bs-toggle="modal" data-bs-target="#modalTambahAset">
+<button class="btn btn-dark btn-sm d-flex align-items-center gap-1.5 px-2.5 text-nowrap" data-bs-toggle="modal" data-bs-target="#modalTambahAset" title="Tambah Aset">
   <i class="bi bi-plus-lg"></i>
-  <span>Tambah Aset</span>
+  <span class="d-none d-sm-inline">Tambah Aset</span>
 </button>
 @endsection
 
@@ -66,7 +66,7 @@
     </div>
   @else
     <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0 text-sm">
+      <table class="table table-hover align-middle mb-0 text-sm text-nowrap">
         <thead class="text-muted border-bottom border-slate-200">
           <tr>
             <th class="py-2.5">Nama Aset</th>

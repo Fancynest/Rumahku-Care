@@ -3,9 +3,9 @@
 @section('title', ($selectedVehicle ? $selectedVehicle->name : 'Kendaraan') . ' - Garasi Rumahku Care')
 
 @section('header-action')
-<button class="btn btn-dark btn-sm d-flex align-items-center gap-1.5 px-3" data-bs-toggle="modal" data-bs-target="#modalTambahKendaraan">
+<button class="btn btn-dark btn-sm d-flex align-items-center gap-1.5 px-2.5 text-nowrap" data-bs-toggle="modal" data-bs-target="#modalTambahKendaraan" title="Tambah Kendaraan">
   <i class="bi bi-plus-lg"></i>
-  <span>Tambah Kendaraan</span>
+  <span class="d-none d-sm-inline">Tambah Kendaraan</span>
 </button>
 @endsection
 
